@@ -8,7 +8,7 @@ The website has been converted from the original Canva AI Code export into a sta
 
 - `index.html` - page markup and content.
 - `styles.css` - extracted site styles.
-- `app.js` - mobile menu, contact form, subscription UI, and icon initialization.
+- `app.js` - mobile menu, contact form, and icon initialization.
 - `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
@@ -29,9 +29,8 @@ The exported page includes:
 - "What's Inside" section covering F1 history, cars, drivers, circuits, activities, and statistics.
 - "Did You Know?" fact section.
 - Character profile section.
-- Authors section for Ekya Book Writers.
+- Authors section for the student author group.
 - Contact form that opens an email client.
-- Sticky subscription bar that currently stores emails only in local JavaScript memory.
 
 ## Dependencies
 
@@ -72,7 +71,7 @@ An `assets/` directory is recommended later for local images, but it has not bee
 
 ## Deployment Notes
 
-For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. After cleanup, the deployment target can remain fully static unless the subscription/contact features need a backend or form service.
+For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. After cleanup, the deployment target can remain fully static unless the contact feature needs a backend or form service.
 
 ## Vercel Deployment
 
@@ -96,6 +95,5 @@ https://www.formularacingcamp.com/puzzles
 ## Near-Term Tasks
 
 1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
-2. Decide how subscriptions should be stored, since the current implementation does not persist them.
-3. Download or organize key image assets if the site should not depend on third-party image hosting.
-4. Consider replacing the Tailwind CDN with a build step if the project grows.
+2. Download or organize key image assets if the site should not depend on third-party image hosting.
+3. Consider replacing the Tailwind CDN with a build step if the project grows.

@@ -26,64 +26,6 @@ link.addEventListener('click', closeMenu);
 });
 
 
-// Initialize local email list
-let allSubscriptions = [];
-
-
-// Subscription functionality
-const emailInput = document.getElementById('subscription-email');
-const subscribeBtn = document.getElementById('subscribe-btn');
-const messageDiv = document.getElementById('subscription-message');
-
-
-subscribeBtn.addEventListener('click', async function(e) {
-e.preventDefault();
-const email = emailInput.value.trim();
-
-
-if (!email || !email.includes('@')) {
-showMessage('Please enter a valid email address', 'error');
-return;
-}
-
-
-subscribeBtn.disabled = true;
-subscribeBtn.textContent = 'Subscribing...';
-subscribeBtn.style.opacity = '0.7';
-
-
-// Store locally
-allSubscriptions.push({ email: email, subscribed_at: new Date().toISOString() });
-
-showMessage('✓ Thank you! We\'ll be in touch soon.', 'success');
-emailInput.value = '';
-setTimeout(() => {
-subscribeBtn.disabled = false;
-subscribeBtn.textContent = 'Subscribe';
-subscribeBtn.style.opacity = '1';
-messageDiv.style.display = 'none';
-}, 3000);
-});
-
-
-function showMessage(text, type) {
-messageDiv.textContent = text;
-messageDiv.style.display = 'block';
-if (type === 'success') {
-messageDiv.style.color = '#4ade80';
-} else {
-messageDiv.style.color = '#ff6b6b';
-}
-}
-
-
-emailInput.addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-subscribeBtn.click();
-}
-});
-
-
 // Contact Form Functionality
 function handleContactSubmit(event) {
 event.preventDefault();

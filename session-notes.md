@@ -33,10 +33,9 @@ The workspace was not initialized as a git repository at the start of the sessio
 - Styling now lives in `styles.css`, with many original inline style attributes and Tailwind utility classes still preserved from the Canva export.
 - JavaScript handles:
   - Mobile navigation toggle.
-  - Subscription form UI state.
   - Contact form validation and `mailto:` launch.
   - Lucide icon initialization.
-- The subscription form currently stores emails in a local in-memory array only. It does not persist data after reload and does not send data to a service.
+- The sticky subscription bar has been removed.
 - Several buttons are placeholders or informational only because the book is still in progress.
 
 ## Content Map
@@ -54,7 +53,7 @@ The intended site includes:
 - About the Authors section.
 - Final CTA section.
 - Contact form.
-- Footer and sticky subscription bar.
+- Footer.
 - Puzzles page with crossword, Wordle-style game, and quiz sections.
 
 ## Technical Recommendation
@@ -84,11 +83,11 @@ The puzzles page follows the same split-file approach with page-specific `puzzle
 2. Confirm whether GitHub Pages will serve the site from the root branch.
 3. Confirm Buy and Preview destinations when the book is ready.
 4. Decide whether to keep third-party image hosting or move images into the repository.
-5. Choose a real subscription/contact workflow if form persistence is needed.
+5. Choose a real contact workflow if form persistence is needed.
 
 ## Open Questions
 
 - Should the website continue to rely on hosted `i.ibb.co` images, or should important images live in this repository?
 - What should the Buy and Preview buttons link to when the book is ready?
-- Should the subscription form use a real service such as Formspree, Google Forms, Buttondown, Mailchimp, or a small backend?
+- Should the contact form use a real service such as Formspree, Google Forms, or a small backend?
 - The production domain is `www.formularacingcamp.com`, with `formularacingcamp.com` redirecting to it.
