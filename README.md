@@ -70,6 +70,19 @@ An `assets/` directory is recommended later for local images, but it has not bee
 
 For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. After cleanup, the deployment target can remain fully static unless the subscription/contact features need a backend or form service.
 
+## Vercel Deployment
+
+This repository is ready to import into Vercel as a static site.
+
+Recommended Vercel settings:
+
+- Framework Preset: Other
+- Build Command: leave blank
+- Output Directory: leave blank
+- Install Command: leave blank
+
+The `vercel.json` file enables clean URLs and a basic security header. The `.vercelignore` file keeps reference-only files out of the deployed public output.
+
 ## Near-Term Tasks
 
 1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
