@@ -83,4 +83,4 @@ The first three files now exist. `assets/` remains a future option if hosted ima
 - Should the website continue to rely on hosted `i.ibb.co` images, or should important images live in this repository?
 - What should the Buy and Preview buttons link to when the book is ready?
 - Should the subscription form use a real service such as Formspree, Google Forms, Buttondown, Mailchimp, or a small backend?
-- Should the canonical domain be `formularacingcamp.com` instead of the current Canva URL once the custom domain is ready?
+- The production domain is `www.formularacingcamp.com`, with `formularacingcamp.com` redirecting to it.
