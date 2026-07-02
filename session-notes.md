@@ -127,3 +127,18 @@ Recommended next steps:
 - Move important hosted images into an `assets/` directory if long-term reliability matters.
 - Add a real form backend if contact submissions should be stored or sent without opening an email client.
 - Consider a local Tailwind build only if the site grows beyond simple static pages.
+
+## Follow-Up Wrap-Up
+
+Date: 2026-07-02
+
+Completed:
+
+- Updated the homepage hero card to use the new hosted Formula Racing Camp cover page image.
+- Kept the existing hero cover styling and fallback card behavior.
+
+Validation performed:
+
+- `node --check app.js`
+- `node --check puzzles.js`
+- No local preview servers were found on common ports `3000`, `4173`, `5173`, `8000`, `8080`, or `8787`.
