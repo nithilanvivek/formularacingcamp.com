@@ -91,3 +91,39 @@ The puzzles page follows the same split-file approach with page-specific `puzzle
 - What should the Buy and Preview buttons link to when the book is ready?
 - Should the contact form use a real service such as Formspree, Google Forms, or a small backend?
 - The production domain is `www.formularacingcamp.com`, with `formularacingcamp.com` redirecting to it.
+
+## End Session Summary
+
+Wrapped on 2026-07-02.
+
+Completed during this session:
+
+- Split the original Canva AI Code homepage into `index.html`, `styles.css`, and `app.js`.
+- Added Vercel static deployment config with clean URLs and ignored reference-only files.
+- Connected and pushed the workspace to `nithilanvivek/formularacingcamp.com`.
+- Confirmed production domain setup with `www.formularacingcamp.com` as the canonical domain and apex redirecting to it.
+- Converted the Canva puzzles export into `puzzles.html`, `puzzles.css`, and `puzzles.js`.
+- Linked the home page puzzles CTA to `/puzzles`.
+- Updated homepage title, hero copy, authors copy, and header navigation.
+- Removed the subscribe bar from the homepage.
+- Fixed crossword answer checking and Wordle-style submitted-row color feedback.
+- Created and updated a personal Codex `$endsession` skill outside this repository for future wrap-up workflows, including stopping local preview servers.
+
+Validation performed:
+
+- `node --check app.js`
+- `node --check puzzles.js`
+- Browser checks during development for the homepage and puzzles page.
+
+Latest pushed site commit before final documentation wrap-up:
+
+```text
+45c068e Fix Wordle tile feedback colors
+```
+
+Recommended next steps:
+
+- Replace placeholder buy, preview, and social links when final destinations exist.
+- Move important hosted images into an `assets/` directory if long-term reliability matters.
+- Add a real form backend if contact submissions should be stored or sent without opening an email client.
+- Consider a local Tailwind build only if the site grows beyond simple static pages.

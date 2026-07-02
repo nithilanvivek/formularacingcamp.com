@@ -4,7 +4,7 @@ Static website workspace for the **Formula Racing Camp** book, an educational ra
 
 ## Current Project State
 
-The website has been converted from the original Canva AI Code export into a standard static structure:
+The website has been converted from the original Canva AI Code exports into a standard static structure:
 
 - `index.html` - page markup and content.
 - `styles.css` - extracted site styles.
@@ -12,9 +12,24 @@ The website has been converted from the original Canva AI Code export into a sta
 - `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
+- `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
+- `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
-The current deployable entry point is `index.html`.
+The current deployable entry point is `index.html`, with the puzzles page available through the clean URL `/puzzles`.
+
+## Latest Session State
+
+As of 2026-07-02:
+
+- Production domain is `https://www.formularacingcamp.com`.
+- `https://formularacingcamp.com` redirects to the `www` domain.
+- Home page title and hero copy now use "Formula Racing Camp: Learning In The Fast Lane".
+- The subscribe bar has been removed.
+- Header navigation includes a "Get in Touch" link.
+- Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
+- The puzzles page is wired at `/puzzles`.
+- The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 
 ## Site Content
 
@@ -65,6 +80,13 @@ The project now uses:
 index.html
 styles.css
 app.js
+puzzles.html
+puzzles.css
+puzzles.js
+vercel.json
+.vercelignore
+README.md
+session-notes.md
 ```
 
 An `assets/` directory is recommended later for local images, but it has not been created yet because the current page still references hosted images.
