@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formula Racing Camp Puzzles | F1 Puzzle Collection</title>
+<meta name="description" content="Play Formula Racing Camp puzzles, including a Formula 1 crossword, Wordle-style challenge, and F1 quiz.">
+<link rel="canonical" href="https://www.formularacingcamp.com/puzzles">
+<meta property="og:title" content="Formula Racing Camp Puzzles">
+<meta property="og:description" content="Play Formula 1 crossword, word, and quiz puzzles from Formula Racing Camp.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.formularacingcamp.com/puzzles">
+
+<link rel="stylesheet" href="puzzles.css">
+</head>
+<body>
+<div class="app-wrapper">
+<div class="header">
+<h1 id="app-title">F1 PUZZLE COLLECTION</h1>
+<p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #999; letter-spacing: 0.5px; text-transform: uppercase;">New Puzzle Every Sunday</p>
+<p id="app-subtitle">Test your Formula 1 knowledge!</p>
+</div>
+<div class="nav-buttons"><button class="nav-btn active" onclick="showPuzzle('crossword')">Crossword</button> <button class="nav-btn" onclick="showPuzzle('wordle')">Wordle</button> <button class="nav-btn" onclick="showPuzzle('quiz')">Quiz</button>
+</div>
+<div class="content">
+<!-- Crossword Puzzle -->
+<div id="crossword" class="puzzle-section active">
+<div style="border: 3px solid #000; padding: 1.5rem; margin-bottom: 2rem; background: #fff;">
+<div style="border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">
+<div style="font-size: 0.85rem; color: #666; letter-spacing: 1px; margin-bottom: 0.5rem;">
+FORMULA 1 TIMES
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline;">
+<h2 style="color: #000; margin: 0; font-size: 1.8rem; font-weight: 900;">PUZZLE No. 000001</h2>
+<div style="color: #000; font-size: 0.95rem; font-weight: 600;">
+Sunday 3rd May
+</div>
+</div>
+</div>
+<div class="crossword-layout">
+<div class="crossword-grid" id="crossword-grid"></div>
+<div class="clues-container">
+<div class="clues-section">
+<h3>ACROSS</h3>
+<div class="clue">
+<span class="clue-num">1.</span> Racing technique where a car follows closely behind another to reduce drag
+</div>
+<div class="clue">
+<span class="clue-num">4.</span> S-shaped turn in a racetrack
+</div>
+<div class="clue">
+<span class="clue-num">7.</span> Final session before the race on Sunday
+</div>
+</div>
+<div class="clues-section">
+<h3>DOWN</h3>
+<div class="clue">
+<span class="clue-num">1.</span> The transmission system in an F1 car
+</div>
+<div class="clue">
+<span class="clue-num">2.</span> Team's plan for tire changes during the race
+</div>
+<div class="clue">
+<span class="clue-num">3.</span> Material used for F1 car chassis for strength and light weight
+</div>
+</div>
+</div>
+</div>
+<div class="button-group"><button class="btn" onclick="resetCrossword()">Reset</button> <button class="btn" onclick="checkCrossword()">Check Answer</button>
+</div>
+<div id="crossword-message"></div>
+</div>
+</div><!-- Quiz Puzzle -->
+<div id="quiz" class="puzzle-section">
+<div style="border: 3px solid #000; padding: 1.5rem; background: #fff;">
+<div style="font-size: 0.85rem; color: #666; letter-spacing: 1px; margin-bottom: 1rem;">
+FORMULA 1 TIMES
+</div>
+<div style="border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">
+<h2 style="color: #000; margin: 0; font-size: 1.8rem; font-weight: 900;">QUESTION No. 000001</h2>
+<div style="color: #000; font-size: 0.95rem; font-weight: 600;">
+Sunday 26th April 2026
+</div>
+</div>
+<div id="quiz-container" style="max-width: 600px; margin: 0 auto;">
+<div id="quiz-content"></div>
+<div id="quiz-message"></div>
+</div>
+</div>
+</div>
+<div id="wordle" class="puzzle-section">
+<div style="border: 3px solid #000; padding: 1.5rem; background: #fff;">
+<div style="border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 1rem;">
+<h2 style="color: #000; margin: 0; font-size: 1.8rem; font-weight: 900;">F1 WORDLE</h2>
+</div>
+<p style="color: #666; margin: 0 0 1.5rem 0;">Guess the F1 word in 6 tries. Green = correct position, Yellow = in word but wrong position, Gray = not in word.</p>
+<div class="wordle-container">
+<div class="wordle-guesses" id="wordle-guesses"></div>
+<div class="keyboard" id="keyboard"></div>
+<div id="wordle-message"></div>
+<div class="button-group"><button class="btn" onclick="resetWordle()">New Game</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src="puzzles.js"></script>
+</body>
+</html>

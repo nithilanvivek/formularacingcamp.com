@@ -13,6 +13,9 @@ Current site files:
 - `index.html`
 - `styles.css`
 - `app.js`
+- `puzzles.html`
+- `puzzles.css`
+- `puzzles.js`
 - `formularacingcamp.html`
 - `README.md`
 - `session-notes.md`
@@ -25,6 +28,8 @@ The workspace was not initialized as a git repository at the start of the sessio
 - The intended website has been extracted into a deployable `index.html`.
 - Styles have been moved into `styles.css`.
 - Behavior has been moved into `app.js`.
+- The Canva AI Code puzzles export has been converted into `puzzles.html`, `puzzles.css`, and `puzzles.js`.
+- The home page puzzles CTA now points to `/puzzles`.
 - Styling now lives in `styles.css`, with many original inline style attributes and Tailwind utility classes still preserved from the Canva export.
 - JavaScript handles:
   - Mobile navigation toggle.
@@ -50,6 +55,7 @@ The intended site includes:
 - Final CTA section.
 - Contact form.
 - Footer and sticky subscription bar.
+- Puzzles page with crossword, Wordle-style game, and quiz sections.
 
 ## Technical Recommendation
 
@@ -69,6 +75,8 @@ session-notes.md
 ```
 
 The first three files now exist. `assets/` remains a future option if hosted images are moved into the repository.
+
+The puzzles page follows the same split-file approach with page-specific `puzzles.css` and `puzzles.js`.
 
 ## Suggested Next Steps
 

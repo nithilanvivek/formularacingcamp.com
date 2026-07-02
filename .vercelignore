@@ -3,5 +3,6 @@
 *.log
 
 # Reference/source notes that do not need to be public deployment files.
+README.md
 formularacingcamp.html
 session-notes.md

@@ -9,6 +9,9 @@ The website has been converted from the original Canva AI Code export into a sta
 - `index.html` - page markup and content.
 - `styles.css` - extracted site styles.
 - `app.js` - mobile menu, contact form, subscription UI, and icon initialization.
+- `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
+- `puzzles.css` - extracted puzzles page styles.
+- `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
 The current deployable entry point is `index.html`.
@@ -20,6 +23,7 @@ The exported page includes:
 - A ticker/banner noting that buying and previewing are not yet active.
 - Navigation for About, Chapters, What's Inside, Characters, and Authors.
 - Hero section with book cover, title, subtitle, description, and CTAs.
+- Local puzzles page linked from the hero CTA.
 - About section explaining the learning focus.
 - Table of contents with chapter/category cards.
 - "What's Inside" section covering F1 history, cars, drivers, circuits, activities, and statistics.
@@ -82,6 +86,12 @@ Recommended Vercel settings:
 - Install Command: leave blank
 
 The `vercel.json` file enables clean URLs and a basic security header. The `.vercelignore` file keeps reference-only files out of the deployed public output.
+
+With clean URLs enabled, `puzzles.html` is served at:
+
+```text
+https://www.formularacingcamp.com/puzzles
+```
 
 ## Near-Term Tasks
 
