@@ -30,7 +30,7 @@ As of 2026-07-02:
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
-- The hero book cover uses `https://i.ibb.co/ynrWqVnL/Formula-Racing-Camp-coverpage.jpg`.
+- The hero book cover uses `https://i.ibb.co/tT83ksp0/Formula-Racing-Camp-coverpage.png`.
 
 ## Site Content
 

@@ -142,3 +142,13 @@ Validation performed:
 - `node --check app.js`
 - `node --check puzzles.js`
 - No local preview servers were found on common ports `3000`, `4173`, `5173`, `8000`, `8080`, or `8787`.
+
+## Cover Image Follow-Up
+
+Date: 2026-07-02
+
+Completed:
+
+- Replaced the homepage hero cover image with the PNG hosted at `https://i.ibb.co/tT83ksp0/Formula-Racing-Camp-coverpage.png`.
+- Updated the cover source link to `https://ibb.co/Rkz7Z0TX`.
+- Re-ran JS syntax checks and found no local preview servers on common ports.
