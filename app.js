@@ -93,9 +93,16 @@ clearTimeout(bookAnnouncementTimer);
 }
 
 
-window.addEventListener('load', () => {
+function scheduleBookAnnouncement() {
 setTimeout(showBookAnnouncement, 1000);
-});
+}
+
+
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', scheduleBookAnnouncement, { once: true });
+} else {
+scheduleBookAnnouncement();
+}
 
 if (bookAnnouncementClose) {
 bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
