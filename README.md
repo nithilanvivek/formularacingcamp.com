@@ -12,6 +12,7 @@ The website has been converted from the original Canva AI Code exports into a st
 - `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
+- `assets/` - local optimized images, including the book cover and character bio WebP files.
 - `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
@@ -84,13 +85,14 @@ app.js
 puzzles.html
 puzzles.css
 puzzles.js
+assets/
 vercel.json
 .vercelignore
 README.md
 session-notes.md
 ```
 
-An `assets/` directory is recommended later for local images, but it has not been created yet because the current page still references hosted images.
+Character bio images are served from local optimized WebP files in `assets/characters/` to keep that section fast. Some non-character images still use hosted sources.
 
 ## Deployment Notes
 
