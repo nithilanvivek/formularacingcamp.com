@@ -30,6 +30,7 @@ link.addEventListener('click', closeMenu);
 
 const bookAnnouncement = document.getElementById('book-announcement');
 const bookAnnouncementClose = document.getElementById('book-announcement-close');
+let bookAnnouncementTimer;
 
 function getRgbChannels(color) {
 const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -75,6 +76,8 @@ updateAnnouncementPalette();
 document.body.classList.add('announcement-visible');
 bookAnnouncement.classList.add('active');
 bookAnnouncement.setAttribute('aria-hidden', 'false');
+clearTimeout(bookAnnouncementTimer);
+bookAnnouncementTimer = setTimeout(hideBookAnnouncement, 3750);
 }
 
 
@@ -86,6 +89,7 @@ return;
 document.body.classList.remove('announcement-visible');
 bookAnnouncement.classList.remove('active');
 bookAnnouncement.setAttribute('aria-hidden', 'true');
+clearTimeout(bookAnnouncementTimer);
 }
 
 
