@@ -62,6 +62,7 @@ background: var(--announcement-backdrop, rgba(3, 11, 22, 0.66));
 opacity: 0;
 pointer-events: none;
 transition: opacity 0.35s ease;
+overflow: hidden;
 }
 
 .book-announcement.active {
@@ -70,9 +71,11 @@ pointer-events: auto;
 }
 
 .book-announcement-text {
+position: relative;
+z-index: 2;
 max-width: 980px;
 font-family: Fredoka, sans-serif;
-font-size: clamp(2.6rem, 9vw, 7.5rem);
+font-size: clamp(2.25rem, 8vw, 7.1rem);
 font-weight: 700;
 line-height: 0.96;
 letter-spacing: 0;
@@ -117,6 +120,203 @@ outline: 3px solid #FF9500;
 outline-offset: 3px;
 }
 
+.announcement-scene {
+position: absolute;
+left: 0;
+right: 0;
+bottom: clamp(1rem, 5vh, 3.5rem);
+height: clamp(105px, 16vw, 180px);
+z-index: 1;
+pointer-events: none;
+}
+
+.announcement-road {
+position: absolute;
+left: -5vw;
+right: -5vw;
+bottom: 0;
+height: clamp(20px, 3vw, 34px);
+background: linear-gradient(180deg, rgba(20, 24, 31, 0.88), rgba(5, 7, 12, 0.95));
+box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.announcement-road::before {
+content: "";
+position: absolute;
+left: 0;
+right: 0;
+top: 50%;
+height: 4px;
+background: repeating-linear-gradient(90deg, #ffffff 0 58px, transparent 58px 96px);
+opacity: 0.76;
+animation: roadStripes 0.5s linear infinite;
+}
+
+.announcement-bookstore {
+position: absolute;
+right: clamp(1rem, 5vw, 5rem);
+bottom: clamp(18px, 3vw, 30px);
+width: clamp(82px, 13vw, 150px);
+height: clamp(72px, 11vw, 125px);
+border: clamp(3px, 0.35vw, 5px) solid var(--announcement-outline, #06111F);
+border-radius: 8px 8px 4px 4px;
+background: linear-gradient(180deg, #FFE4A8 0%, #FFD166 100%);
+box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+}
+
+.announcement-bookstore-roof {
+position: absolute;
+left: -10%;
+right: -10%;
+top: -25%;
+height: 30%;
+background: #FF6B35;
+clip-path: polygon(50% 0, 100% 100%, 0 100%);
+filter: drop-shadow(0 4px 0 var(--announcement-outline, #06111F));
+}
+
+.announcement-bookstore-sign {
+position: absolute;
+left: 10%;
+right: 10%;
+top: 20%;
+padding: 0.2rem 0;
+border-radius: 4px;
+background: #0096FF;
+color: #ffffff;
+font-family: Fredoka, sans-serif;
+font-size: clamp(0.55rem, 1.15vw, 0.95rem);
+font-weight: 700;
+line-height: 1;
+text-align: center;
+box-shadow: 0 3px 0 var(--announcement-outline, #06111F);
+}
+
+.announcement-bookstore-window,
+.announcement-bookstore-door {
+position: absolute;
+bottom: 8%;
+border: 3px solid var(--announcement-outline, #06111F);
+background: #BDEBFF;
+}
+
+.announcement-bookstore-window {
+left: 12%;
+width: 30%;
+height: 28%;
+border-radius: 5px;
+}
+
+.announcement-bookstore-door {
+right: 14%;
+width: 26%;
+height: 42%;
+border-radius: 6px 6px 0 0;
+background: #7C3AED;
+}
+
+.announcement-car {
+position: absolute;
+left: 0;
+bottom: clamp(14px, 2.5vw, 26px);
+width: clamp(170px, 24vw, 320px);
+animation: carToBookstore 3.25s cubic-bezier(0.16, 0.86, 0.38, 1) forwards;
+filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
+}
+
+.announcement-car svg {
+display: block;
+width: 100%;
+height: auto;
+overflow: visible;
+}
+
+.announcement-speed-lines path {
+fill: none;
+stroke: var(--announcement-secondary, #FFB000);
+stroke-width: 9;
+stroke-linecap: round;
+opacity: 0.9;
+animation: speedLinePulse 0.22s linear infinite alternate;
+}
+
+.announcement-car-book-frame {
+fill: #ffffff;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 5;
+}
+
+.announcement-car-book-cover {
+filter: saturate(1.18) contrast(1.08);
+}
+
+.announcement-car-book-outline {
+fill: none;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 5;
+}
+
+.announcement-car-shadow {
+fill: none;
+stroke: rgba(0, 0, 0, 0.38);
+stroke-width: 14;
+stroke-linecap: round;
+}
+
+.announcement-car-body,
+.announcement-car-nose,
+.announcement-car-wing {
+fill: #06111F;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 7;
+stroke-linejoin: round;
+}
+
+.announcement-car-livery {
+opacity: 0.96;
+filter: saturate(1.28) contrast(1.18);
+}
+
+.announcement-car-outline {
+fill: none;
+stroke: #ffffff;
+stroke-width: 3;
+stroke-linejoin: round;
+opacity: 0.86;
+}
+
+.announcement-car-cockpit {
+fill: #111827;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 6;
+}
+
+.announcement-car-team-label {
+fill: #ffffff;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 5;
+paint-order: stroke fill;
+font-family: Fredoka, sans-serif;
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0;
+}
+
+.announcement-car-wheel {
+fill: #05070A;
+stroke: #ffffff;
+stroke-width: 6;
+animation: wheelSpin 0.36s linear infinite;
+transform-box: fill-box;
+transform-origin: center;
+}
+
+.announcement-car-hub {
+fill: #FFB000;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 4;
+}
+
 @keyframes announcementFlash {
 0%, 49.99% {
 color: var(--announcement-primary, #0096FF);
@@ -144,9 +344,51 @@ text-shadow:
 }
 }
 
+@keyframes carToBookstore {
+0% {
+transform: translateX(-115%) translateY(0) rotate(-1deg);
+}
+72% {
+transform: translateX(calc(100vw - min(35vw, 430px))) translateY(-3px) rotate(0.5deg);
+}
+100% {
+transform: translateX(calc(100vw - min(35vw, 430px))) translateY(0) rotate(0deg);
+}
+}
+
+@keyframes wheelSpin {
+to {
+transform: rotate(360deg);
+}
+}
+
+@keyframes speedLinePulse {
+to {
+opacity: 0.45;
+transform: translateX(-12px);
+}
+}
+
+@keyframes roadStripes {
+to {
+background-position: -96px 0;
+}
+}
+
 @media (prefers-reduced-motion: reduce) {
 .book-announcement-text {
 animation: none;
+}
+
+.announcement-car,
+.announcement-car-wheel,
+.announcement-speed-lines path,
+.announcement-road::before {
+animation: none;
+}
+
+.announcement-car {
+transform: translateX(calc(100vw - min(35vw, 430px)));
 }
 }
 
