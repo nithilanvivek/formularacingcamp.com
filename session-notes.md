@@ -152,3 +152,33 @@ Completed:
 - Replaced the homepage hero cover image with the PNG hosted at `https://i.ibb.co/tT83ksp0/Formula-Racing-Camp-coverpage.png`.
 - Updated the cover source link to `https://ibb.co/Rkz7Z0TX`.
 - Re-ran JS syntax checks and found no local preview servers on common ports.
+
+## Book Announcement Session
+
+Date: 2026-07-04
+
+Completed:
+
+- Added a full-screen publishing announcement that appears one second after the page loads.
+- Blurs and darkens the page behind the announcement while it is visible.
+- Improved announcement contrast with adaptive light/dark background palettes, discrete flashing colors, and outline shadows.
+- Set the announcement to auto-dismiss after `3.75s`, while keeping the close button available for early dismissal.
+- Removed the old orange top announcement banner from the homepage.
+- Added a version query to the homepage `app.js` script reference so browsers pick up the announcement timer update promptly.
+
+Validation performed:
+
+- `git diff --check`
+- Browser verification on the local static site for announcement visibility, dismissal behavior, contrast, and removal of the old top banner.
+
+Latest pushed site commit before session wrap-up:
+
+```text
+3b58bc0 Tune announcement timing and remove top banner
+```
+
+Recommended next steps:
+
+- Confirm production deployment updates from `origin/main`.
+- Replace placeholder buy and preview actions when final destinations are ready.
+- Consider moving critical hosted images into the repository if long-term availability matters.
