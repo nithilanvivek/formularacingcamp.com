@@ -182,3 +182,35 @@ Recommended next steps:
 - Confirm production deployment updates from `origin/main`.
 - Replace placeholder buy and preview actions when final destinations are ready.
 - Consider moving critical hosted images into the repository if long-term availability matters.
+
+## Announcement Animation Wrap-Up
+
+Date: 2026-07-04
+
+Completed:
+
+- Added an animated F1-style car scene to the publishing announcement overlay.
+- Updated the car to a generic black-and-gold livery with a more realistic F1 silhouette, exposed wheels, front/rear wings, cockpit/halo, and suspension lines.
+- Kept the book cover as the top layer on the car and used a local optimized cover image at `assets/formula-racing-camp-coverpage.png`.
+- Extended the overlay to `4.5s` so the car can wait at the bookstore before dismissal.
+- Changed announcement scheduling from `window.load` to `DOMContentLoaded` so it appears after the page structure is visible instead of waiting for all images.
+- Updated the homepage hero copy to `Perfect for ages 9+`.
+
+Validation performed:
+
+- `node --check app.js`
+- `node --check puzzles.js`
+- `git diff --check`
+- Browser checks for desktop/mobile announcement layout, car layering, livery colors, and DOM-ready script loading.
+
+Latest pushed site commit before session wrap-up:
+
+```text
+9cabea6 Show announcement after DOM ready
+```
+
+Recommended next steps:
+
+- Confirm the production deployment has picked up `origin/main`.
+- Revisit buy and preview destinations when the book publishing flow is ready.
+- Consider moving the main homepage logo and hero cover to local `assets/` later to reduce reliance on third-party image hosting.
