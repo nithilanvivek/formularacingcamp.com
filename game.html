@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formula Racing Camp Launch Grand Prix</title>
+<meta name="description" content="Play the Formula Racing Camp launch-week game for a chance to win signed copy and Amazon promo code prizes.">
+<link rel="canonical" href="https://www.formularacingcamp.com/game">
+<meta property="og:title" content="Formula Racing Camp Launch Grand Prix">
+<meta property="og:description" content="Three levels. One launch week. Race for signed-copy and Amazon promo code prizes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.formularacingcamp.com/game">
+<link rel="stylesheet" href="launch-game.css">
+</head>
+<body>
+<main class="game-shell">
+<header class="game-hero">
+<nav class="game-nav" aria-label="Launch game navigation">
+<a href="index.html" class="brand-link">
+<img src="assets/site/f1-camp-logo.webp" alt="" width="44" height="44">
+<span>Formula Racing Camp</span>
+</a>
+<div class="nav-links">
+<a href="puzzles.html">Monthly Puzzles</a>
+<a href="index.html">Home</a>
+</div>
+</nav>
+<section class="hero-grid">
+<div class="hero-copy">
+<p class="eyebrow">Publishing week special</p>
+<h1>Launch Grand Prix</h1>
+<p class="hero-text">Complete all 3 levels, submit your run, and race for the launch-week podium prizes.</p>
+<div class="username-prompt" aria-label="Username prompt">
+<label for="username-input">Enter username</label>
+<input id="username-input" type="text" maxlength="40" placeholder="Driver name">
+<p id="username-mode-note">Use test for a no-save test run.</p>
+</div>
+<div class="hero-actions">
+<button class="primary-action" id="start-game-btn" type="button">Start Level 1</button>
+<a class="secondary-action" href="#rules">Prize Rules</a>
+</div>
+</div>
+<div class="hero-media" aria-label="Formula Racing Camp book and race track">
+<img src="assets/site/book-cover.webp" alt="Formula Racing Camp book cover" width="450" height="639">
+<div class="track-stripes" aria-hidden="true"></div>
+</div>
+</section>
+</header>
+
+<section class="podium-panel" id="rules" aria-labelledby="prize-title">
+<div>
+<p class="eyebrow">Launch-week podium</p>
+<h2 id="prize-title">Prizes</h2>
+</div>
+<ol class="prize-list">
+<li><strong>1st place</strong><span>Free signed copy</span></li>
+<li><strong>2nd place</strong><span>One-time 50% Amazon promo code</span></li>
+<li><strong>3rd place</strong><span>One-time 25% Amazon promo code</span></li>
+<li><strong>All other valid entrants</strong><span>5% off code after review</span></li>
+</ol>
+<p class="fine-print">Winner codes are sent by email after review. Promo codes are one-time use. If someone else uses a code before the winner, it cannot be replaced.</p>
+</section>
+
+<section class="score-strip" aria-label="Game progress">
+<div>
+<span>Total Score</span>
+<strong id="total-score">0</strong>
+</div>
+<div>
+<span>Levels Complete</span>
+<strong id="levels-complete">0/3</strong>
+</div>
+<div>
+<span>Run Status</span>
+<strong id="run-status">Ready</strong>
+</div>
+<div>
+<span>Review Flags</span>
+<strong id="review-flags">Clean</strong>
+</div>
+</section>
+
+<section class="level-tabs" aria-label="Game levels">
+<button class="level-tab active" type="button" data-level-tab="1">1. Start Lights</button>
+<button class="level-tab" type="button" data-level-tab="2" disabled>2. Pit Lane Dash</button>
+<button class="level-tab" type="button" data-level-tab="3" disabled>3. Strategy Code</button>
+</section>
+
+<section class="level-panel active" id="level-1" aria-labelledby="level-1-title">
+<div class="level-heading">
+<div>
+<p class="eyebrow">Level 1</p>
+<h2 id="level-1-title">Start Lights</h2>
+</div>
+<p>Wait for green. Launch too early and the stewards add a penalty.</p>
+</div>
+<div class="lights-grid" id="lights-grid" aria-label="Starting lights">
+<span></span><span></span><span></span><span></span><span></span>
+</div>
+<div class="level-controls">
+<button class="primary-action" id="reaction-arm-btn" type="button">Arm Start</button>
+<button class="secondary-action" id="reaction-launch-btn" type="button" disabled>Launch</button>
+</div>
+<p class="level-message" id="reaction-message">Press Arm Start, then launch when all lights turn green.</p>
+</section>
+
+<section class="level-panel" id="level-2" aria-labelledby="level-2-title">
+<div class="level-heading">
+<div>
+<p class="eyebrow">Level 2</p>
+<h2 id="level-2-title">Pit Lane Dash</h2>
+</div>
+<p>Collect books, helmets, and tyres. Avoid oil slicks. Arrow keys, A/D, buttons, or touch all work.</p>
+</div>
+<div class="canvas-wrap">
+<canvas id="pit-lane-canvas" width="900" height="420" aria-label="Pit lane driving game"></canvas>
+<div class="pause-overlay" id="pause-overlay" hidden>Paused while away from the tab</div>
+</div>
+<div class="level-controls">
+<button class="secondary-action steer-btn" type="button" data-steer="-1">Left</button>
+<button class="primary-action" id="dash-start-btn" type="button">Start Dash</button>
+<button class="secondary-action steer-btn" type="button" data-steer="1">Right</button>
+</div>
+<p class="level-message" id="dash-message">Score as many clean pickups as you can in 25 seconds.</p>
+</section>
+
+<section class="level-panel" id="level-3" aria-labelledby="level-3-title">
+<div class="level-heading">
+<div>
+<p class="eyebrow">Level 3</p>
+<h2 id="level-3-title">Strategy Code</h2>
+</div>
+<p>Pick the smartest race calls to unlock the final launch code.</p>
+</div>
+<div class="strategy-grid" id="strategy-grid"></div>
+<div class="code-box">
+<label for="strategy-code">Enter launch code</label>
+<div class="code-entry">
+<input id="strategy-code" name="strategy-code" type="text" inputmode="numeric" maxlength="4" placeholder="0000">
+<button class="primary-action" id="code-submit-btn" type="button">Finish Run</button>
+</div>
+</div>
+<p class="level-message" id="strategy-message">Each correct call reveals one digit.</p>
+</section>
+
+<section class="entry-panel" id="entry-panel" aria-labelledby="entry-title" hidden>
+<div class="level-heading">
+<div>
+<p class="eyebrow">Final step</p>
+<h2 id="entry-title">Submit Your Run</h2>
+</div>
+<p>Top entries are reviewed after launch week before Amazon promo codes are emailed.</p>
+</div>
+<form id="entry-form">
+<div class="form-grid">
+<label>Player nickname
+<input type="text" id="player-name" name="playerName" maxlength="40" required>
+</label>
+<label>Parent or player email
+<input type="email" id="player-email" name="email" required>
+</label>
+</div>
+<label>Optional note
+<textarea id="player-note" name="note" maxlength="280" placeholder="Anything we should know about this run?"></textarea>
+</label>
+<label class="check-row">
+<input type="checkbox" id="rules-agree" required>
+<span>I understand winners receive one-time Amazon promo codes by email, and codes cannot be replaced if shared or used by someone else first.</span>
+</label>
+<button class="primary-action" id="entry-submit-btn" type="submit">Submit Entry</button>
+</form>
+<p class="level-message" id="entry-message"></p>
+</section>
+
+<section class="monthly-panel">
+<div>
+<p class="eyebrow">Monthly puzzle reward</p>
+<h2>Monthly Solver Gets 5% Off</h2>
+<p>After launch week, the regular puzzle page can keep running as a monthly 5% reward program.</p>
+</div>
+<a class="secondary-action" href="puzzles.html">Go to Puzzles</a>
+</section>
+</main>
+<script src="launch-game.js"></script>
+</body>
+</html>

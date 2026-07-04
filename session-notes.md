@@ -247,3 +247,38 @@ Recommended next steps:
 
 - Revisit buy and preview destinations when the book publishing flow is ready.
 - Consider replacing remaining CDN dependencies for Tailwind, Lucide, and fonts if fully offline/self-hosted loading becomes important.
+
+## Launch Grand Prix Wrap-Up
+
+Date: 2026-07-05
+
+Completed:
+
+- Added a first-week publishing game, Launch Grand Prix, served from `game.html` and intended for `https://www.formularacingcamp.com/game`.
+- Built three levels: Start Lights reaction timing, Pit Lane Dash canvas collection game, and Strategy Code decision puzzle.
+- Added username entry before the game starts. Username `test` enables no-save test mode.
+- Added tab-hidden/window-blur tracking so entries can be flagged as clean, warning, review, or invalid.
+- Added launch-week prize copy: 1st place signed copy, 2nd place one-time 50% Amazon promo code, 3rd place one-time 25% Amazon promo code, and 5% for other valid entrants.
+- Added `api/launch-game-submit.js` for Vercel submissions, with server-side dry-run handling for username `test`.
+- Linked the game from the homepage and puzzles page.
+
+Validation performed:
+
+- `node --check launch-game.js`
+- `node --check api/launch-game-submit.js`
+- `node --check app.js`
+- `node --check puzzles.js`
+- `git diff --check`
+- Local browser smoke test for page load, level unlock flow, canvas rendering, and test-mode no-save messaging.
+
+Deployment notes:
+
+- Vercel clean URLs should serve `game.html` at `/game`.
+- Real durable entry collection requires setting `LAUNCH_GAME_WEBHOOK_URL` in Vercel.
+- Test runs using username `test` are not saved or forwarded by the front end or API endpoint.
+
+Recommended next steps:
+
+- Configure the launch game webhook or database destination before accepting real entries.
+- Confirm winner review criteria and final email copy for Amazon promo code delivery.
+- After deployment, verify `https://www.formularacingcamp.com/game` loads and the API route returns as expected.

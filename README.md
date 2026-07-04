@@ -12,16 +12,20 @@ The website has been converted from the original Canva AI Code exports into a st
 - `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
+- `game.html` - Launch Grand Prix game page, available at `/game`.
+- `launch-game.css` - Launch Grand Prix styles.
+- `launch-game.js` - Launch Grand Prix browser game logic and test-mode handling.
+- `api/launch-game-submit.js` - Vercel Function endpoint for launch game submissions and review flags.
 - `assets/` - local optimized images, including the book cover and character bio WebP files.
 - `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
-The current deployable entry point is `index.html`, with the puzzles page available through the clean URL `/puzzles`.
+The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles` and the launch-week game available through `/game`.
 
 ## Latest Session State
 
-As of 2026-07-02:
+As of 2026-07-05:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
@@ -30,6 +34,7 @@ As of 2026-07-02:
 - Header navigation includes a "Get in Touch" link.
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
+- The Launch Grand Prix game is wired at `/game`.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 
@@ -41,6 +46,7 @@ The exported page includes:
 - Navigation for About, Chapters, What's Inside, Characters, and Authors.
 - Hero section with book cover, title, subtitle, description, and CTAs.
 - Local puzzles page linked from the hero CTA.
+- Launch Grand Prix CTA for the first-week publishing game.
 - About section explaining the learning focus.
 - Table of contents with chapter/category cards.
 - "What's Inside" section covering F1 history, cars, drivers, circuits, activities, and statistics.
@@ -84,6 +90,10 @@ app.js
 puzzles.html
 puzzles.css
 puzzles.js
+game.html
+launch-game.css
+launch-game.js
+api/
 assets/
 vercel.json
 .vercelignore
@@ -116,8 +126,17 @@ With clean URLs enabled, `puzzles.html` is served at:
 https://www.formularacingcamp.com/puzzles
 ```
 
+With clean URLs enabled, `game.html` is served at:
+
+```text
+https://www.formularacingcamp.com/game
+```
+
+Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Runs with username `test` are treated as dry runs and are not saved or forwarded.
+
 ## Near-Term Tasks
 
 1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
-2. Download or organize key image assets if the site should not depend on third-party image hosting.
-3. Consider replacing the Tailwind CDN with a build step if the project grows.
+2. Configure the launch game submission webhook before judging real winners.
+3. Confirm Amazon promo code fulfillment copy and winner email workflow.
+4. Consider replacing the Tailwind CDN with a build step if the project grows.
