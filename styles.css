@@ -21,7 +21,101 @@ font-family: Fredoka, sans-serif;
 #app-wrapper {
 width: 100%;
 min-height: 100%;
-transition: background-color 0.3s ease;
+transition: background-color 0.3s ease, filter 0.45s ease, transform 0.45s ease;
+}
+
+body.announcement-visible {
+overflow: hidden;
+}
+
+body.announcement-visible #app-wrapper {
+filter: blur(9px) saturate(0.85) brightness(0.8);
+transform: scale(1.01);
+}
+
+.book-announcement {
+position: fixed;
+inset: 0;
+z-index: 2000;
+display: grid;
+place-items: center;
+padding: 1.5rem;
+background: rgba(2, 10, 24, 0.42);
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.35s ease;
+}
+
+.book-announcement.active {
+opacity: 1;
+pointer-events: auto;
+}
+
+.book-announcement-text {
+max-width: 980px;
+font-family: Fredoka, sans-serif;
+font-size: clamp(2.6rem, 9vw, 7.5rem);
+font-weight: 700;
+line-height: 0.96;
+letter-spacing: 0;
+text-align: center;
+color: #0096FF;
+text-shadow:
+0 0 16px rgba(255, 149, 0, 0.92),
+0 0 34px rgba(0, 150, 255, 0.68),
+0 8px 0 #FF9500,
+0 18px 40px rgba(0, 0, 0, 0.42);
+animation: announcementFlash 0.72s steps(2, end) infinite;
+}
+
+.book-announcement-close {
+position: absolute;
+top: 1rem;
+right: 1rem;
+width: 44px;
+height: 44px;
+border-radius: 50%;
+border: 3px solid #ffffff;
+background: #FF9500;
+color: #ffffff;
+font-size: 2rem;
+line-height: 1;
+font-weight: 700;
+display: grid;
+place-items: center;
+box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+}
+
+.book-announcement-close:hover,
+.book-announcement-close:focus-visible {
+background: #0096FF;
+outline: 3px solid #FF9500;
+outline-offset: 3px;
+}
+
+@keyframes announcementFlash {
+0%, 100% {
+color: #0096FF;
+text-shadow:
+0 0 16px rgba(255, 149, 0, 0.92),
+0 0 34px rgba(0, 150, 255, 0.68),
+0 8px 0 #FF9500,
+0 18px 40px rgba(0, 0, 0, 0.42);
+}
+50% {
+color: #FF9500;
+text-shadow:
+0 0 18px rgba(0, 150, 255, 0.96),
+0 0 42px rgba(255, 149, 0, 0.76),
+0 8px 0 #0096FF,
+0 18px 40px rgba(0, 0, 0, 0.42);
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.book-announcement-text {
+animation: none;
+}
 }
 
 .book-shadow {

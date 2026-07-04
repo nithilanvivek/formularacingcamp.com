@@ -19,11 +19,47 @@ mobileOverlay.classList.remove('active');
 }
 
 
+if (hamburgerBtn && mobileMenu && mobileOverlay) {
 hamburgerBtn.addEventListener('click', toggleMenu);
 mobileOverlay.addEventListener('click', closeMenu);
+}
 mobileMenuLinks.forEach(link => {
 link.addEventListener('click', closeMenu);
 });
+
+
+const bookAnnouncement = document.getElementById('book-announcement');
+const bookAnnouncementClose = document.getElementById('book-announcement-close');
+
+function showBookAnnouncement() {
+if (!bookAnnouncement) {
+return;
+}
+
+document.body.classList.add('announcement-visible');
+bookAnnouncement.classList.add('active');
+bookAnnouncement.setAttribute('aria-hidden', 'false');
+}
+
+
+function hideBookAnnouncement() {
+if (!bookAnnouncement) {
+return;
+}
+
+document.body.classList.remove('announcement-visible');
+bookAnnouncement.classList.remove('active');
+bookAnnouncement.setAttribute('aria-hidden', 'true');
+}
+
+
+window.addEventListener('load', () => {
+setTimeout(showBookAnnouncement, 1000);
+});
+
+if (bookAnnouncementClose) {
+bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
+}
 
 
 // Contact Form Functionality
