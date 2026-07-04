@@ -31,11 +31,47 @@ link.addEventListener('click', closeMenu);
 const bookAnnouncement = document.getElementById('book-announcement');
 const bookAnnouncementClose = document.getElementById('book-announcement-close');
 
+function getRgbChannels(color) {
+const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+if (!match || match[4] === '0') {
+return null;
+}
+
+return {
+red: Number(match[1]),
+green: Number(match[2]),
+blue: Number(match[3])
+};
+}
+
+
+function isLightAnnouncementBackground() {
+const wrapper = document.getElementById('app-wrapper');
+const sampledColor = wrapper ? getComputedStyle(wrapper).backgroundColor : getComputedStyle(document.body).backgroundColor;
+const rgb = getRgbChannels(sampledColor);
+
+if (!rgb) {
+return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+const luminance = (0.2126 * rgb.red + 0.7152 * rgb.green + 0.0722 * rgb.blue) / 255;
+return luminance > 0.55;
+}
+
+
+function updateAnnouncementPalette() {
+const isLight = isLightAnnouncementBackground();
+document.body.classList.toggle('announcement-background-light', isLight);
+document.body.classList.toggle('announcement-background-dark', !isLight);
+}
+
+
 function showBookAnnouncement() {
 if (!bookAnnouncement) {
 return;
 }
 
+updateAnnouncementPalette();
 document.body.classList.add('announcement-visible');
 bookAnnouncement.classList.add('active');
 bookAnnouncement.setAttribute('aria-hidden', 'false');
