@@ -220,8 +220,12 @@ position: absolute;
 left: 0;
 bottom: clamp(14px, 2.5vw, 26px);
 width: clamp(170px, 24vw, 320px);
-animation: carToBookstore 3.25s cubic-bezier(0.16, 0.86, 0.38, 1) forwards;
+transform: translateX(clamp(1rem, 4vw, 4rem));
 filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
+}
+
+.book-announcement.active .announcement-car {
+animation: carToBookstore 3s linear forwards;
 }
 
 .announcement-car svg {
@@ -265,7 +269,12 @@ stroke-linecap: round;
 
 .announcement-car-body,
 .announcement-car-nose,
-.announcement-car-wing {
+.announcement-car-front-wing,
+.announcement-car-front-wing-flap,
+.announcement-car-rear-wing,
+.announcement-car-rear-wing-endplate,
+.announcement-car-rear-floor,
+.announcement-car-sidepod {
 fill: #06111F;
 stroke: var(--announcement-outline, #06111F);
 stroke-width: 7;
@@ -273,8 +282,12 @@ stroke-linejoin: round;
 }
 
 .announcement-car-livery {
-opacity: 0.96;
-filter: saturate(1.28) contrast(1.18);
+fill: #D7A72F;
+stroke: #FFF2A8;
+stroke-width: 2.5;
+stroke-linejoin: round;
+opacity: 0.98;
+filter: drop-shadow(0 0 5px rgba(255, 208, 74, 0.68));
 }
 
 .announcement-car-outline {
@@ -289,6 +302,21 @@ opacity: 0.86;
 fill: #111827;
 stroke: var(--announcement-outline, #06111F);
 stroke-width: 6;
+}
+
+.announcement-car-halo,
+.announcement-car-suspension {
+fill: none;
+stroke: #D7A72F;
+stroke-width: 5;
+stroke-linecap: round;
+stroke-linejoin: round;
+}
+
+.announcement-car-suspension {
+stroke: #E5E7EB;
+stroke-width: 4;
+opacity: 0.82;
 }
 
 .announcement-car-team-label {
@@ -345,14 +373,14 @@ text-shadow:
 }
 
 @keyframes carToBookstore {
-0% {
-transform: translateX(-115%) translateY(0) rotate(-1deg);
+0%, 50% {
+transform: translateX(clamp(1rem, 4vw, 4rem)) translateY(0) rotate(-1deg);
 }
-72% {
-transform: translateX(calc(100vw - min(35vw, 430px))) translateY(-3px) rotate(0.5deg);
+94% {
+transform: translateX(calc(100vw - clamp(170px, 24vw, 320px) - clamp(1rem, 5vw, 5rem))) translateY(-3px) rotate(0.5deg);
 }
 100% {
-transform: translateX(calc(100vw - min(35vw, 430px))) translateY(0) rotate(0deg);
+transform: translateX(calc(100vw - clamp(170px, 24vw, 320px) - clamp(1rem, 5vw, 5rem))) translateY(0) rotate(0deg);
 }
 }
 
@@ -388,7 +416,7 @@ animation: none;
 }
 
 .announcement-car {
-transform: translateX(calc(100vw - min(35vw, 430px)));
+transform: translateX(calc(100vw - clamp(170px, 24vw, 320px) - clamp(1rem, 5vw, 5rem)));
 }
 }
 
