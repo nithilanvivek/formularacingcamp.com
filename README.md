@@ -46,7 +46,7 @@ The exported page includes:
 - "Did You Know?" fact section.
 - Character profile section.
 - Authors section for the student author group.
-- Contact form that opens an email client.
+- Contact form that submits messages through Formspree without opening an email client.
 
 ## Dependencies
 
@@ -94,7 +94,7 @@ An `assets/` directory is recommended later for local images, but it has not bee
 
 ## Deployment Notes
 
-For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. After cleanup, the deployment target can remain fully static unless the contact feature needs a backend or form service.
+For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. The contact form uses Formspree, so visitors can submit messages from the page without a custom backend.
 
 ## Vercel Deployment
 

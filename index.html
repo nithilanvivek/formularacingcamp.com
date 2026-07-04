@@ -650,12 +650,12 @@ with speed, agility, and an unshakeable smile! 🚀✨</p>
 <h2 class="font-fredoka text-4xl font-bold text-center mb-4" style="color: #0096FF;">Get in Touch</h2>
 <p class="text-center text-lg mb-12" style="color: #666666;">Have questions about Formula Racing Camp? We'd love to hear from you!</p>
 <div class="p-8 rounded-2xl" style="background-color: #ffffff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-<form id="contact-form" onsubmit="handleContactSubmit(event)">
-<div class="mb-6"><label for="contact-email" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Your Email</label> <input type="email" id="contact-email" placeholder="your@email.com" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;" required>
+<form id="contact-form" action="https://formspree.io/f/mzdlylbl" method="POST" onsubmit="handleContactSubmit(event)">
+<div class="mb-6"><label for="contact-email" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Your Email</label> <input type="email" id="contact-email" name="email" placeholder="your@email.com" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;" required>
 </div>
-<div class="mb-6"><label for="contact-subject" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Subject</label> <input type="text" id="contact-subject" placeholder="What is this about?" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;" required>
+<div class="mb-6"><label for="contact-subject" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Subject</label> <input type="text" id="contact-subject" name="subject" placeholder="What is this about?" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;" required>
 </div>
-<div class="mb-6"><label for="contact-message" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Your Message</label> <textarea id="contact-message" placeholder="Tell us what you're thinking..." style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit; min-height: 120px; resize: vertical;" required></textarea>
+<div class="mb-6"><label for="contact-message" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Your Message</label> <textarea id="contact-message" name="message" placeholder="Tell us what you're thinking..." style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit; min-height: 120px; resize: vertical;" required></textarea>
 </div><button type="submit" id="contact-submit-btn" class="w-full font-bold py-3 rounded-lg transition-all duration-300" style="background-color: #0096FF; color: #ffffff; cursor: pointer; font-size: 1rem;">Send Message</button>
 </form>
 <div id="contact-message-status" style="margin-top: 16px; text-align: center; display: none; font-weight: 600; font-size: 0.95rem;"></div>

@@ -110,10 +110,11 @@ bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
 
 
 // Contact Form Functionality
-function handleContactSubmit(event) {
+async function handleContactSubmit(event) {
 event.preventDefault();
 
 
+const form = event.target;
 const email = document.getElementById('contact-email').value.trim();
 const subject = document.getElementById('contact-subject').value.trim();
 const message = document.getElementById('contact-message').value.trim();
@@ -138,37 +139,46 @@ return;
 }
 
 
-// Prepare the email
-const mailtoLink = `mailto:nithilanvivek@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${email}\n\n${message}`)}`;
-
-
 // Show loading state
 submitBtn.disabled = true;
 submitBtn.textContent = 'Sending...';
-
-
-// Open mailto link
-window.open(mailtoLink, '_blank');
-
-
-// Show success message
-setTimeout(() => {
-statusDiv.textContent = '✓ Opening your email client...';
-statusDiv.style.color = '#4ade80';
 statusDiv.style.display = 'block';
+statusDiv.textContent = 'Sending your message...';
+statusDiv.style.color = '#0096FF';
 
+try {
+const formData = new FormData(form);
+formData.set('_subject', `Formula Racing Camp: ${subject}`);
+
+const response = await fetch(form.action, {
+method: 'POST',
+body: formData,
+headers: {
+Accept: 'application/json'
+}
+});
+
+if (!response.ok) {
+throw new Error('Formspree submission failed');
+}
+
+statusDiv.textContent = '✓ Message sent! Thanks for getting in touch.';
+statusDiv.style.color = '#22c55e';
 
 // Reset form
-document.getElementById('contact-form').reset();
-submitBtn.disabled = false;
-submitBtn.textContent = 'Send Message';
-
+form.reset();
 
 // Clear message after 3 seconds
 setTimeout(() => {
 statusDiv.style.display = 'none';
 }, 3000);
-}, 500);
+} catch (error) {
+statusDiv.textContent = 'Message could not be sent. Please try again in a moment.';
+statusDiv.style.color = '#ff6b6b';
+} finally {
+submitBtn.disabled = false;
+submitBtn.textContent = 'Send Message';
+}
 }
 
 if (window.lucide) {
