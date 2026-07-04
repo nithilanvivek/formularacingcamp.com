@@ -214,3 +214,36 @@ Recommended next steps:
 - Confirm the production deployment has picked up `origin/main`.
 - Revisit buy and preview destinations when the book publishing flow is ready.
 - Consider moving the main homepage logo and hero cover to local `assets/` later to reduce reliance on third-party image hosting.
+
+## Contact Form and Image Performance Wrap-Up
+
+Date: 2026-07-04
+
+Completed:
+
+- Replaced the homepage contact form `mailto:` flow with a Formspree AJAX submission to `https://formspree.io/f/mzdlylbl`, keeping users on the page with inline success/error states.
+- Verified the Formspree endpoint accepted a real test submission before deployment.
+- Converted all homepage bitmap images to local optimized WebP assets under `assets/site/` and `assets/characters/`.
+- Removed the remaining active `i.ibb.co` homepage image dependencies and the old unused cover PNG.
+- Confirmed real-world image loading felt nearly instant after cache clear on MacBook and under half a second on Chrome for Google Pixel 4a.
+
+Validation performed:
+
+- `node --check app.js`
+- Verified all homepage image references resolve to existing local assets.
+- Fetched production with cache-busting URLs and confirmed no remote homepage image `src` references remain.
+- Verified deployed optimized image assets return `200`.
+
+Latest pushed site commits before session wrap-up:
+
+```text
+12afbf6 Use optimized cover in announcement
+f651e4a Optimize remaining homepage images
+4add4f2 Optimize character bio images
+50a3707 Use Formspree for contact form
+```
+
+Recommended next steps:
+
+- Revisit buy and preview destinations when the book publishing flow is ready.
+- Consider replacing remaining CDN dependencies for Tailwind, Lucide, and fonts if fully offline/self-hosted loading becomes important.
