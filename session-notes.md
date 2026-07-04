@@ -191,7 +191,7 @@ Completed:
 
 - Added an animated F1-style car scene to the publishing announcement overlay.
 - Updated the car to a generic black-and-gold livery with a more realistic F1 silhouette, exposed wheels, front/rear wings, cockpit/halo, and suspension lines.
-- Kept the book cover as the top layer on the car and used a local optimized cover image at `assets/formula-racing-camp-coverpage.png`.
+- Kept the book cover as the top layer on the car and used a local optimized cover image at `assets/site/book-cover.webp`.
 - Extended the overlay to `4.5s` so the car can wait at the bookstore before dismissal.
 - Changed announcement scheduling from `window.load` to `DOMContentLoaded` so it appears after the page structure is visible instead of waiting for all images.
 - Updated the homepage hero copy to `Perfect for ages 9+`.
