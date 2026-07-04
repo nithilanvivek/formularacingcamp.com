@@ -31,7 +31,7 @@ As of 2026-07-02:
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
-- The hero book cover uses `https://i.ibb.co/tT83ksp0/Formula-Racing-Camp-coverpage.png`.
+- Homepage bitmap images are served from local optimized assets.
 
 ## Site Content
 
@@ -56,9 +56,8 @@ The page depends on remote/CDN resources:
 - Tailwind CSS CDN.
 - Google Fonts: Fredoka and Poppins.
 - Lucide icons CDN.
-- Images hosted on `i.ibb.co`.
 
-Because these are loaded externally, the page needs internet access for the full visual experience.
+Because the CSS, fonts, and icons are loaded externally, the page needs internet access for the full visual experience.
 
 ## Local Development
 
@@ -92,7 +91,7 @@ README.md
 session-notes.md
 ```
 
-Character bio images are served from local optimized WebP files in `assets/characters/` to keep that section fast. Some non-character images still use hosted sources.
+Homepage images are served from local optimized WebP files in `assets/site/` and `assets/characters/` to keep the page fast.
 
 ## Deployment Notes
 
