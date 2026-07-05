@@ -37,12 +37,7 @@
 </div>
 <div class="hero-actions">
 <button class="primary-action" id="start-game-btn" type="button">Start Level 1</button>
-<a class="secondary-action" href="#rules">Prize Rules</a>
 </div>
-</div>
-<div class="hero-media" aria-label="Formula Racing Camp book and race track">
-<img src="assets/site/book-cover.webp" alt="Formula Racing Camp book cover" width="450" height="639">
-<div class="track-stripes" aria-hidden="true"></div>
 </div>
 </section>
 </header>
@@ -58,7 +53,13 @@
 <li><strong>3rd place</strong><span>One-time 25% Amazon promo code</span></li>
 <li><strong>All other valid entrants</strong><span>5% off code after review</span></li>
 </ol>
-<p class="fine-print">Each player gets one attempt. Leaving the game tab after starting ends the run. Winner codes are sent by email after review. Promo codes are one-time use. If someone else uses a code before the winner, it cannot be replaced.</p>
+<ul class="rules-list" aria-label="Game rules">
+<li>Do not switch to another tab or another window, or your attempt will be disqualified.</li>
+<li>Everyone has only one attempt; you cannot use a new username for a new attempt.</li>
+<li>Complete all 3 levels before submitting your run.</li>
+<li>Winner entries are reviewed after launch week before prizes are emailed.</li>
+<li>Amazon promo codes are one-time use. If someone else uses your code first, it cannot be replaced.</li>
+</ul>
 </section>
 
 <section class="score-strip" aria-label="Game progress">
@@ -114,14 +115,14 @@
 </div>
 <div class="canvas-wrap">
 <canvas id="pit-lane-canvas" width="900" height="420" aria-label="Pit lane driving game"></canvas>
-<div class="pause-overlay" id="pause-overlay" hidden>Run ended because this tab changed. One attempt only.</div>
+<div class="pause-overlay" id="pause-overlay" hidden>Run ended because you opened a new tab. One attempt only.</div>
 </div>
 <div class="level-controls">
 <button class="secondary-action steer-btn" type="button" data-steer="-1">Left</button>
 <button class="primary-action" id="dash-start-btn" type="button">Start Dash</button>
 <button class="secondary-action steer-btn" type="button" data-steer="1">Right</button>
 </div>
-<p class="level-message" id="dash-message">Score as many clean pickups as you can in 25 seconds.</p>
+<p class="level-message" id="dash-message">Score as many clean pickups as you can in 20 seconds.</p>
 </section>
 
 <section class="level-panel" id="level-3" aria-labelledby="level-3-title">
@@ -136,7 +137,7 @@
 <div class="code-box">
 <label for="strategy-code">Enter launch code</label>
 <div class="code-entry">
-<input id="strategy-code" name="strategy-code" type="text" inputmode="numeric" maxlength="4" placeholder="0000">
+<input id="strategy-code" name="strategy-code" type="text" inputmode="numeric" maxlength="8" placeholder="00000000">
 <button class="primary-action" id="code-submit-btn" type="button">Finish Run</button>
 </div>
 </div>

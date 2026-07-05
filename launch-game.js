@@ -1,36 +1,37 @@
 const GAME_ENDPOINT = '/api/launch-game-submit';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
-const STRATEGY_CODE = '5284';
+const STRATEGY_CODE = '52841936';
+const DASH_DURATION_MS = 20000;
 const DASH_ITEM_SCRIPT = [
-{ at: 400, kind: 'book', label: 'BOOK', lane: 1, speed: 260 },
-{ at: 1200, kind: 'helmet', label: 'HELM', lane: 0, speed: 255 },
-{ at: 2000, kind: 'oil', label: 'OIL', lane: 2, speed: 265 },
-{ at: 2800, kind: 'tyre', label: 'TYRE', lane: 1, speed: 250 },
-{ at: 3600, kind: 'book', label: 'BOOK', lane: 2, speed: 270 },
-{ at: 4400, kind: 'oil', label: 'OIL', lane: 0, speed: 260 },
-{ at: 5200, kind: 'helmet', label: 'HELM', lane: 1, speed: 255 },
-{ at: 6000, kind: 'tyre', label: 'TYRE', lane: 0, speed: 265 },
-{ at: 6800, kind: 'book', label: 'BOOK', lane: 2, speed: 250 },
-{ at: 7600, kind: 'oil', label: 'OIL', lane: 1, speed: 270 },
-{ at: 8400, kind: 'helmet', label: 'HELM', lane: 2, speed: 260 },
-{ at: 9200, kind: 'tyre', label: 'TYRE', lane: 1, speed: 255 },
-{ at: 10000, kind: 'book', label: 'BOOK', lane: 0, speed: 265 },
-{ at: 10800, kind: 'oil', label: 'OIL', lane: 2, speed: 250 },
-{ at: 11600, kind: 'helmet', label: 'HELM', lane: 0, speed: 270 },
-{ at: 12400, kind: 'tyre', label: 'TYRE', lane: 2, speed: 260 },
-{ at: 13200, kind: 'book', label: 'BOOK', lane: 1, speed: 255 },
-{ at: 14000, kind: 'oil', label: 'OIL', lane: 0, speed: 265 },
-{ at: 14800, kind: 'helmet', label: 'HELM', lane: 2, speed: 250 },
-{ at: 15600, kind: 'tyre', label: 'TYRE', lane: 0, speed: 270 },
-{ at: 16400, kind: 'book', label: 'BOOK', lane: 2, speed: 260 },
-{ at: 17200, kind: 'oil', label: 'OIL', lane: 1, speed: 255 },
-{ at: 18000, kind: 'helmet', label: 'HELM', lane: 1, speed: 265 },
-{ at: 18800, kind: 'tyre', label: 'TYRE', lane: 2, speed: 250 },
-{ at: 19600, kind: 'book', label: 'BOOK', lane: 0, speed: 270 },
-{ at: 20400, kind: 'oil', label: 'OIL', lane: 2, speed: 260 },
-{ at: 21200, kind: 'helmet', label: 'HELM', lane: 0, speed: 255 },
-{ at: 22000, kind: 'tyre', label: 'TYRE', lane: 1, speed: 265 }
+{ at: 300, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
+{ at: 900, kind: 'helmet', label: 'HELM', lane: 0, speed: 350 },
+{ at: 1500, kind: 'oil', label: 'OIL', lane: 2, speed: 370 },
+{ at: 2100, kind: 'tyre', label: 'TYRE', lane: 1, speed: 345 },
+{ at: 2700, kind: 'book', label: 'BOOK', lane: 2, speed: 385 },
+{ at: 3300, kind: 'oil', label: 'OIL', lane: 0, speed: 365 },
+{ at: 3900, kind: 'helmet', label: 'HELM', lane: 1, speed: 355 },
+{ at: 4500, kind: 'tyre', label: 'TYRE', lane: 0, speed: 375 },
+{ at: 5100, kind: 'book', label: 'BOOK', lane: 2, speed: 350 },
+{ at: 5700, kind: 'oil', label: 'OIL', lane: 1, speed: 390 },
+{ at: 6300, kind: 'helmet', label: 'HELM', lane: 2, speed: 370 },
+{ at: 6900, kind: 'tyre', label: 'TYRE', lane: 1, speed: 360 },
+{ at: 7500, kind: 'book', label: 'BOOK', lane: 0, speed: 380 },
+{ at: 8100, kind: 'oil', label: 'OIL', lane: 2, speed: 355 },
+{ at: 8700, kind: 'helmet', label: 'HELM', lane: 0, speed: 395 },
+{ at: 9300, kind: 'tyre', label: 'TYRE', lane: 2, speed: 370 },
+{ at: 9900, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
+{ at: 10500, kind: 'oil', label: 'OIL', lane: 0, speed: 385 },
+{ at: 11100, kind: 'helmet', label: 'HELM', lane: 2, speed: 355 },
+{ at: 11700, kind: 'tyre', label: 'TYRE', lane: 0, speed: 400 },
+{ at: 12300, kind: 'book', label: 'BOOK', lane: 2, speed: 370 },
+{ at: 12900, kind: 'oil', label: 'OIL', lane: 1, speed: 365 },
+{ at: 13500, kind: 'helmet', label: 'HELM', lane: 1, speed: 385 },
+{ at: 14100, kind: 'tyre', label: 'TYRE', lane: 2, speed: 355 },
+{ at: 14700, kind: 'book', label: 'BOOK', lane: 0, speed: 395 },
+{ at: 15300, kind: 'oil', label: 'OIL', lane: 2, speed: 375 },
+{ at: 15900, kind: 'helmet', label: 'HELM', lane: 0, speed: 365 },
+{ at: 16500, kind: 'tyre', label: 'TYRE', lane: 1, speed: 385 }
 ];
 
 const state = {
@@ -64,7 +65,7 @@ running: false,
 paused: false,
 score: 0,
 penalty: 0,
-remainingMs: 25000,
+remainingMs: DASH_DURATION_MS,
 lastFrameAt: 0,
 scriptIndex: 0,
 carLane: 1,
@@ -141,6 +142,38 @@ prompt: 'The car ahead punches a hole in the air. Which move helps you gain spee
 digit: '4',
 correct: 'Use the slipstream',
 choices: ['Use the slipstream', 'Open the parachute', 'Drive off line']
+},
+{
+id: 'brakes',
+title: 'Heavy braking zone',
+prompt: 'A tight corner is coming after the longest straight. What should the driver do first?',
+digit: '1',
+correct: 'Brake before turning',
+choices: ['Brake before turning', 'Turn at full throttle', 'Look at the crowd']
+},
+{
+id: 'safety',
+title: 'Safety car restart',
+prompt: 'The safety car is about to come in. What matters most before the green flag?',
+digit: '9',
+correct: 'Warm tyres and stay alert',
+choices: ['Warm tyres and stay alert', 'Stop on track', 'Switch off the radio']
+},
+{
+id: 'aero',
+title: 'Fast corner balance',
+prompt: 'The car slides wide in a fast corner. Which setup area helps grip at speed?',
+digit: '3',
+correct: 'Aerodynamics',
+choices: ['Aerodynamics', 'Snack choice', 'Helmet color']
+},
+{
+id: 'radio',
+title: 'Team radio warning',
+prompt: 'The engineer reports traffic ahead. What should the driver do?',
+digit: '6',
+correct: 'Plan the overtake safely',
+choices: ['Plan the overtake safely', 'Close their eyes', 'Ignore all flags']
 }
 ];
 
@@ -547,7 +580,7 @@ return;
 const dt = Math.min(48, now - state.dash.lastFrameAt);
 state.dash.lastFrameAt = now;
 state.dash.remainingMs -= dt;
-const elapsedMs = 25000 - state.dash.remainingMs;
+const elapsedMs = DASH_DURATION_MS - state.dash.remainingMs;
 
 if (state.dash.keys.has('ArrowLeft') || state.dash.keys.has('a')) {
 state.dash.targetLane = Math.max(0, state.dash.targetLane - 1);
@@ -614,14 +647,14 @@ state.dash.running = true;
 state.dash.paused = false;
 state.dash.score = 0;
 state.dash.penalty = 0;
-state.dash.remainingMs = 25000;
+state.dash.remainingMs = DASH_DURATION_MS;
 state.dash.scriptIndex = 0;
 state.dash.carLane = 1;
 state.dash.targetLane = 1;
 state.dash.items = [];
 elements.dashStartBtn.textContent = 'Dash Running';
 elements.dashStartBtn.disabled = true;
-elements.dashMessage.textContent = 'Drive clean and collect the scripted item set.';
+elements.dashMessage.textContent = 'Drive clean. Same item set, faster pace.';
 recordEvent('dash_start', { itemScript: DASH_ITEM_SCRIPT.length });
 state.dash.lastFrameAt = performance.now();
 state.dash.animationId = requestAnimationFrame(dashLoop);
@@ -798,7 +831,7 @@ state.antiCheat.tabHiddenCount += 1;
 state.antiCheat.lastHiddenAt = Date.now();
 recordEvent('tab_hidden');
 if (state.startedAt && !state.submitted) {
-endAttempt('tab_changed', 'This attempt ended because the tab changed. Everyone gets one attempt.');
+endAttempt('tab_changed', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
 }
 } else {
 if (state.antiCheat.lastHiddenAt) {
@@ -871,12 +904,12 @@ document.addEventListener('visibilitychange', handleVisibilityChange);
 window.addEventListener('blur', () => {
 state.antiCheat.blurCount += 1;
 recordEvent('window_blur');
-handleFocusLoss('focus_lost', 'This attempt ended because the game tab lost focus. Everyone gets one attempt.');
+handleFocusLoss('focus_lost', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
 updateScoreboard();
 });
 window.addEventListener('pagehide', () => {
 recordEvent('page_hidden');
-handleFocusLoss('page_left', 'This attempt ended because the game page was left. Everyone gets one attempt.');
+handleFocusLoss('page_left', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
 });
 }
 

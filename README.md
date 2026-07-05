@@ -35,6 +35,7 @@ As of 2026-07-05:
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
 - The Launch Grand Prix game is wired at `/game`.
+- Launch Grand Prix now uses a full-screen visual hero, explicit one-attempt rules, a faster fixed Pit Lane Dash item script, and an expanded 8-question Strategy Code.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 
@@ -139,4 +140,5 @@ Launch game submissions post to `/api/launch-game-submit`. To forward real entri
 1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
 2. Configure the launch game submission webhook before judging real winners.
 3. Confirm Amazon promo code fulfillment copy and winner email workflow.
-4. Consider replacing the Tailwind CDN with a build step if the project grows.
+4. Verify the launch-week game on production Chrome/Safari after deployment.
+5. Consider replacing the Tailwind CDN with a build step if the project grows.

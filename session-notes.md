@@ -282,3 +282,22 @@ Recommended next steps:
 - Configure the launch game webhook or database destination before accepting real entries.
 - Confirm winner review criteria and final email copy for Amazon promo code delivery.
 - After deployment, verify `https://www.formularacingcamp.com/game` loads and the API route returns as expected.
+
+## Launch Game Graphics and Difficulty Pass
+
+Date: 2026-07-05
+
+Completed:
+
+- Reworked the Launch Grand Prix opening screen into a large visual race-track hero and removed the separate rules shortcut button.
+- Added the visible launch-week rules below the hero, including tab/window disqualification, one browser attempt, completion requirements, winner review, and one-time Amazon promo code handling.
+- Updated player-facing disqualification wording to say the attempt ended because a new tab was opened.
+- Made Pit Lane Dash faster, shortened it to 20 seconds, and kept the scripted item set fair with equal books, helmets, tyres, and oil slicks for every player.
+- Expanded Strategy Code from 4 to 8 race-decision questions.
+
+Validation performed:
+
+- `node --check launch-game.js`
+- `node --check api/launch-game-submit.js`
+- `git diff --check`
+- Local browser smoke test for the new hero, rules list, removed rules shortcut button, 20-second dash copy, and 8 Strategy Code cards.
