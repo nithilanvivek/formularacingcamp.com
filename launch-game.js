@@ -282,7 +282,7 @@ return false;
 }
 
 state.player.username = username;
-state.player.testMode = username.toLowerCase() === 'test';
+state.player.testMode = username.toLowerCase() === 'test_nalihtin';
 recordEvent('username_entered', { testMode: state.player.testMode });
 
 if (!state.player.testMode && hasAttemptUsed()) {

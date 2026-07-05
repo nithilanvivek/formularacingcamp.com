@@ -58,7 +58,7 @@ return;
 const payload = req.body || {};
 const review = reviewStatus(payload);
 
-if (payload.testMode === true || String(payload.username || '').trim().toLowerCase() === 'test') {
+if (payload.testMode === true || String(payload.username || '').trim().toLowerCase() === 'test_nalihtin') {
 res.status(200).json({
 ok: true,
 dryRun: true,
