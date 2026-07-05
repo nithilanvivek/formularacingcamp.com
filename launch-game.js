@@ -813,6 +813,14 @@ recordEvent('tab_visible');
 updateScoreboard();
 }
 
+function handleFocusLoss(reason, message) {
+if (!state.startedAt || state.submitted || state.locked) {
+return;
+}
+
+endAttempt(reason, message);
+}
+
 function setupEvents() {
 elements.startGameBtn.addEventListener('click', startGame);
 elements.usernameInput.addEventListener('input', () => {
@@ -863,7 +871,12 @@ document.addEventListener('visibilitychange', handleVisibilityChange);
 window.addEventListener('blur', () => {
 state.antiCheat.blurCount += 1;
 recordEvent('window_blur');
+handleFocusLoss('focus_lost', 'This attempt ended because the game tab lost focus. Everyone gets one attempt.');
 updateScoreboard();
+});
+window.addEventListener('pagehide', () => {
+recordEvent('page_hidden');
+handleFocusLoss('page_left', 'This attempt ended because the game page was left. Everyone gets one attempt.');
 });
 }
 

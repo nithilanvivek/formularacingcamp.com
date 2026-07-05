@@ -29,9 +29,10 @@ if (payload.locked === true) flags.push('attempt_locked');
 if (payload.lockReason) flags.push(`lock_${payload.lockReason}`);
 if (antiCheat.tabHiddenCount >= 3) flags.push('multiple_tab_switches');
 if (antiCheat.hiddenMs > 20000) flags.push('long_hidden_time');
+if (antiCheat.blurCount > 0) flags.push('focus_lost');
 if (antiCheat.blurCount > 5) flags.push('many_window_blurs');
 
-if (flags.some((flag) => ['missing_payload', 'invalid_email', 'invalid_score', 'incomplete_levels', 'tab_changed', 'attempt_locked'].includes(flag))) {
+if (flags.some((flag) => ['missing_payload', 'invalid_email', 'invalid_score', 'incomplete_levels', 'tab_changed', 'attempt_locked', 'focus_lost'].includes(flag))) {
 return { status: 'invalid', flags };
 }
 
