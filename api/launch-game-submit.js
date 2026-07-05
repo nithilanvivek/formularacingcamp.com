@@ -1,4 +1,4 @@
-const MAX_SCORE = 1200;
+const MAX_SCORE = 4000;
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -24,11 +24,14 @@ if (!Number.isFinite(payload.score) || payload.score < 0 || payload.score > MAX_
 if (!payload.levels || !payload.levels.reaction || !payload.levels.dash || !payload.levels.strategy) flags.push('incomplete_levels');
 
 const antiCheat = payload.antiCheat || {};
+if (antiCheat.tabHiddenCount > 0) flags.push('tab_changed');
+if (payload.locked === true) flags.push('attempt_locked');
+if (payload.lockReason) flags.push(`lock_${payload.lockReason}`);
 if (antiCheat.tabHiddenCount >= 3) flags.push('multiple_tab_switches');
 if (antiCheat.hiddenMs > 20000) flags.push('long_hidden_time');
 if (antiCheat.blurCount > 5) flags.push('many_window_blurs');
 
-if (flags.some((flag) => ['missing_payload', 'invalid_email', 'invalid_score', 'incomplete_levels'].includes(flag))) {
+if (flags.some((flag) => ['missing_payload', 'invalid_email', 'invalid_score', 'incomplete_levels', 'tab_changed', 'attempt_locked'].includes(flag))) {
 return { status: 'invalid', flags };
 }
 

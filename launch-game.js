@@ -1,5 +1,6 @@
 const GAME_ENDPOINT = '/api/launch-game-submit';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
+const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const STRATEGY_CODE = '5284';
 
 const state = {
@@ -43,7 +44,9 @@ animationId: null,
 keys: new Set()
 },
 strategySelections: {},
-submitted: false
+submitted: false,
+locked: false,
+lockReason: ''
 };
 
 const elements = {
@@ -113,6 +116,7 @@ choices: ['Use the slipstream', 'Open the parachute', 'Drive off line']
 
 let reactionReadyAt = 0;
 let reactionTimer = null;
+let reactionLightInterval = null;
 let reactionArmed = false;
 let reactionFinished = false;
 
@@ -133,6 +137,10 @@ return Object.values(state.levels).filter(Boolean).length;
 }
 
 function getReviewStatus() {
+if (state.locked) {
+return 'Invalid';
+}
+
 if (state.antiCheat.tabHiddenCount >= 3 || state.antiCheat.hiddenMs > 20000) {
 return 'Review';
 }
@@ -151,6 +159,8 @@ elements.reviewFlags.textContent = getReviewStatus();
 
 if (state.submitted) {
 elements.runStatus.textContent = 'Submitted';
+} else if (state.locked) {
+elements.runStatus.textContent = 'Attempt ended';
 } else if (completedCount() === 3) {
 elements.runStatus.textContent = 'Ready to submit';
 } else if (state.startedAt) {
@@ -168,12 +178,81 @@ tab.disabled = !state.levels.reaction;
 if (level === 3) {
 tab.disabled = !state.levels.dash;
 }
+if (state.locked) {
+tab.disabled = true;
+}
 });
 
 if (completedCount() === 3) {
 elements.entryPanel.hidden = false;
 elements.entryPanel.classList.add('active');
 }
+}
+
+function hasAttemptUsed() {
+try {
+return localStorage.getItem(ATTEMPT_KEY) === 'true';
+} catch (error) {
+return false;
+}
+}
+
+function markAttemptUsed() {
+if (state.player.testMode) {
+return;
+}
+
+try {
+localStorage.setItem(ATTEMPT_KEY, 'true');
+} catch (error) {
+recordEvent('attempt_storage_failed');
+}
+}
+
+function setLevelMessage(message) {
+elements.reactionMessage.textContent = message;
+elements.dashMessage.textContent = message;
+elements.strategyMessage.textContent = message;
+elements.entryMessage.textContent = message;
+}
+
+function disableGameControls() {
+[
+elements.startGameBtn,
+elements.reactionArmBtn,
+elements.reactionLaunchBtn,
+elements.dashStartBtn,
+elements.codeSubmitBtn,
+elements.entrySubmitBtn,
+...elements.steerButtons,
+...elements.levelTabs,
+...Array.from(document.querySelectorAll('[data-challenge]'))
+].forEach((control) => {
+if (control) {
+control.disabled = true;
+}
+});
+}
+
+function endAttempt(reason, message) {
+if (state.locked) {
+return;
+}
+
+state.locked = true;
+state.lockReason = reason;
+state.dash.running = false;
+state.dash.paused = false;
+clearTimeout(reactionTimer);
+clearInterval(reactionLightInterval);
+cancelAnimationFrame(state.dash.animationId);
+reactionArmed = false;
+elements.pauseOverlay.hidden = state.activeLevel !== 2;
+markAttemptUsed();
+recordEvent('attempt_ended', { reason });
+disableGameControls();
+setLevelMessage(message);
+updateScoreboard();
 }
 
 function requestUsername() {
@@ -188,6 +267,11 @@ return false;
 state.player.username = username;
 state.player.testMode = username.toLowerCase() === 'test';
 recordEvent('username_entered', { testMode: state.player.testMode });
+
+if (!state.player.testMode && hasAttemptUsed()) {
+endAttempt('attempt_already_used', 'This browser has already used its Launch Grand Prix attempt.');
+return false;
+}
 
 const playerNameInput = document.getElementById('player-name');
 if (playerNameInput) {
@@ -204,6 +288,7 @@ return true;
 }
 
 function showLevel(level) {
+if (state.locked) return;
 if (level === 2 && !state.levels.reaction) return;
 if (level === 3 && !state.levels.dash) return;
 
@@ -222,12 +307,17 @@ updateScoreboard();
 }
 
 function startGame() {
+if (state.locked) {
+return;
+}
+
 if (!state.player.username && !requestUsername()) {
 return;
 }
 
 if (!state.startedAt) {
 state.startedAt = Date.now();
+markAttemptUsed();
 recordEvent('game_start');
 }
 showLevel(1);
@@ -242,21 +332,22 @@ light.classList.toggle('green', mode === 'green');
 }
 
 function armReactionStart() {
-if (reactionFinished) return;
+if (reactionFinished || state.locked) return;
 
 clearTimeout(reactionTimer);
+clearInterval(reactionLightInterval);
 reactionArmed = true;
 reactionReadyAt = 0;
 setLights('red', 0);
 elements.reactionLaunchBtn.disabled = false;
-elements.reactionMessage.textContent = 'Wait for green. Launch too early and you get a penalty.';
+elements.reactionMessage.textContent = 'Wait for green. Your Level 1 score will be 1000 minus your reaction time.';
 
 let redCount = 0;
-const redInterval = setInterval(() => {
+reactionLightInterval = setInterval(() => {
 redCount += 1;
 setLights('red', redCount);
 if (redCount >= elements.lights.length) {
-clearInterval(redInterval);
+clearInterval(reactionLightInterval);
 const delay = 900 + Math.random() * 1600;
 reactionTimer = setTimeout(() => {
 reactionReadyAt = performance.now();
@@ -269,27 +360,32 @@ recordEvent('reaction_green');
 }
 
 function launchReaction() {
-if (!reactionArmed || reactionFinished) return;
+if (!reactionArmed || reactionFinished || state.locked) return;
 
 if (!reactionReadyAt) {
 clearTimeout(reactionTimer);
+clearInterval(reactionLightInterval);
 reactionArmed = false;
 setLights('red', elements.lights.length);
-markLevelComplete('reaction', 60);
+markLevelComplete('reaction', 0);
 reactionFinished = true;
 elements.reactionLaunchBtn.disabled = true;
-elements.reactionMessage.textContent = 'False start. You still move on, but with a heavy penalty.';
+elements.reactionMessage.textContent = 'False start. Level 1 score: 0. Level 2 unlocked.';
 setTimeout(() => showLevel(2), 900);
 return;
 }
 
 const reactionMs = performance.now() - reactionReadyAt;
-const score = Math.max(80, 340 - reactionMs * 0.55);
+const roundedReaction = Math.round(reactionMs);
+const score = Math.max(0, 1000 - roundedReaction);
+clearInterval(reactionLightInterval);
 reactionArmed = false;
 reactionFinished = true;
 elements.reactionLaunchBtn.disabled = true;
 elements.reactionArmBtn.disabled = true;
-elements.reactionMessage.textContent = `Reaction time: ${Math.round(reactionMs)} ms. Level 2 unlocked.`;
+elements.reactionMessage.textContent = roundedReaction > 1000
+? `Late start: ${roundedReaction} ms. Level 1 score: 0. Level 2 unlocked.`
+: `Reaction time: ${roundedReaction} ms. Level 1 score: ${score}. Level 2 unlocked.`;
 markLevelComplete('reaction', score);
 setTimeout(() => showLevel(2), 900);
 }
@@ -390,6 +486,7 @@ speed: 210 + Math.random() * 110
 }
 
 function finishDash() {
+if (state.locked) return;
 cancelAnimationFrame(state.dash.animationId);
 state.dash.running = false;
 elements.dashStartBtn.disabled = true;
@@ -401,7 +498,7 @@ setTimeout(() => showLevel(3), 900);
 }
 
 function dashLoop(now) {
-if (!state.dash.running) return;
+if (!state.dash.running || state.locked) return;
 
 if (state.dash.paused) {
 state.dash.lastFrameAt = now;
@@ -470,7 +567,7 @@ state.dash.animationId = requestAnimationFrame(dashLoop);
 }
 
 function startDash() {
-if (state.dash.running || state.levels.dash) return;
+if (state.dash.running || state.levels.dash || state.locked) return;
 
 state.dash.running = true;
 state.dash.paused = false;
@@ -490,7 +587,7 @@ state.dash.animationId = requestAnimationFrame(dashLoop);
 }
 
 function steer(direction) {
-if (!state.dash.running || state.dash.paused) return;
+if (!state.dash.running || state.dash.paused || state.locked) return;
 state.dash.targetLane = Math.max(0, Math.min(2, state.dash.targetLane + direction));
 }
 
@@ -508,6 +605,7 @@ return `
 }
 
 function handleStrategyChoice(button) {
+if (state.locked) return;
 const id = button.dataset.challenge;
 const choice = button.dataset.choice;
 const challenge = strategyChallenges.find((item) => item.id === id);
@@ -540,7 +638,7 @@ updateScoreboard();
 }
 
 function submitStrategyCode() {
-if (state.levels.strategy) return;
+if (state.levels.strategy || state.locked) return;
 
 const entered = elements.strategyCode.value.trim();
 if (entered !== STRATEGY_CODE) {
@@ -582,6 +680,8 @@ antiCheat: {
 currentHidden: document.hidden
 },
 reviewStatus: getReviewStatus(),
+locked: state.locked,
+lockReason: state.lockReason,
 events: state.events.slice(-80),
 userAgent: navigator.userAgent
 };
@@ -598,6 +698,11 @@ localStorage.setItem(LOCAL_PREVIEW_KEY, JSON.stringify(entries.slice(-25)));
 
 async function submitEntry(event) {
 event.preventDefault();
+if (state.locked) {
+elements.entryMessage.textContent = 'This attempt ended and cannot be submitted.';
+return;
+}
+
 if (completedCount() !== 3) {
 elements.entryMessage.textContent = 'Complete all 3 levels before submitting.';
 return;
@@ -649,16 +754,18 @@ function handleVisibilityChange() {
 if (document.hidden) {
 state.antiCheat.tabHiddenCount += 1;
 state.antiCheat.lastHiddenAt = Date.now();
-state.dash.paused = true;
-elements.pauseOverlay.hidden = false;
 recordEvent('tab_hidden');
+if (state.startedAt && !state.submitted) {
+endAttempt('tab_changed', 'This attempt ended because the tab changed. Everyone gets one attempt.');
+}
 } else {
 if (state.antiCheat.lastHiddenAt) {
 state.antiCheat.hiddenMs += Date.now() - state.antiCheat.lastHiddenAt;
 state.antiCheat.lastHiddenAt = null;
 }
-state.dash.paused = false;
+if (!state.locked) {
 elements.pauseOverlay.hidden = true;
+}
 recordEvent('tab_visible');
 }
 updateScoreboard();
@@ -684,6 +791,7 @@ button.addEventListener('click', () => steer(Number(button.dataset.steer)));
 });
 
 document.addEventListener('keydown', (event) => {
+if (state.locked) return;
 if (event.code === 'Space' && state.activeLevel === 1 && !elements.reactionLaunchBtn.disabled) {
 event.preventDefault();
 launchReaction();

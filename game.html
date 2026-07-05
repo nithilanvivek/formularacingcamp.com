@@ -58,7 +58,7 @@
 <li><strong>3rd place</strong><span>One-time 25% Amazon promo code</span></li>
 <li><strong>All other valid entrants</strong><span>5% off code after review</span></li>
 </ol>
-<p class="fine-print">Winner codes are sent by email after review. Promo codes are one-time use. If someone else uses a code before the winner, it cannot be replaced.</p>
+<p class="fine-print">Each player gets one attempt. Leaving the game tab after starting ends the run. Winner codes are sent by email after review. Promo codes are one-time use. If someone else uses a code before the winner, it cannot be replaced.</p>
 </section>
 
 <section class="score-strip" aria-label="Game progress">
@@ -92,7 +92,7 @@
 <p class="eyebrow">Level 1</p>
 <h2 id="level-1-title">Start Lights</h2>
 </div>
-<p>Wait for green. Launch too early and the stewards add a penalty.</p>
+<p>Wait for green. Score is 1000 minus your reaction time in milliseconds. More than 1000 ms is a late start.</p>
 </div>
 <div class="lights-grid" id="lights-grid" aria-label="Starting lights">
 <span></span><span></span><span></span><span></span><span></span>
@@ -110,11 +110,11 @@
 <p class="eyebrow">Level 2</p>
 <h2 id="level-2-title">Pit Lane Dash</h2>
 </div>
-<p>Collect books, helmets, and tyres. Avoid oil slicks. Arrow keys, A/D, buttons, or touch all work.</p>
+<p>Collect books, helmets, and tyres. Avoid oil slicks, shown as purple lines. Arrow keys, A/D, buttons, or touch all work.</p>
 </div>
 <div class="canvas-wrap">
 <canvas id="pit-lane-canvas" width="900" height="420" aria-label="Pit lane driving game"></canvas>
-<div class="pause-overlay" id="pause-overlay" hidden>Paused while away from the tab</div>
+<div class="pause-overlay" id="pause-overlay" hidden>Run ended because this tab changed. One attempt only.</div>
 </div>
 <div class="level-controls">
 <button class="secondary-action steer-btn" type="button" data-steer="-1">Left</button>
