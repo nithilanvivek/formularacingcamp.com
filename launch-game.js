@@ -191,19 +191,36 @@ elements.entryPanel.classList.add('active');
 
 function hasAttemptUsed() {
 try {
-return localStorage.getItem(ATTEMPT_KEY) === 'true';
-} catch (error) {
+const attempt = localStorage.getItem(ATTEMPT_KEY);
+if (!attempt) {
 return false;
+}
+
+if (attempt === 'true') {
+return true;
+}
+
+const parsed = JSON.parse(attempt);
+return parsed && parsed.used === true;
+} catch (error) {
+return true;
 }
 }
 
-function markAttemptUsed() {
+function saveAttemptRecord(reason) {
 if (state.player.testMode) {
 return;
 }
 
 try {
-localStorage.setItem(ATTEMPT_KEY, 'true');
+localStorage.setItem(ATTEMPT_KEY, JSON.stringify({
+used: true,
+reason,
+sessionId: state.sessionId,
+username: state.player.username,
+score: totalScore(),
+completedAt: state.completedAt || Date.now()
+}));
 } catch (error) {
 recordEvent('attempt_storage_failed');
 }
@@ -248,8 +265,8 @@ clearInterval(reactionLightInterval);
 cancelAnimationFrame(state.dash.animationId);
 reactionArmed = false;
 elements.pauseOverlay.hidden = state.activeLevel !== 2;
-markAttemptUsed();
 recordEvent('attempt_ended', { reason });
+saveAttemptRecord(reason);
 disableGameControls();
 setLevelMessage(message);
 updateScoreboard();
@@ -317,7 +334,6 @@ return;
 
 if (!state.startedAt) {
 state.startedAt = Date.now();
-markAttemptUsed();
 recordEvent('game_start');
 }
 showLevel(1);
@@ -655,6 +671,7 @@ return;
 state.completedAt = Date.now();
 const score = state.scores.strategy + 120;
 markLevelComplete('strategy', score);
+saveAttemptRecord('completed');
 elements.strategyMessage.textContent = 'Run complete. Submit your entry for launch-week review.';
 elements.codeSubmitBtn.disabled = true;
 updateScoreboard();
