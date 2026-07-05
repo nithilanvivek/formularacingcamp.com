@@ -132,7 +132,7 @@ With clean URLs enabled, `game.html` is served at:
 https://www.formularacingcamp.com/game
 ```
 
-Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Runs with username `test` are treated as dry runs and are not saved or forwarded.
+Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel.
 
 ## Near-Term Tasks
 

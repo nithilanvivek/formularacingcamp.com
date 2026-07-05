@@ -256,10 +256,10 @@ Completed:
 
 - Added a first-week publishing game, Launch Grand Prix, served from `game.html` and intended for `https://www.formularacingcamp.com/game`.
 - Built three levels: Start Lights reaction timing, Pit Lane Dash canvas collection game, and Strategy Code decision puzzle.
-- Added username entry before the game starts. Username `test` enables no-save test mode.
+- Added username entry before the game starts.
 - Added tab-hidden/window-blur tracking so entries can be flagged as clean, warning, review, or invalid.
 - Added launch-week prize copy: 1st place signed copy, 2nd place one-time 50% Amazon promo code, 3rd place one-time 25% Amazon promo code, and 5% for other valid entrants.
-- Added `api/launch-game-submit.js` for Vercel submissions, with server-side dry-run handling for username `test`.
+- Added `api/launch-game-submit.js` for Vercel submissions, with server-side dry-run handling for test entries.
 - Linked the game from the homepage and puzzles page.
 
 Validation performed:
@@ -269,13 +269,13 @@ Validation performed:
 - `node --check app.js`
 - `node --check puzzles.js`
 - `git diff --check`
-- Local browser smoke test for page load, level unlock flow, canvas rendering, and test-mode no-save messaging.
+- Local browser smoke test for page load, level unlock flow, canvas rendering, and dry-run entry handling.
 
 Deployment notes:
 
 - Vercel clean URLs should serve `game.html` at `/game`.
 - Real durable entry collection requires setting `LAUNCH_GAME_WEBHOOK_URL` in Vercel.
-- Test runs using username `test` are not saved or forwarded by the front end or API endpoint.
+- Test entries are not saved or forwarded by the front end or API endpoint.
 
 Recommended next steps:
 

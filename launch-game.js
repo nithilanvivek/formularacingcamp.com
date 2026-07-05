@@ -149,9 +149,7 @@ elements.totalScore.textContent = String(totalScore());
 elements.levelsComplete.textContent = `${completedCount()}/3`;
 elements.reviewFlags.textContent = getReviewStatus();
 
-if (state.player.testMode) {
-elements.runStatus.textContent = 'Test mode';
-} else if (state.submitted) {
+if (state.submitted) {
 elements.runStatus.textContent = 'Submitted';
 } else if (completedCount() === 3) {
 elements.runStatus.textContent = 'Ready to submit';
@@ -197,10 +195,9 @@ playerNameInput.value = username;
 }
 
 if (state.player.testMode) {
-elements.usernameModeNote.textContent = 'Test mode active. This run will not be saved.';
-elements.entryMessage.textContent = 'Test mode is active. This run will not be saved or submitted.';
+elements.entryMessage.textContent = '';
 } else {
-elements.usernameModeNote.textContent = `Racing as ${username}.`;
+elements.usernameModeNote.textContent = '';
 }
 
 return true;
@@ -614,9 +611,9 @@ elements.entryMessage.textContent = 'Sending your run for review.';
 
 if (state.player.testMode) {
 state.submitted = true;
-elements.entryMessage.textContent = 'Test mode entry checked. No data was saved or submitted.';
+elements.entryMessage.textContent = 'Entry checked.';
 elements.entrySubmitBtn.disabled = true;
-elements.entrySubmitBtn.textContent = 'Test Entry Checked';
+elements.entrySubmitBtn.textContent = 'Entry Checked';
 updateScoreboard();
 return;
 }
@@ -670,8 +667,7 @@ updateScoreboard();
 function setupEvents() {
 elements.startGameBtn.addEventListener('click', startGame);
 elements.usernameInput.addEventListener('input', () => {
-const isTest = elements.usernameInput.value.trim().toLowerCase() === 'test';
-elements.usernameModeNote.textContent = isTest ? 'Test mode: this run will not be saved.' : 'Use test for a no-save test run.';
+elements.usernameModeNote.textContent = '';
 });
 elements.reactionArmBtn.addEventListener('click', armReactionStart);
 elements.reactionLaunchBtn.addEventListener('click', launchReaction);

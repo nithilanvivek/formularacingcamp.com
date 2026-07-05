@@ -195,6 +195,10 @@ font-size: 0.9rem;
 font-weight: 800;
 }
 
+.username-prompt p:empty {
+display: none;
+}
+
 .primary-action,
 .secondary-action {
 min-height: 48px;
