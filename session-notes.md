@@ -312,3 +312,13 @@ Completed:
 - Hid the score strip, level tabs, and level panels until the launch sequence completes.
 - Removed the requested character bio and visible homepage mentions from the deployed homepage.
 - Checked the deployed homepage files for removed-name references and 7-author wording.
+
+## Test Leaderboard Routing
+
+Date: 2026-07-05
+
+Completed:
+
+- Added saved test leaderboard usernames: `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
+- Kept `test_nalihtin` as the hidden no-save dry run username.
+- Added `LAUNCH_GAME_TEST_WEBHOOK_URL` support so test leaderboard entries can be forwarded separately from production entries.

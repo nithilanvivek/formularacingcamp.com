@@ -133,7 +133,7 @@ With clean URLs enabled, `game.html` is served at:
 https://www.formularacingcamp.com/game
 ```
 
-Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel.
+Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. To keep testing entries separate, configure `LAUNCH_GAME_TEST_WEBHOOK_URL`; the saved test leaderboard usernames are `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
 
 ## Near-Term Tasks
 

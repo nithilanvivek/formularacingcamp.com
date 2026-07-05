@@ -1,4 +1,13 @@
 const MAX_SCORE = 4000;
+const DRY_RUN_USERNAME = 'test_nalihtin';
+const TEST_LEADERBOARD_USERNAMES = new Set([
+'test_nihira',
+'test_nithilan',
+'test_jaskirat',
+'test_tejas',
+'test_nandana',
+'test_shaurya'
+]);
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,6 +17,10 @@ res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
 function isValidEmail(email) {
 return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function normalizedUsername(payload) {
+return String(payload?.username || '').trim().toLowerCase();
 }
 
 function reviewStatus(payload) {
@@ -58,8 +71,11 @@ return;
 
 const payload = req.body || {};
 const review = reviewStatus(payload);
+const username = normalizedUsername(payload);
+const isDryRun = payload.testMode === true || username === DRY_RUN_USERNAME;
+const isTestLeaderboard = payload.testLeaderboard === true || TEST_LEADERBOARD_USERNAMES.has(username);
 
-if (payload.testMode === true || String(payload.username || '').trim().toLowerCase() === 'test_nalihtin') {
+if (isDryRun) {
 res.status(200).json({
 ok: true,
 dryRun: true,
@@ -72,14 +88,19 @@ return;
 
 const entry = {
 ...payload,
+testLeaderboard: isTestLeaderboard,
+entryBucket: isTestLeaderboard ? 'test_leaderboard' : 'production',
 serverReceivedAt: new Date().toISOString(),
 serverReviewStatus: review.status,
 serverReviewFlags: review.flags
 };
+const webhookUrl = isTestLeaderboard
+? process.env.LAUNCH_GAME_TEST_WEBHOOK_URL
+: process.env.LAUNCH_GAME_WEBHOOK_URL;
 
-if (process.env.LAUNCH_GAME_WEBHOOK_URL) {
+if (webhookUrl) {
 try {
-const response = await fetch(process.env.LAUNCH_GAME_WEBHOOK_URL, {
+const response = await fetch(webhookUrl, {
 method: 'POST',
 headers: {
 'Content-Type': 'application/json'
@@ -95,12 +116,13 @@ res.status(502).json({ ok: false, error: 'submission_webhook_failed' });
 return;
 }
 } else {
-console.log('Launch game entry received without LAUNCH_GAME_WEBHOOK_URL configured', entry);
+console.log('Launch game entry received without webhook configured', entry);
 }
 
 res.status(review.status === 'invalid' ? 400 : 200).json({
 ok: review.status !== 'invalid',
 entryId: payload.sessionId,
+entryBucket: entry.entryBucket,
 reviewStatus: review.status,
 flags: review.flags
 });

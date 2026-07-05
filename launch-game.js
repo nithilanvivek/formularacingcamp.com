@@ -3,6 +3,15 @@ const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const STRATEGY_CODE = '52841936';
 const DASH_DURATION_MS = 20000;
+const DRY_RUN_USERNAME = 'test_nalihtin';
+const TEST_LEADERBOARD_USERNAMES = new Set([
+'test_nihira',
+'test_nithilan',
+'test_jaskirat',
+'test_tejas',
+'test_nandana',
+'test_shaurya'
+]);
 const DASH_ITEM_SCRIPT = [
 { at: 300, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
 { at: 900, kind: 'helmet', label: 'HELM', lane: 0, speed: 350 },
@@ -58,7 +67,8 @@ lastHiddenAt: null
   events: [],
   player: {
     username: null,
-    testMode: false
+    testMode: false,
+    testLeaderboard: false
   },
   dash: {
 running: false,
@@ -275,7 +285,7 @@ return true;
 }
 
 function saveAttemptRecord(reason) {
-if (state.player.testMode) {
+if (state.player.testMode || state.player.testLeaderboard) {
 return;
 }
 
@@ -353,10 +363,15 @@ return false;
 }
 
 state.player.username = username;
-state.player.testMode = username.toLowerCase() === 'test_nalihtin';
-recordEvent('username_entered', { testMode: state.player.testMode });
+const normalizedUsername = username.toLowerCase();
+state.player.testMode = normalizedUsername === DRY_RUN_USERNAME;
+state.player.testLeaderboard = TEST_LEADERBOARD_USERNAMES.has(normalizedUsername);
+recordEvent('username_entered', {
+testMode: state.player.testMode,
+testLeaderboard: state.player.testLeaderboard
+});
 
-if (!state.player.testMode && hasAttemptUsed()) {
+if (!state.player.testMode && !state.player.testLeaderboard && hasAttemptUsed()) {
 endAttempt('attempt_already_used', 'This browser has already used its Launch Grand Prix attempt.');
 return false;
 }
@@ -789,6 +804,7 @@ return {
 sessionId: state.sessionId,
 username: state.player.username,
 testMode: state.player.testMode,
+testLeaderboard: state.player.testLeaderboard,
 playerName: formData.get('playerName'),
 email: formData.get('email'),
 note: formData.get('note') || '',
