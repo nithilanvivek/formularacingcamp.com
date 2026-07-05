@@ -301,3 +301,14 @@ Validation performed:
 - `node --check api/launch-game-submit.js`
 - `git diff --check`
 - Local browser smoke test for the new hero, rules list, removed rules shortcut button, 20-second dash copy, and 8 Strategy Code cards.
+
+## Launch Animation and Author Cleanup
+
+Date: 2026-07-05
+
+Completed:
+
+- Added a launch transition so clicking Launch Game sends racing cars across the screen before Level 1 is revealed.
+- Hid the score strip, level tabs, and level panels until the launch sequence completes.
+- Removed the requested character bio and visible homepage mentions from the deployed homepage.
+- Checked the deployed homepage files for removed-name references and 7-author wording.

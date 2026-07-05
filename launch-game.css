@@ -230,6 +230,12 @@ background: var(--red);
 color: #fff;
 }
 
+.hero-launch-action {
+min-height: 64px;
+padding: 16px 28px;
+font-size: 1.22rem;
+}
+
 .secondary-action {
 background: #fff;
 color: var(--ink);
@@ -263,6 +269,118 @@ box-shadow: 4px 4px 0 var(--line);
 border: 3px solid var(--line);
 background: var(--panel);
 box-shadow: 6px 6px 0 var(--line);
+}
+
+.game-shell:not(.game-started) .score-strip,
+.game-shell:not(.game-started) .level-tabs,
+.game-shell:not(.game-started) .level-panel,
+.game-shell:not(.game-started) .entry-panel {
+display: none;
+}
+
+.game-shell.launching .game-hero,
+.game-shell.launching .podium-panel,
+.game-shell.launching .monthly-panel {
+filter: blur(2px);
+}
+
+.launch-reveal {
+position: fixed;
+inset: 0;
+z-index: 50;
+display: grid;
+place-items: center;
+overflow: hidden;
+background:
+linear-gradient(180deg, rgba(6, 10, 19, 0.88), rgba(6, 10, 19, 0.7)),
+repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0 44px, transparent 44px 86px),
+linear-gradient(110deg, #10131a 0 28%, #eef5ff 28.3% 33%, #10131a 33.3% 66%, #eef5ff 66.3% 71%, #10131a 71.3%);
+animation: revealFade 1.55s ease forwards;
+}
+
+.launch-reveal[hidden] {
+display: none;
+}
+
+.launch-track {
+position: absolute;
+inset: 0;
+}
+
+.launch-car {
+position: absolute;
+left: -180px;
+width: 138px;
+height: 44px;
+border: 4px solid #05070a;
+border-radius: 999px 34px 24px 999px;
+background: var(--red);
+box-shadow: 0 12px 0 rgba(0, 0, 0, 0.24);
+animation: carZip 1.15s cubic-bezier(0.17, 0.72, 0.12, 1) forwards;
+}
+
+.launch-car::before,
+.launch-car::after {
+content: "";
+position: absolute;
+bottom: -13px;
+width: 28px;
+height: 28px;
+border: 5px solid #05070a;
+border-radius: 50%;
+background: #eef5ff;
+}
+
+.launch-car::before {
+left: 18px;
+}
+
+.launch-car::after {
+right: 18px;
+}
+
+.car-red {
+top: 30%;
+background: #ff3b30;
+}
+
+.car-blue {
+top: 48%;
+background: #0096ff;
+animation-delay: 0.16s;
+transform: scale(0.92);
+}
+
+.car-gold {
+top: 64%;
+background: #ffb000;
+animation-delay: 0.28s;
+transform: scale(1.08);
+}
+
+@keyframes carZip {
+0% {
+left: -190px;
+}
+
+72% {
+left: calc(100vw + 80px);
+}
+
+100% {
+left: calc(100vw + 220px);
+}
+}
+
+@keyframes revealFade {
+0%,
+72% {
+opacity: 1;
+}
+
+100% {
+opacity: 0;
+}
 }
 
 .podium-panel,

@@ -77,10 +77,14 @@ keys: new Set()
 strategySelections: {},
 submitted: false,
 locked: false,
-lockReason: ''
+lockReason: '',
+launchRevealed: false,
+launchInProgress: false
 };
 
 const elements = {
+gameShell: document.querySelector('.game-shell'),
+launchReveal: document.getElementById('launch-reveal'),
 startGameBtn: document.getElementById('start-game-btn'),
 usernameInput: document.getElementById('username-input'),
 usernameModeNote: document.getElementById('username-mode-note'),
@@ -319,6 +323,10 @@ if (state.locked) {
 return;
 }
 
+elements.gameShell.classList.add('game-started');
+elements.gameShell.classList.remove('launching');
+elements.launchReveal.hidden = true;
+state.launchInProgress = false;
 state.locked = true;
 state.lockReason = reason;
 state.dash.running = false;
@@ -387,7 +395,7 @@ updateScoreboard();
 }
 
 function startGame() {
-if (state.locked) {
+if (state.locked || state.launchInProgress) {
 return;
 }
 
@@ -399,8 +407,48 @@ if (!state.startedAt) {
 state.startedAt = Date.now();
 recordEvent('game_start');
 }
+
+if (!state.launchRevealed) {
+playLaunchReveal();
+return;
+}
+
+revealLevelOne();
+}
+
+function revealLevelOne() {
+if (state.locked) {
+return;
+}
+
+state.launchRevealed = true;
+elements.gameShell.classList.add('game-started');
 showLevel(1);
+elements.startGameBtn.textContent = 'Level 1 Ready';
 elements.reactionArmBtn.focus();
+document.getElementById('level-1').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function playLaunchReveal() {
+state.launchInProgress = true;
+elements.startGameBtn.disabled = true;
+elements.startGameBtn.textContent = 'Launching...';
+elements.gameShell.classList.add('launching');
+elements.launchReveal.hidden = false;
+recordEvent('launch_reveal_start');
+
+setTimeout(() => {
+elements.launchReveal.hidden = true;
+elements.gameShell.classList.remove('launching');
+state.launchInProgress = false;
+if (state.locked) {
+return;
+}
+
+elements.startGameBtn.disabled = false;
+recordEvent('launch_reveal_complete');
+revealLevelOne();
+}, 1600);
 }
 
 function setLights(mode, count = 0) {
