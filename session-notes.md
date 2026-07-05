@@ -322,3 +322,21 @@ Completed:
 - Added saved test leaderboard usernames: `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
 - Kept `test_nalihtin` as the hidden no-save dry run username.
 - Added `LAUNCH_GAME_TEST_WEBHOOK_URL` support so test leaderboard entries can be forwarded separately from production entries.
+
+## End Session Wrap-Up
+
+Date: 2026-07-05
+
+Current state:
+
+- Latest pushed commit before wrap-up: `4dd4f24 Route saved test leaderboard entries separately`.
+- Branch: `main`, tracking `origin/main`.
+- Production domain: `https://www.formularacingcamp.com`, with the launch game at `/game`.
+- Testing is planned for tomorrow with the saved `test_*` leaderboard usernames.
+
+Recommended next steps:
+
+- Choose the storage/email path for the scheduled leaderboard email before broad testing.
+- Configure `LAUNCH_GAME_TEST_WEBHOOK_URL` for separated test entries.
+- Configure `LAUNCH_GAME_WEBHOOK_URL` before accepting real production entries.
+- Confirm the exact leaderboard email time, recipients, and code fulfillment copy.
