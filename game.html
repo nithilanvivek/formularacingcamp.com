@@ -36,7 +36,7 @@
 <p id="username-mode-note" aria-live="polite"></p>
 </div>
 <div class="hero-actions">
-<button class="primary-action hero-launch-action" id="start-game-btn" type="button">Launch Game</button>
+<button class="primary-action hero-launch-action" id="start-game-btn" type="button">See Rules</button>
 </div>
 </div>
 </section>
@@ -47,6 +47,13 @@
 <span class="launch-car car-red"></span>
 <span class="launch-car car-blue"></span>
 <span class="launch-car car-gold"></span>
+</div>
+</div>
+
+<div class="attention-flash" id="attention-flash" role="alert" aria-live="assertive" hidden>
+<div>
+<strong>Run ended</strong>
+<span id="attention-flash-message">This attempt ended because you opened a new tab. Everyone gets one attempt.</span>
 </div>
 </div>
 
@@ -69,7 +76,7 @@
 <li>Amazon promo codes are one-time use. If someone else uses your code first, it cannot be replaced.</li>
 </ul>
 <div class="screen-actions">
-<button class="primary-action" id="rules-continue-btn" type="button">Start Level 1</button>
+<button class="primary-action" id="rules-continue-btn" type="button">Launch</button>
 </div>
 </section>
 
@@ -106,6 +113,7 @@
 <div class="level-controls">
 <button class="primary-action" id="reaction-arm-btn" type="button">Arm Start</button>
 <button class="secondary-action" id="reaction-launch-btn" type="button" disabled>Launch</button>
+<button class="primary-action" id="reaction-next-btn" type="button" hidden>Next Level</button>
 </div>
 <p class="level-message" id="reaction-message">Press Arm Start, then launch when all lights turn green.</p>
 </section>
@@ -126,6 +134,7 @@
 <button class="secondary-action steer-btn" type="button" data-steer="-1">Left</button>
 <button class="primary-action" id="dash-start-btn" type="button">Start Dash</button>
 <button class="secondary-action steer-btn" type="button" data-steer="1">Right</button>
+<button class="primary-action" id="dash-next-btn" type="button" hidden>Next Level</button>
 </div>
 <p class="level-message" id="dash-message">Score as many clean pickups as you can in 20 seconds.</p>
 </section>
@@ -140,7 +149,7 @@
 </div>
 <div class="strategy-grid" id="strategy-grid"></div>
 <div class="screen-actions">
-<button class="primary-action" id="strategy-finish-btn" type="button" disabled>Save Strategy</button>
+<button class="primary-action" id="strategy-finish-btn" type="button" disabled>Results</button>
 </div>
 <p class="level-message" id="strategy-message">Answer each strategy card to save your run.</p>
 </section>

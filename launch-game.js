@@ -61,7 +61,8 @@ antiCheat: {
 tabHiddenCount: 0,
 blurCount: 0,
 hiddenMs: 0,
-lastHiddenAt: null
+lastHiddenAt: null,
+pendingFlash: false
 },
   events: [],
   player: {
@@ -108,11 +109,15 @@ scoreStrip: document.querySelector('.score-strip'),
 lights: Array.from(document.querySelectorAll('#lights-grid span')),
 reactionArmBtn: document.getElementById('reaction-arm-btn'),
 reactionLaunchBtn: document.getElementById('reaction-launch-btn'),
+reactionNextBtn: document.getElementById('reaction-next-btn'),
 reactionMessage: document.getElementById('reaction-message'),
 dashCanvas: document.getElementById('pit-lane-canvas'),
 dashStartBtn: document.getElementById('dash-start-btn'),
+dashNextBtn: document.getElementById('dash-next-btn'),
 dashMessage: document.getElementById('dash-message'),
 pauseOverlay: document.getElementById('pause-overlay'),
+attentionFlash: document.getElementById('attention-flash'),
+attentionFlashMessage: document.getElementById('attention-flash-message'),
 steerButtons: Array.from(document.querySelectorAll('.steer-btn')),
 strategyGrid: document.getElementById('strategy-grid'),
 strategyFinishBtn: document.getElementById('strategy-finish-btn'),
@@ -290,7 +295,9 @@ function disableGameControls() {
 elements.startGameBtn,
 elements.reactionArmBtn,
 elements.reactionLaunchBtn,
+elements.reactionNextBtn,
 elements.dashStartBtn,
+elements.dashNextBtn,
 elements.strategyFinishBtn,
 elements.entrySubmitBtn,
 ...elements.steerButtons,
@@ -300,6 +307,34 @@ if (control) {
 control.disabled = true;
 }
 });
+}
+
+function shouldFlashAttemptEnd(reason) {
+return ['tab_changed', 'focus_lost', 'page_left'].includes(reason);
+}
+
+function showAttentionFlash(message) {
+if (!elements.attentionFlash) {
+return;
+}
+
+if (document.hidden) {
+state.antiCheat.pendingFlash = true;
+return;
+}
+
+if (elements.attentionFlashMessage) {
+elements.attentionFlashMessage.textContent = message;
+}
+
+elements.attentionFlash.hidden = false;
+elements.attentionFlash.classList.remove('active');
+void elements.attentionFlash.offsetWidth;
+elements.attentionFlash.classList.add('active');
+window.setTimeout(() => {
+elements.attentionFlash.classList.remove('active');
+elements.attentionFlash.hidden = true;
+}, 1750);
 }
 
 function endAttempt(reason, message) {
@@ -324,6 +359,9 @@ recordEvent('attempt_ended', { reason });
 saveAttemptRecord(reason);
 disableGameControls();
 setLevelMessage(message);
+if (shouldFlashAttemptEnd(reason)) {
+showAttentionFlash(message);
+}
 updateScoreboard();
 }
 
@@ -409,41 +447,49 @@ state.startedAt = Date.now();
 recordEvent('game_start');
 }
 
-if (!state.launchRevealed) {
-playLaunchReveal();
-return;
-}
-
-showScreen('rules');
-}
-
-function showRulesAfterLaunch() {
-if (state.locked) {
-return;
-}
-
+runScreenTransition({
+button: elements.startGameBtn,
+pendingText: 'Opening Rules...',
+next: () => {
 state.launchRevealed = true;
 showScreen('rules');
-elements.startGameBtn.textContent = 'Rules Ready';
 elements.rulesContinueBtn.focus();
+}
+});
 }
 
 function startLevelOne() {
-if (state.locked || !state.startedAt) {
+if (state.locked || !state.startedAt || state.launchInProgress) {
 return;
 }
 
+runScreenTransition({
+button: elements.rulesContinueBtn,
+pendingText: 'Launching...',
+next: () => {
 showLevel(1);
 elements.reactionArmBtn.focus();
 }
+});
+}
 
-function playLaunchReveal() {
+function runScreenTransition({ button, pendingText, next }) {
+if (state.launchInProgress) {
+return;
+}
+
 state.launchInProgress = true;
-elements.startGameBtn.disabled = true;
-elements.startGameBtn.textContent = 'Launching...';
+if (button) {
+button.disabled = true;
+if (pendingText) {
+button.textContent = pendingText;
+}
+}
 elements.gameShell.classList.add('launching');
+elements.launchReveal.hidden = true;
+void elements.launchReveal.offsetWidth;
 elements.launchReveal.hidden = false;
-recordEvent('launch_reveal_start');
+recordEvent('screen_transition_start');
 
 setTimeout(() => {
 elements.launchReveal.hidden = true;
@@ -453,9 +499,8 @@ if (state.locked) {
 return;
 }
 
-elements.startGameBtn.disabled = false;
-recordEvent('launch_reveal_complete');
-showRulesAfterLaunch();
+recordEvent('screen_transition_complete');
+next();
 }, 1600);
 }
 
@@ -471,6 +516,7 @@ if (reactionFinished || state.locked) return;
 
 clearTimeout(reactionTimer);
 clearInterval(reactionLightInterval);
+elements.reactionNextBtn.hidden = true;
 reactionArmed = true;
 reactionReadyAt = 0;
 setLights('red', 0);
@@ -505,8 +551,8 @@ setLights('red', elements.lights.length);
 markLevelComplete('reaction', 0);
 reactionFinished = true;
 elements.reactionLaunchBtn.disabled = true;
-elements.reactionMessage.textContent = 'False start. Level 1 score: 0. Level 2 unlocked.';
-setTimeout(() => showLevel(2), 900);
+elements.reactionMessage.textContent = 'False start. Level 1 score: 0. Level 2 is ready.';
+elements.reactionNextBtn.hidden = false;
 return;
 }
 
@@ -519,10 +565,22 @@ reactionFinished = true;
 elements.reactionLaunchBtn.disabled = true;
 elements.reactionArmBtn.disabled = true;
 elements.reactionMessage.textContent = roundedReaction > 1000
-? `Late start: ${roundedReaction} ms. Level 1 score: 0. Level 2 unlocked.`
-: `Reaction time: ${roundedReaction} ms. Level 1 score: ${score}. Level 2 unlocked.`;
+? `Late start: ${roundedReaction} ms. Level 1 score: 0. Level 2 is ready.`
+: `Reaction time: ${roundedReaction} ms. Level 1 score: ${score}. Level 2 is ready.`;
 markLevelComplete('reaction', score);
-setTimeout(() => showLevel(2), 900);
+elements.reactionNextBtn.hidden = false;
+}
+
+function goToLevelTwo() {
+if (!state.levels.reaction || state.locked || state.launchInProgress) {
+return;
+}
+
+runScreenTransition({
+button: elements.reactionNextBtn,
+pendingText: 'Next Level...',
+next: () => showLevel(2)
+});
 }
 
 function laneX(lane) {
@@ -619,9 +677,9 @@ state.dash.running = false;
 elements.dashStartBtn.disabled = true;
 const cleanScore = Math.max(0, state.dash.score - state.dash.penalty);
 markLevelComplete('dash', cleanScore);
-elements.dashMessage.textContent = `Pit Lane Dash complete. Level score: ${cleanScore}. Strategy Calls unlocked.`;
+elements.dashMessage.textContent = `Pit Lane Dash complete. Level score: ${cleanScore}. Strategy Calls are ready.`;
 drawDash();
-setTimeout(() => showLevel(3), 900);
+elements.dashNextBtn.hidden = false;
 }
 
 function dashLoop(now) {
@@ -708,12 +766,25 @@ state.dash.scriptIndex = 0;
 state.dash.carLane = 1;
 state.dash.targetLane = 1;
 state.dash.items = [];
+elements.dashNextBtn.hidden = true;
 elements.dashStartBtn.textContent = 'Dash Running';
 elements.dashStartBtn.disabled = true;
 elements.dashMessage.textContent = 'Drive clean. Same item set, faster pace.';
 recordEvent('dash_start', { itemScript: DASH_ITEM_SCRIPT.length });
 state.dash.lastFrameAt = performance.now();
 state.dash.animationId = requestAnimationFrame(dashLoop);
+}
+
+function goToLevelThree() {
+if (!state.levels.dash || state.locked || state.launchInProgress) {
+return;
+}
+
+runScreenTransition({
+button: elements.dashNextBtn,
+pendingText: 'Next Level...',
+next: () => showLevel(3)
+});
 }
 
 function steer(direction) {
@@ -781,10 +852,13 @@ state.completedAt = Date.now();
 const score = state.scores.strategy + 160;
 markLevelComplete('strategy', score);
 saveAttemptRecord('completed');
-elements.strategyMessage.textContent = 'Run complete. Continue to submit your email.';
-elements.strategyFinishBtn.disabled = true;
+elements.strategyMessage.textContent = 'Run complete. Loading results.';
 updateScoreboard();
-setTimeout(showConclusion, 700);
+runScreenTransition({
+button: elements.strategyFinishBtn,
+pendingText: 'Results...',
+next: showConclusion
+});
 }
 
 function currentPayload(formData) {
@@ -884,7 +958,11 @@ state.antiCheat.tabHiddenCount += 1;
 state.antiCheat.lastHiddenAt = Date.now();
 recordEvent('tab_hidden');
 if (state.startedAt && !state.submitted) {
+if (state.locked && shouldFlashAttemptEnd(state.lockReason)) {
+state.antiCheat.pendingFlash = true;
+} else {
 endAttempt('tab_changed', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
+}
 }
 } else {
 if (state.antiCheat.lastHiddenAt) {
@@ -893,6 +971,10 @@ state.antiCheat.lastHiddenAt = null;
 }
 if (!state.locked) {
 elements.pauseOverlay.hidden = true;
+}
+if (state.antiCheat.pendingFlash) {
+state.antiCheat.pendingFlash = false;
+showAttentionFlash('This attempt ended because you opened a new tab. Everyone gets one attempt.');
 }
 recordEvent('tab_visible');
 }
@@ -915,7 +997,9 @@ elements.usernameModeNote.textContent = '';
 });
 elements.reactionArmBtn.addEventListener('click', armReactionStart);
 elements.reactionLaunchBtn.addEventListener('click', launchReaction);
+elements.reactionNextBtn.addEventListener('click', goToLevelTwo);
 elements.dashStartBtn.addEventListener('click', startDash);
+elements.dashNextBtn.addEventListener('click', goToLevelThree);
 elements.strategyFinishBtn.addEventListener('click', finishStrategy);
 elements.entryForm.addEventListener('submit', submitEntry);
 

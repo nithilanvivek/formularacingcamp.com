@@ -39,14 +39,14 @@ color: inherit;
 }
 
 .game-shell {
-height: 100vh;
+height: 100svh;
 overflow: hidden;
 background: #eef5ff;
 }
 
 .game-screen {
 display: none;
-height: 100vh;
+height: 100svh;
 overflow-y: auto;
 }
 
@@ -64,8 +64,8 @@ margin: 0 auto;
 
 .game-hero {
 position: relative;
-min-height: min(760px, 96vh);
-padding: 20px 0 56px;
+min-height: 100svh;
+padding: clamp(12px, 2svh, 20px) 0 clamp(24px, 5svh, 48px);
 overflow: hidden;
 background:
 linear-gradient(180deg, rgba(6, 10, 19, 0.1) 0%, rgba(6, 10, 19, 0.18) 44%, rgba(238, 245, 255, 0.98) 100%),
@@ -86,7 +86,7 @@ display: flex;
 justify-content: space-between;
 align-items: center;
 gap: 16px;
-padding: 12px 0 24px;
+padding: clamp(8px, 1.8svh, 12px) 0 clamp(14px, 3svh, 24px);
 }
 
 .brand-link,
@@ -134,18 +134,18 @@ outline: none;
 position: relative;
 z-index: 1;
 width: min(1120px, calc(100% - 32px));
-min-height: calc(min(760px, 96vh) - 104px);
+min-height: calc(100svh - clamp(88px, 14svh, 116px));
 display: flex;
 align-items: center;
 margin: 0 auto;
 }
 
 .hero-copy {
-max-width: 760px;
+max-width: min(760px, 68vw);
 display: flex;
 flex-direction: column;
 justify-content: center;
-padding: clamp(28px, 6vw, 72px) 0;
+padding: clamp(16px, 4svh, 48px) 0;
 text-shadow: 0 2px 0 #fff, 0 10px 34px rgba(16, 19, 26, 0.24);
 }
 
@@ -165,8 +165,8 @@ line-height: 1;
 }
 
 h1 {
-font-size: clamp(4.8rem, 14vw, 11rem);
-max-width: 9ch;
+font-size: clamp(3.4rem, min(10vw, 14svh), 7.2rem);
+max-width: 12.5ch;
 letter-spacing: 0;
 }
 
@@ -176,8 +176,8 @@ font-size: clamp(1.7rem, 4vw, 3rem);
 
 .hero-text {
 max-width: 620px;
-margin: 22px 0 0;
-font-size: clamp(1.15rem, 2.5vw, 1.7rem);
+margin: clamp(12px, 2.2svh, 22px) 0 0;
+font-size: clamp(1rem, min(2.2vw, 2.6svh), 1.45rem);
 line-height: 1.45;
 color: #2d3442;
 font-weight: 800;
@@ -190,14 +190,14 @@ display: flex;
 flex-wrap: wrap;
 gap: 12px;
 align-items: center;
-margin-top: 24px;
+margin-top: clamp(14px, 2.8svh, 24px);
 }
 
 .username-prompt {
 display: grid;
 gap: 8px;
 max-width: 360px;
-margin-top: 24px;
+margin-top: clamp(14px, 2.8svh, 24px);
 }
 
 .username-prompt label {
@@ -241,9 +241,9 @@ color: #fff;
 }
 
 .hero-launch-action {
-min-height: 64px;
-padding: 16px 28px;
-font-size: 1.22rem;
+min-height: clamp(54px, 7svh, 64px);
+padding: clamp(13px, 2svh, 16px) clamp(22px, 3vw, 28px);
+font-size: clamp(1.08rem, min(2vw, 2.4svh), 1.22rem);
 }
 
 .secondary-action {
@@ -591,6 +591,75 @@ padding: 24px;
 display: none;
 }
 
+.attention-flash {
+position: fixed;
+inset: 0;
+z-index: 1200;
+display: grid;
+place-items: center;
+padding: 24px;
+background:
+radial-gradient(circle at center, rgba(255, 255, 255, 0.95) 0 18%, rgba(255, 214, 10, 0.92) 32%, rgba(255, 59, 48, 0.9) 100%);
+color: #05070a;
+text-align: center;
+pointer-events: none;
+opacity: 0;
+}
+
+.attention-flash.active {
+animation: attentionFlash 1.7s ease-out both;
+}
+
+.attention-flash div {
+max-width: 760px;
+border: 5px solid #05070a;
+border-radius: 8px;
+background: #ffffff;
+padding: clamp(20px, 5vw, 42px);
+box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.attention-flash strong {
+display: block;
+font-size: clamp(2.2rem, 8vw, 5.8rem);
+line-height: 0.92;
+text-transform: uppercase;
+}
+
+.attention-flash span {
+display: block;
+margin-top: 14px;
+font-size: clamp(1.1rem, 3vw, 2rem);
+font-weight: 900;
+}
+
+.attention-flash[hidden] {
+display: none;
+}
+
+@keyframes attentionFlash {
+0% {
+opacity: 0;
+filter: brightness(1);
+}
+8%, 22%, 38% {
+opacity: 1;
+filter: brightness(1.35);
+}
+15%, 30% {
+opacity: 0.35;
+filter: brightness(0.9);
+}
+50%, 72% {
+opacity: 1;
+filter: brightness(1.12);
+}
+100% {
+opacity: 0;
+filter: brightness(1);
+}
+}
+
 .strategy-grid {
 display: grid;
 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -723,7 +792,7 @@ grid-template-columns: 1fr;
 }
 
 .game-hero {
-min-height: auto;
+min-height: 100svh;
 }
 
 .prize-list,
@@ -742,6 +811,47 @@ margin-top: 12px;
 
 .score-strip {
 bottom: 8px;
+}
+}
+
+@media (max-height: 760px) and (min-width: 821px) {
+.game-nav {
+padding-bottom: 10px;
+}
+
+.brand-link img {
+width: 38px;
+height: 38px;
+}
+
+.hero-grid {
+min-height: calc(100svh - 82px);
+}
+
+.hero-copy {
+padding: 10px 0 20px;
+max-width: min(720px, 64vw);
+}
+
+h1 {
+font-size: clamp(3.1rem, min(8.4vw, 12svh), 5.8rem);
+max-width: 13ch;
+}
+
+.hero-text {
+font-size: clamp(0.98rem, 2svh, 1.18rem);
+margin-top: 10px;
+max-width: 560px;
+}
+
+.username-prompt,
+.hero-actions {
+margin-top: 12px;
+}
+
+.hero-launch-action {
+min-height: 52px;
+padding: 12px 22px;
 }
 }
 
