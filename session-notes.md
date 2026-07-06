@@ -364,6 +364,8 @@ Completed:
 - Added car-zip transitions for player-clicked screen changes between launch, rules, levels, results, and conclusion.
 - Added explicit `Next Level` and `Results` buttons so screens do not advance automatically.
 - Added a high-visibility run-ended flash for tab/window disqualification.
+- Redirected disqualified runs back to the homepage after the warning flash.
+- Moved the level score strip into reserved layout space so it cannot cover level controls.
 - Made the launch hero responsive to both viewport width and height for 13-inch and 16-inch laptop screens.
 - Increased launch hero text contrast so the title, description, and username prompt remain readable on the track background.
 

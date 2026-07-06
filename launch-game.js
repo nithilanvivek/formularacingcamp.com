@@ -313,8 +313,13 @@ function shouldFlashAttemptEnd(reason) {
 return ['tab_changed', 'focus_lost', 'page_left'].includes(reason);
 }
 
+function returnToHomeAfterDisqualification() {
+window.location.assign('index.html');
+}
+
 function showAttentionFlash(message) {
 if (!elements.attentionFlash) {
+returnToHomeAfterDisqualification();
 return;
 }
 
@@ -334,6 +339,7 @@ elements.attentionFlash.classList.add('active');
 window.setTimeout(() => {
 elements.attentionFlash.classList.remove('active');
 elements.attentionFlash.hidden = true;
+returnToHomeAfterDisqualification();
 }, 1750);
 }
 
@@ -415,12 +421,14 @@ if (level === 2 && !state.levels.reaction) return;
 if (level === 3 && !state.levels.dash) return;
 
 state.activeLevel = level;
+elements.gameShell.classList.add('level-active');
 elements.scoreStrip.hidden = false;
 showScreen(`level-${level}`);
 updateScoreboard();
 }
 
 function showConclusion() {
+elements.gameShell.classList.remove('level-active');
 elements.scoreStrip.hidden = true;
 showScreen('conclusion');
 updateScoreboard();

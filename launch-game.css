@@ -42,6 +42,8 @@ color: inherit;
 height: 100svh;
 overflow: hidden;
 background: #eef5ff;
+display: grid;
+grid-template-rows: auto minmax(0, 1fr);
 }
 
 .game-screen {
@@ -52,6 +54,12 @@ overflow-y: auto;
 
 .game-screen.active {
 display: block;
+}
+
+.game-shell.level-active .game-screen {
+height: 100%;
+min-height: 0;
+grid-row: 2;
 }
 
 .podium-panel,
@@ -465,17 +473,14 @@ line-height: 1.35;
 }
 
 .score-strip {
-position: fixed;
-left: 50%;
-bottom: 16px;
-z-index: 20;
-transform: translateX(-50%);
+position: relative;
+z-index: 5;
 display: grid;
 grid-template-columns: repeat(4, minmax(140px, 1fr));
 gap: 10px;
 width: min(1120px, calc(100% - 32px));
-margin: 0;
-pointer-events: none;
+margin: 12px auto 8px;
+pointer-events: auto;
 }
 
 .score-strip[hidden] {
@@ -822,9 +827,6 @@ display: block;
 margin-top: 12px;
 }
 
-.score-strip {
-bottom: 8px;
-}
 }
 
 @media (max-height: 760px) and (min-width: 821px) {

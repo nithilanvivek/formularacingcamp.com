@@ -37,6 +37,7 @@ As of 2026-07-06:
 - The Launch Grand Prix game is wired at `/game`.
 - Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, player-clicked screen transitions with car-zip animation, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
 - The launch game has a high-visibility tab/window disqualification flash and a viewport-responsive launch hero for laptop screen sizes.
+- Disqualified game runs return to the homepage, and the score strip is placed in reserved layout space so it does not cover controls.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 
