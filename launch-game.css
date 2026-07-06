@@ -25,6 +25,7 @@ body {
 font-family: Arial, Helvetica, sans-serif;
 background: #eef5ff;
 color: var(--ink);
+overflow: hidden;
 }
 
 button,
@@ -38,16 +39,25 @@ color: inherit;
 }
 
 .game-shell {
-min-height: 100vh;
+height: 100vh;
+overflow: hidden;
 background: #eef5ff;
+}
+
+.game-screen {
+display: none;
+height: 100vh;
+overflow-y: auto;
+}
+
+.game-screen.active {
+display: block;
 }
 
 .podium-panel,
 .score-strip,
-.level-tabs,
 .level-panel,
-.entry-panel,
-.monthly-panel {
+.entry-panel {
 width: min(1120px, calc(100% - 32px));
 margin: 0 auto;
 }
@@ -175,7 +185,7 @@ font-weight: 800;
 
 .hero-actions,
 .level-controls,
-.code-entry {
+.screen-actions {
 display: flex;
 flex-wrap: wrap;
 gap: 12px;
@@ -264,23 +274,14 @@ box-shadow: 4px 4px 0 var(--line);
 
 .podium-panel,
 .entry-panel,
-.monthly-panel,
 .level-panel {
 border: 3px solid var(--line);
 background: var(--panel);
 box-shadow: 6px 6px 0 var(--line);
 }
 
-.game-shell:not(.game-started) .score-strip,
-.game-shell:not(.game-started) .level-tabs,
-.game-shell:not(.game-started) .level-panel,
-.game-shell:not(.game-started) .entry-panel {
-display: none;
-}
-
 .game-shell.launching .game-hero,
-.game-shell.launching .podium-panel,
-.game-shell.launching .monthly-panel {
+.game-shell.launching .podium-panel {
 filter: blur(2px);
 }
 
@@ -383,19 +384,21 @@ opacity: 0;
 }
 }
 
-.podium-panel,
-.monthly-panel {
+.podium-panel {
 display: grid;
 grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
 gap: 22px;
 align-items: center;
 padding: 24px;
-margin-top: 24px;
+align-content: center;
 }
 
-.monthly-panel {
-grid-template-columns: minmax(0, 1fr) auto;
-margin-bottom: 48px;
+.game-screen:not(.active) {
+display: none;
+}
+
+.podium-panel.game-screen.active {
+display: grid;
 }
 
 .prize-list {
@@ -449,14 +452,25 @@ line-height: 1.35;
 }
 
 .score-strip {
+position: fixed;
+left: 50%;
+bottom: 16px;
+z-index: 20;
+transform: translateX(-50%);
 display: grid;
 grid-template-columns: repeat(4, minmax(140px, 1fr));
 gap: 10px;
-margin-top: 24px;
+width: min(1120px, calc(100% - 32px));
+margin: 0;
+pointer-events: none;
+}
+
+.score-strip[hidden] {
+display: none;
 }
 
 .score-strip div {
-padding: 16px;
+padding: 12px;
 border: 3px solid var(--line);
 background: #10131a;
 color: #fff;
@@ -474,35 +488,14 @@ color: #a7f3d0;
 .score-strip strong {
 display: block;
 margin-top: 6px;
-font-size: 1.55rem;
-}
-
-.level-tabs {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 10px;
-margin-top: 24px;
-}
-
-.level-tab {
-min-height: 54px;
-border: 3px solid var(--line);
-border-radius: 6px;
-background: #fff;
-font-weight: 900;
-cursor: pointer;
-}
-
-.level-tab.active {
-background: var(--blue);
-color: #fff;
+font-size: 1.25rem;
 }
 
 .level-panel,
 .entry-panel {
 display: none;
 padding: 24px;
-margin-top: 16px;
+align-content: center;
 }
 
 .level-panel.active,
@@ -600,7 +593,7 @@ display: none;
 
 .strategy-grid {
 display: grid;
-grid-template-columns: repeat(3, minmax(0, 1fr));
+grid-template-columns: repeat(2, minmax(0, 1fr));
 gap: 14px;
 margin-top: 24px;
 }
@@ -647,19 +640,6 @@ color: #08200f;
 background: #ffd4d1;
 }
 
-.digit {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-width: 42px;
-height: 42px;
-border: 3px solid var(--line);
-background: #10131a;
-color: #fff;
-font-size: 1.4rem;
-font-weight: 900;
-}
-
 .code-box {
 margin-top: 24px;
 padding: 18px;
@@ -673,7 +653,6 @@ gap: 8px;
 font-weight: 900;
 }
 
-.code-entry input,
 form input,
 form textarea {
 width: 100%;
@@ -681,13 +660,6 @@ border: 3px solid var(--line);
 border-radius: 6px;
 padding: 12px;
 background: #fff;
-}
-
-.code-entry input {
-max-width: 280px;
-font-size: 1.5rem;
-font-weight: 900;
-letter-spacing: 0.16em;
 }
 
 .form-grid {
@@ -720,9 +692,32 @@ height: 20px;
 margin-top: 2px;
 }
 
+.final-score-card {
+display: inline-grid;
+gap: 8px;
+margin: 22px 0;
+padding: 18px 22px;
+border: 3px solid var(--line);
+background: #10131a;
+color: #fff;
+box-shadow: 6px 6px 0 var(--line);
+}
+
+.final-score-card span {
+font-size: 0.78rem;
+font-weight: 900;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+color: #a7f3d0;
+}
+
+.final-score-card strong {
+font-size: 2.2rem;
+line-height: 1;
+}
+
 @media (max-width: 820px) {
 .podium-panel,
-.monthly-panel,
 .form-grid {
 grid-template-columns: 1fr;
 }
@@ -733,7 +728,6 @@ min-height: auto;
 
 .prize-list,
 .score-strip,
-.level-tabs,
 .strategy-grid {
 grid-template-columns: 1fr;
 }
@@ -746,8 +740,8 @@ display: block;
 margin-top: 12px;
 }
 
-.monthly-panel .secondary-action {
-width: 100%;
+.score-strip {
+bottom: 8px;
 }
 }
 
@@ -755,10 +749,8 @@ width: 100%;
 .game-hero,
 .podium-panel,
 .score-strip,
-.level-tabs,
 .level-panel,
-.entry-panel,
-.monthly-panel {
+.entry-panel {
 width: min(100% - 20px, 1120px);
 }
 
@@ -780,8 +772,7 @@ padding: 14px;
 .hero-copy,
 .level-panel,
 .entry-panel,
-.podium-panel,
-.monthly-panel {
+.podium-panel {
 padding: 18px;
 }
 }

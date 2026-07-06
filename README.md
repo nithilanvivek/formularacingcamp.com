@@ -35,7 +35,7 @@ As of 2026-07-05:
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
 - The Launch Grand Prix game is wired at `/game`.
-- Launch Grand Prix now uses a full-screen visual hero, explicit one-attempt rules, a faster fixed Pit Lane Dash item script, and an expanded 8-question Strategy Code.
+- Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 

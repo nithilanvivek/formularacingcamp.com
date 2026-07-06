@@ -340,3 +340,15 @@ Recommended next steps:
 - Configure `LAUNCH_GAME_TEST_WEBHOOK_URL` for separated test entries.
 - Configure `LAUNCH_GAME_WEBHOOK_URL` before accepting real production entries.
 - Confirm the exact leaderboard email time, recipients, and code fulfillment copy.
+
+## Six-Screen Game Flow
+
+Date: 2026-07-06
+
+Completed:
+
+- Reworked Launch Grand Prix into six separate screens: Launch Game, Rules, Level 1, Level 2, Level 3, and Conclusion/email submission.
+- Removed the level-tab jump navigation and the long scroll-page flow.
+- Removed the Strategy Code mechanic so players cannot copy a shared final code.
+- Replaced Level 3 with harder strategy decision cards and a Save Strategy button.
+- Verified the full local no-save flow from Launch Game through conclusion email submission.

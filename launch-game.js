@@ -1,7 +1,6 @@
 const GAME_ENDPOINT = '/api/launch-game-submit';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
-const STRATEGY_CODE = '52841936';
 const DASH_DURATION_MS = 20000;
 const DRY_RUN_USERNAME = 'test_nalihtin';
 const TEST_LEADERBOARD_USERNAMES = new Set([
@@ -95,14 +94,17 @@ launchInProgress: false
 const elements = {
 gameShell: document.querySelector('.game-shell'),
 launchReveal: document.getElementById('launch-reveal'),
+screens: Array.from(document.querySelectorAll('[data-screen]')),
 startGameBtn: document.getElementById('start-game-btn'),
+rulesContinueBtn: document.getElementById('rules-continue-btn'),
 usernameInput: document.getElementById('username-input'),
 usernameModeNote: document.getElementById('username-mode-note'),
 totalScore: document.getElementById('total-score'),
+finalScore: document.getElementById('final-score'),
 levelsComplete: document.getElementById('levels-complete'),
 runStatus: document.getElementById('run-status'),
 reviewFlags: document.getElementById('review-flags'),
-levelTabs: Array.from(document.querySelectorAll('[data-level-tab]')),
+scoreStrip: document.querySelector('.score-strip'),
 lights: Array.from(document.querySelectorAll('#lights-grid span')),
 reactionArmBtn: document.getElementById('reaction-arm-btn'),
 reactionLaunchBtn: document.getElementById('reaction-launch-btn'),
@@ -113,8 +115,7 @@ dashMessage: document.getElementById('dash-message'),
 pauseOverlay: document.getElementById('pause-overlay'),
 steerButtons: Array.from(document.querySelectorAll('.steer-btn')),
 strategyGrid: document.getElementById('strategy-grid'),
-strategyCode: document.getElementById('strategy-code'),
-codeSubmitBtn: document.getElementById('code-submit-btn'),
+strategyFinishBtn: document.getElementById('strategy-finish-btn'),
 strategyMessage: document.getElementById('strategy-message'),
 entryPanel: document.getElementById('entry-panel'),
 entryForm: document.getElementById('entry-form'),
@@ -127,67 +128,59 @@ const ctx = elements.dashCanvas.getContext('2d');
 const strategyChallenges = [
 {
 id: 'tyres',
-title: 'Rain clouds are arriving',
-prompt: 'You are on slicks and the track is getting wet. What is the smartest call?',
-digit: '5',
-correct: 'Switch to intermediates',
-choices: ['Stay on slicks', 'Switch to intermediates', 'Use hard tyres']
+title: 'Rain starts in Sector 2',
+prompt: 'The track is damp only in one sector. Your slicks are fast elsewhere, but lap times are slipping by four tenths. What is the smartest call?',
+correct: 'Box for intermediates if radar shows rain staying',
+choices: ['Stay out because one sector is still manageable', 'Box for intermediates if radar shows rain staying', 'Switch to full wets immediately']
 },
 {
 id: 'energy',
-title: 'Final straight attack',
-prompt: 'You need extra speed for one overtake. What should the driver save and deploy?',
-digit: '2',
-correct: 'Battery energy',
-choices: ['Battery energy', 'Extra fuel', 'Brake dust']
+title: 'ERS overtake setup',
+prompt: 'You are 0.7 seconds behind with two laps left. The next straight is the best passing place. What should the driver do before the zone?',
+correct: 'Harvest now and deploy on corner exit',
+choices: ['Deploy everything in the braking zone', 'Save energy until after the straight', 'Harvest now and deploy on corner exit']
 },
 {
 id: 'pit',
-title: 'Slow stop recovery',
-prompt: 'A slow pit stop costs time. What is the best next move?',
-digit: '8',
-correct: 'Clean laps with no mistakes',
-choices: ['Panic and pit again', 'Clean laps with no mistakes', 'Ignore blue flags']
+title: 'Undercut threat',
+prompt: 'A rival pits early and comes out in clean air. Your tyres are fading but traffic is ahead. What is the best response?',
+correct: 'Pit next lap if the out-lap delta beats traffic loss',
+choices: ['Stay out until the tyres are completely gone', 'Pit next lap if the out-lap delta beats traffic loss', 'Pit only after the rival catches you']
 },
 {
 id: 'drag',
-title: 'Chasing on a straight',
-prompt: 'The car ahead punches a hole in the air. Which move helps you gain speed?',
-digit: '4',
-correct: 'Use the slipstream',
-choices: ['Use the slipstream', 'Open the parachute', 'Drive off line']
+title: 'Slipstream timing',
+prompt: 'You are close behind on the straight, but the car ahead is defending the inside. Where should you position first?',
+correct: 'Stay tucked in, then move late before braking',
+choices: ['Move out early and lose the tow', 'Brake earlier to avoid dirty air', 'Stay tucked in, then move late before braking']
 },
 {
 id: 'brakes',
-title: 'Heavy braking zone',
-prompt: 'A tight corner is coming after the longest straight. What should the driver do first?',
-digit: '1',
-correct: 'Brake before turning',
-choices: ['Brake before turning', 'Turn at full throttle', 'Look at the crowd']
+title: 'Brake balance shift',
+prompt: 'Fuel is lighter and the rear tyres are overheating. The rear feels nervous under braking. What setup adjustment helps stability?',
+correct: 'Move brake balance slightly forward',
+choices: ['Move brake balance far rearward', 'Move brake balance slightly forward', 'Open DRS before braking']
 },
 {
 id: 'safety',
 title: 'Safety car restart',
-prompt: 'The safety car is about to come in. What matters most before the green flag?',
-digit: '9',
-correct: 'Warm tyres and stay alert',
-choices: ['Warm tyres and stay alert', 'Stop on track', 'Switch off the radio']
+prompt: 'The leader is backing the field up before the restart. Your tyres are cooling and the car behind is close. What matters most?',
+correct: 'Keep tyre temperature and react to the leader',
+choices: ['Drop back to get more space', 'Overtake before the control line', 'Keep tyre temperature and react to the leader']
 },
 {
 id: 'aero',
 title: 'Fast corner balance',
-prompt: 'The car slides wide in a fast corner. Which setup area helps grip at speed?',
-digit: '3',
-correct: 'Aerodynamics',
-choices: ['Aerodynamics', 'Snack choice', 'Helmet color']
+prompt: 'The car understeers in fast corners but is fine in slow hairpins. Which setup area is most likely involved?',
+correct: 'Front wing and aero balance',
+choices: ['Reduce radio volume', 'Front wing and aero balance', 'Only change brake bias']
 },
 {
 id: 'radio',
-title: 'Team radio warning',
-prompt: 'The engineer reports traffic ahead. What should the driver do?',
-digit: '6',
-correct: 'Plan the overtake safely',
-choices: ['Plan the overtake safely', 'Close their eyes', 'Ignore all flags']
+title: 'Blue flag traffic',
+prompt: 'You are on a flying lap and a slower car is approaching blue flags two corners ahead. What should you do?',
+correct: 'Plan the pass without ruining corner exit',
+choices: ['Plan the pass without ruining corner exit', 'Dive late even if it ruins both laps', 'Lift immediately and abandon the lap']
 }
 ];
 
@@ -231,6 +224,7 @@ return 'Clean';
 
 function updateScoreboard() {
 elements.totalScore.textContent = String(totalScore());
+elements.finalScore.textContent = String(totalScore());
 elements.levelsComplete.textContent = `${completedCount()}/3`;
 elements.reviewFlags.textContent = getReviewStatus();
 
@@ -244,25 +238,6 @@ elements.runStatus.textContent = 'Ready to submit';
 elements.runStatus.textContent = `Level ${state.activeLevel}`;
 } else {
 elements.runStatus.textContent = 'Ready';
-}
-
-elements.levelTabs.forEach((tab) => {
-const level = Number(tab.dataset.levelTab);
-tab.classList.toggle('active', level === state.activeLevel);
-if (level === 2) {
-tab.disabled = !state.levels.reaction;
-}
-if (level === 3) {
-tab.disabled = !state.levels.dash;
-}
-if (state.locked) {
-tab.disabled = true;
-}
-});
-
-if (completedCount() === 3) {
-elements.entryPanel.hidden = false;
-elements.entryPanel.classList.add('active');
 }
 }
 
@@ -316,10 +291,9 @@ elements.startGameBtn,
 elements.reactionArmBtn,
 elements.reactionLaunchBtn,
 elements.dashStartBtn,
-elements.codeSubmitBtn,
+elements.strategyFinishBtn,
 elements.entrySubmitBtn,
 ...elements.steerButtons,
-...elements.levelTabs,
 ...Array.from(document.querySelectorAll('[data-challenge]'))
 ].forEach((control) => {
 if (control) {
@@ -351,6 +325,13 @@ saveAttemptRecord(reason);
 disableGameControls();
 setLevelMessage(message);
 updateScoreboard();
+}
+
+function showScreen(screenName) {
+elements.screens.forEach((screen) => {
+screen.classList.toggle('active', screen.dataset.screen === screenName);
+});
+recordEvent('screen_view', { screenName });
 }
 
 function requestUsername() {
@@ -396,9 +377,14 @@ if (level === 2 && !state.levels.reaction) return;
 if (level === 3 && !state.levels.dash) return;
 
 state.activeLevel = level;
-document.querySelectorAll('.level-panel').forEach((panel) => {
-panel.classList.toggle('active', panel.id === `level-${level}`);
-});
+elements.scoreStrip.hidden = false;
+showScreen(`level-${level}`);
+updateScoreboard();
+}
+
+function showConclusion() {
+elements.scoreStrip.hidden = true;
+showScreen('conclusion');
 updateScoreboard();
 }
 
@@ -428,20 +414,27 @@ playLaunchReveal();
 return;
 }
 
-revealLevelOne();
+showScreen('rules');
 }
 
-function revealLevelOne() {
+function showRulesAfterLaunch() {
 if (state.locked) {
 return;
 }
 
 state.launchRevealed = true;
-elements.gameShell.classList.add('game-started');
+showScreen('rules');
+elements.startGameBtn.textContent = 'Rules Ready';
+elements.rulesContinueBtn.focus();
+}
+
+function startLevelOne() {
+if (state.locked || !state.startedAt) {
+return;
+}
+
 showLevel(1);
-elements.startGameBtn.textContent = 'Level 1 Ready';
 elements.reactionArmBtn.focus();
-document.getElementById('level-1').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function playLaunchReveal() {
@@ -462,7 +455,7 @@ return;
 
 elements.startGameBtn.disabled = false;
 recordEvent('launch_reveal_complete');
-revealLevelOne();
+showRulesAfterLaunch();
 }, 1600);
 }
 
@@ -626,7 +619,7 @@ state.dash.running = false;
 elements.dashStartBtn.disabled = true;
 const cleanScore = Math.max(0, state.dash.score - state.dash.penalty);
 markLevelComplete('dash', cleanScore);
-elements.dashMessage.textContent = `Pit Lane Dash complete. Level score: ${cleanScore}. Strategy Code unlocked.`;
+elements.dashMessage.textContent = `Pit Lane Dash complete. Level score: ${cleanScore}. Strategy Calls unlocked.`;
 drawDash();
 setTimeout(() => showLevel(3), 900);
 }
@@ -736,7 +729,6 @@ return `
 <h3>${challenge.title}</h3>
 <p>${challenge.prompt}</p>
 <div class="choice-list">${choices}</div>
-<p>Digit: <span class="digit" id="digit-${challenge.id}">?</span></p>
 </article>`;
 }).join('');
 }
@@ -761,42 +753,38 @@ cardButton.classList.add('incorrect');
 });
 
 if (choice === challenge.correct) {
-document.getElementById(`digit-${id}`).textContent = challenge.digit;
-elements.strategyMessage.textContent = `Correct. Digit ${challenge.digit} unlocked.`;
-state.scores.strategy += 60;
+elements.strategyMessage.textContent = 'Sharp call. Strategy score added.';
+state.scores.strategy += 90;
 } else {
-document.getElementById(`digit-${id}`).textContent = challenge.digit;
-elements.strategyMessage.textContent = `Not the best call, but digit ${challenge.digit} is now visible with a penalty.`;
+elements.strategyMessage.textContent = 'That call has risk. Smaller strategy score added.';
 state.scores.strategy += 25;
 }
 
 recordEvent('strategy_choice', { id, correct: choice === challenge.correct });
+if (strategyChallenges.every((item) => state.strategySelections[item.id])) {
+elements.strategyFinishBtn.disabled = false;
+elements.strategyMessage.textContent = 'All strategy calls are locked. Save your run.';
+}
 updateScoreboard();
 }
 
-function submitStrategyCode() {
+function finishStrategy() {
 if (state.levels.strategy || state.locked) return;
-
-const entered = elements.strategyCode.value.trim();
-if (entered !== STRATEGY_CODE) {
-elements.strategyMessage.textContent = 'That code is not right yet. Use the revealed digits in order.';
-return;
-}
 
 const allAnswered = strategyChallenges.every((challenge) => state.strategySelections[challenge.id]);
 if (!allAnswered) {
-elements.strategyMessage.textContent = 'Answer each strategy card before finishing.';
+elements.strategyMessage.textContent = 'Answer each strategy card before saving.';
 return;
 }
 
 state.completedAt = Date.now();
-const score = state.scores.strategy + 120;
+const score = state.scores.strategy + 160;
 markLevelComplete('strategy', score);
 saveAttemptRecord('completed');
-elements.strategyMessage.textContent = 'Run complete. Submit your entry for launch-week review.';
-elements.codeSubmitBtn.disabled = true;
+elements.strategyMessage.textContent = 'Run complete. Continue to submit your email.';
+elements.strategyFinishBtn.disabled = true;
 updateScoreboard();
-elements.entryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+setTimeout(showConclusion, 700);
 }
 
 function currentPayload(formData) {
@@ -810,6 +798,7 @@ email: formData.get('email'),
 note: formData.get('note') || '',
 score: totalScore(),
 scores: state.scores,
+strategySelections: state.strategySelections,
 levels: state.levels,
 startedAt: state.startedAt,
 completedAt: state.completedAt,
@@ -920,18 +909,15 @@ endAttempt(reason, message);
 
 function setupEvents() {
 elements.startGameBtn.addEventListener('click', startGame);
+elements.rulesContinueBtn.addEventListener('click', startLevelOne);
 elements.usernameInput.addEventListener('input', () => {
 elements.usernameModeNote.textContent = '';
 });
 elements.reactionArmBtn.addEventListener('click', armReactionStart);
 elements.reactionLaunchBtn.addEventListener('click', launchReaction);
 elements.dashStartBtn.addEventListener('click', startDash);
-elements.codeSubmitBtn.addEventListener('click', submitStrategyCode);
+elements.strategyFinishBtn.addEventListener('click', finishStrategy);
 elements.entryForm.addEventListener('submit', submitEntry);
-
-elements.levelTabs.forEach((tab) => {
-tab.addEventListener('click', () => showLevel(Number(tab.dataset.levelTab)));
-});
 
 elements.steerButtons.forEach((button) => {
 button.addEventListener('click', () => steer(Number(button.dataset.steer)));
