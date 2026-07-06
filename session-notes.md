@@ -394,3 +394,12 @@ Validation performed:
 - `node --check launch-game.js`
 - `git diff --check`
 - Mocked API tests for dry-run skip, clean receipt send, test-leaderboard wording, invalid receipt skip, and Resend failure fallback.
+
+## Book Preview Link
+
+Date: 2026-07-06
+
+Completed:
+
+- Added the book preview PDF to local site assets.
+- Linked both homepage `Preview Pages` controls to the PDF with `target="_blank"` and `rel="noopener noreferrer"`.

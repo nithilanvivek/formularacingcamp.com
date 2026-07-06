@@ -45,9 +45,9 @@ As of 2026-07-06:
 
 The exported page includes:
 
-- A ticker/banner noting that buying and previewing are not yet active.
+- A ticker/banner noting that buying is not yet active.
 - Navigation for About, Chapters, What's Inside, Characters, and Authors.
-- Hero section with book cover, title, subtitle, description, and CTAs.
+- Hero section with book cover, title, subtitle, description, preview PDF link, and CTAs.
 - Local puzzles page linked from the hero CTA.
 - Launch Grand Prix CTA for the first-week publishing game.
 - About section explaining the learning focus.
@@ -145,7 +145,7 @@ Player receipt emails are sent through Resend after valid, non-dry-run submissio
 
 ## Near-Term Tasks
 
-1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
+1. Confirm remaining CTA destinations: buy link, puzzles, YouTube, and contact email.
 2. Configure the launch game submission webhook before judging real winners.
 3. Configure Resend receipt-email environment variables before broad launch-game testing.
 4. Confirm Amazon promo code fulfillment copy and winner email workflow.
