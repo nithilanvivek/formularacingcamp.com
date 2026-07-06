@@ -340,7 +340,7 @@ window.setTimeout(() => {
 elements.attentionFlash.classList.remove('active');
 elements.attentionFlash.hidden = true;
 returnToHomeAfterDisqualification();
-}, 1750);
+}, 3000);
 }
 
 function endAttempt(reason, message) {
@@ -947,8 +947,15 @@ if (!response.ok) {
 throw new Error('Launch game endpoint unavailable');
 }
 
+const result = await response.json();
 state.submitted = true;
+if (result.emailStatus === 'sent') {
+elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent. Winners will be reviewed after launch week and emailed one-time Amazon promo codes.';
+} else if (result.emailStatus === 'failed') {
+elements.entryMessage.textContent = 'Entry submitted. The receipt email could not be sent, but your run was recorded for review.';
+} else {
 elements.entryMessage.textContent = 'Entry submitted. Winners will be reviewed after launch week and emailed one-time Amazon promo codes.';
+}
 } catch (error) {
 saveLocalPreviewEntry(payload);
 state.submitted = true;

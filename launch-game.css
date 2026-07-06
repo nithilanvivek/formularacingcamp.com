@@ -625,7 +625,7 @@ opacity: 0;
 }
 
 .attention-flash.active {
-animation: attentionFlash 1.7s ease-out both;
+animation: attentionFlash 3s ease-out both;
 }
 
 .attention-flash div {

@@ -137,10 +137,17 @@ https://www.formularacingcamp.com/game
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. To keep testing entries separate, configure `LAUNCH_GAME_TEST_WEBHOOK_URL`; the saved test leaderboard usernames are `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
 
+Player receipt emails are sent through Resend after valid, non-dry-run submissions. Configure these Vercel environment variables before relying on receipts:
+
+- `RESEND_API_KEY`
+- `LAUNCH_GAME_EMAIL_FROM`, default fallback: `Formula Racing Camp <game@formularacingcamp.com>`
+- `LAUNCH_GAME_ADMIN_EMAIL`, optional comma-separated BCC recipients
+
 ## Near-Term Tasks
 
 1. Confirm all CTA destinations: buy link, preview pages, puzzles, YouTube, and contact email.
 2. Configure the launch game submission webhook before judging real winners.
-3. Confirm Amazon promo code fulfillment copy and winner email workflow.
-4. Verify the launch-week game on production Chrome/Safari after deployment.
-5. Consider replacing the Tailwind CDN with a build step if the project grows.
+3. Configure Resend receipt-email environment variables before broad launch-game testing.
+4. Confirm Amazon promo code fulfillment copy and winner email workflow.
+5. Verify the launch-week game on production Chrome/Safari after deployment.
+6. Consider replacing the Tailwind CDN with a build step if the project grows.

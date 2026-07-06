@@ -374,3 +374,23 @@ Validation performed:
 - `node --check launch-game.js`
 - `git diff --check`
 - Local viewport checks at `1280x800` and `1536x960` for launch-screen fit.
+
+## Player Receipt Emails
+
+Date: 2026-07-06
+
+Completed:
+
+- Added Resend receipt emails for valid, non-dry-run Launch Grand Prix submissions.
+- Kept existing webhook forwarding unchanged and skipped player receipts for invalid/disqualified runs.
+- Returned `emailStatus` from the launch-game API so email failures do not erase a valid submitted run.
+- Updated the player confirmation message when a receipt is sent or when the receipt fails but the run is recorded.
+- Marked saved test leaderboard receipt emails with test-leaderboard subject/body wording.
+- Extended the tab/window disqualification flash to 3 seconds before redirecting to the homepage.
+
+Validation performed:
+
+- `node --check api/launch-game-submit.js`
+- `node --check launch-game.js`
+- `git diff --check`
+- Mocked API tests for dry-run skip, clean receipt send, test-leaderboard wording, invalid receipt skip, and Resend failure fallback.
