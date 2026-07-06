@@ -403,3 +403,20 @@ Completed:
 
 - Added the book preview PDF to local site assets.
 - Linked both homepage `Preview Pages` controls to the PDF with `target="_blank"` and `rel="noopener noreferrer"`.
+
+## End Session Wrap-Up
+
+Date: 2026-07-06
+
+Current state:
+
+- Latest pushed commit before wrap-up: `96be8d0 Link book preview PDF`.
+- Branch: `main`, tracking `origin/main`.
+- Production domain: `https://www.formularacingcamp.com`, with the launch game at `/game`.
+- Tomorrow's testing plan is to use saved leaderboard usernames such as `test_nithilan`, `test_jaskirat`, and the other configured `test_*` usernames.
+
+Recommended next steps:
+
+- Configure `RESEND_API_KEY` in Vercel before expecting player receipt emails to send.
+- Configure `LAUNCH_GAME_TEST_WEBHOOK_URL` and `LAUNCH_GAME_WEBHOOK_URL` before judging leaderboard results.
+- Run production smoke tests for the launch game, preview PDF, tab/window disqualification, and receipt-email status after Vercel redeploys.
