@@ -146,7 +146,8 @@ display: flex;
 flex-direction: column;
 justify-content: center;
 padding: clamp(16px, 4svh, 48px) 0;
-text-shadow: 0 2px 0 #fff, 0 10px 34px rgba(16, 19, 26, 0.24);
+color: #f8fbff;
+text-shadow: 0 3px 0 #05070a, 0 14px 34px rgba(5, 7, 10, 0.52);
 }
 
 .eyebrow {
@@ -156,6 +157,7 @@ font-weight: 900;
 letter-spacing: 0.12em;
 text-transform: uppercase;
 color: var(--red);
+text-shadow: 0 2px 0 #fff, 0 6px 18px rgba(5, 7, 10, 0.36);
 }
 
 h1,
@@ -168,6 +170,10 @@ h1 {
 font-size: clamp(3.4rem, min(10vw, 14svh), 7.2rem);
 max-width: 12.5ch;
 letter-spacing: 0;
+color: #f8fbff;
+-webkit-text-stroke: clamp(1px, 0.16vw, 2px) #05070a;
+paint-order: stroke fill;
+text-shadow: 4px 4px 0 #05070a, 0 18px 40px rgba(5, 7, 10, 0.56);
 }
 
 h2 {
@@ -179,8 +185,14 @@ max-width: 620px;
 margin: clamp(12px, 2.2svh, 22px) 0 0;
 font-size: clamp(1rem, min(2.2vw, 2.6svh), 1.45rem);
 line-height: 1.45;
-color: #2d3442;
+color: #ffffff;
 font-weight: 800;
+}
+
+.username-prompt label,
+.username-prompt p {
+color: #ffffff;
+text-shadow: 0 2px 0 #05070a, 0 8px 18px rgba(5, 7, 10, 0.45);
 }
 
 .hero-actions,
@@ -215,9 +227,10 @@ font-weight: 800;
 
 .username-prompt p {
 margin: 0;
-color: var(--muted);
+color: #ffffff;
 font-size: 0.9rem;
 font-weight: 800;
+text-shadow: 0 2px 0 #05070a, 0 8px 18px rgba(5, 7, 10, 0.45);
 }
 
 .username-prompt p:empty {

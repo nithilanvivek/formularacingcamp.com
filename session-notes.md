@@ -352,3 +352,23 @@ Completed:
 - Removed the Strategy Code mechanic so players cannot copy a shared final code.
 - Replaced Level 3 with harder strategy decision cards and a Save Strategy button.
 - Verified the full local no-save flow from Launch Game through conclusion email submission.
+
+## Launch Game Production Polish
+
+Date: 2026-07-06
+
+Completed:
+
+- Updated Nandana's main homepage bio image while keeping the peacock image unchanged.
+- Changed homepage game CTAs to `Launch Discount Game`.
+- Added car-zip transitions for player-clicked screen changes between launch, rules, levels, results, and conclusion.
+- Added explicit `Next Level` and `Results` buttons so screens do not advance automatically.
+- Added a high-visibility run-ended flash for tab/window disqualification.
+- Made the launch hero responsive to both viewport width and height for 13-inch and 16-inch laptop screens.
+- Increased launch hero text contrast so the title, description, and username prompt remain readable on the track background.
+
+Validation performed:
+
+- `node --check launch-game.js`
+- `git diff --check`
+- Local viewport checks at `1280x800` and `1536x960` for launch-screen fit.

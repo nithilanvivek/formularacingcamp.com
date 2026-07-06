@@ -25,7 +25,7 @@ The current deployable entry point is `index.html`, with the puzzles page availa
 
 ## Latest Session State
 
-As of 2026-07-05:
+As of 2026-07-06:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
@@ -35,7 +35,8 @@ As of 2026-07-05:
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
 - The Launch Grand Prix game is wired at `/game`.
-- Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
+- Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, player-clicked screen transitions with car-zip animation, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
+- The launch game has a high-visibility tab/window disqualification flash and a viewport-responsive launch hero for laptop screen sizes.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 
