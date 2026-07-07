@@ -420,3 +420,13 @@ Recommended next steps:
 - Configure `RESEND_API_KEY` in Vercel before expecting player receipt emails to send.
 - Configure `LAUNCH_GAME_TEST_WEBHOOK_URL` and `LAUNCH_GAME_WEBHOOK_URL` before judging leaderboard results.
 - Run production smoke tests for the launch game, preview PDF, tab/window disqualification, and receipt-email status after Vercel redeploys.
+
+## Stricter Anti-Cheat Detection
+
+Date: 2026-07-07
+
+Completed:
+
+- Added active focus polling during live runs to catch missed Chrome/incognito window switches.
+- Blocked context-menu use during live runs to catch browser tools such as Google Lens.
+- Updated rules and disqualification wording to mention tabs, windows, incognito, and browser tools.

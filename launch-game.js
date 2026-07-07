@@ -2,6 +2,8 @@ const GAME_ENDPOINT = '/api/launch-game-submit';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const DASH_DURATION_MS = 20000;
+const FOCUS_POLL_MS = 250;
+const DISQUALIFICATION_MESSAGE = 'This attempt ended because you opened another tab, window, or browser tool. Everyone gets one attempt.';
 const DRY_RUN_USERNAME = 'test_nalihtin';
 const TEST_LEADERBOARD_USERNAMES = new Set([
 'test_nihira',
@@ -62,7 +64,8 @@ tabHiddenCount: 0,
 blurCount: 0,
 hiddenMs: 0,
 lastHiddenAt: null,
-pendingFlash: false
+pendingFlash: false,
+focusPollMisses: 0
 },
   events: [],
   player: {
@@ -976,7 +979,7 @@ if (state.startedAt && !state.submitted) {
 if (state.locked && shouldFlashAttemptEnd(state.lockReason)) {
 state.antiCheat.pendingFlash = true;
 } else {
-endAttempt('tab_changed', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
+endAttempt('tab_changed', DISQUALIFICATION_MESSAGE);
 }
 }
 } else {
@@ -989,7 +992,7 @@ elements.pauseOverlay.hidden = true;
 }
 if (state.antiCheat.pendingFlash) {
 state.antiCheat.pendingFlash = false;
-showAttentionFlash('This attempt ended because you opened a new tab. Everyone gets one attempt.');
+showAttentionFlash(DISQUALIFICATION_MESSAGE);
 }
 recordEvent('tab_visible');
 }
@@ -1002,6 +1005,19 @@ return;
 }
 
 endAttempt(reason, message);
+}
+
+function handleFocusPoll() {
+if (!state.startedAt || state.submitted || state.locked || document.hidden) {
+return;
+}
+
+if (typeof document.hasFocus === 'function' && !document.hasFocus()) {
+state.antiCheat.focusPollMisses += 1;
+state.antiCheat.blurCount += 1;
+recordEvent('focus_poll_miss', { misses: state.antiCheat.focusPollMisses });
+handleFocusLoss('focus_lost', DISQUALIFICATION_MESSAGE);
+}
 }
 
 function setupEvents() {
@@ -1036,6 +1052,17 @@ event.preventDefault();
 state.dash.keys.add(event.key);
 });
 
+document.addEventListener('contextmenu', (event) => {
+if (!state.startedAt || state.submitted || state.locked) {
+return;
+}
+
+event.preventDefault();
+state.antiCheat.blurCount += 1;
+recordEvent('context_menu_blocked');
+handleFocusLoss('focus_lost', DISQUALIFICATION_MESSAGE);
+});
+
 elements.dashCanvas.addEventListener('pointerdown', (event) => {
 const rect = elements.dashCanvas.getBoundingClientRect();
 const x = event.clientX - rect.left;
@@ -1050,15 +1077,16 @@ handleStrategyChoice(button);
 });
 
 document.addEventListener('visibilitychange', handleVisibilityChange);
+window.setInterval(handleFocusPoll, FOCUS_POLL_MS);
 window.addEventListener('blur', () => {
 state.antiCheat.blurCount += 1;
 recordEvent('window_blur');
-handleFocusLoss('focus_lost', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
+handleFocusLoss('focus_lost', DISQUALIFICATION_MESSAGE);
 updateScoreboard();
 });
 window.addEventListener('pagehide', () => {
 recordEvent('page_hidden');
-handleFocusLoss('page_left', 'This attempt ended because you opened a new tab. Everyone gets one attempt.');
+handleFocusLoss('page_left', DISQUALIFICATION_MESSAGE);
 });
 }
 
