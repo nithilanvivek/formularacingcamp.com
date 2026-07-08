@@ -125,7 +125,28 @@
       "submittedAt": "2026-07-08T14:40:42.764Z",
       "completedAt": 1783521613047,
       "durationMs": 73452
+    },
+    {
+      "id": "fb813b00-eb57-401e-9c0e-e795e533c45e",
+      "username": "a",
+      "score": 2420,
+      "scores": {
+        "reaction": 595,
+        "dash": 945,
+        "strategy": 880
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-08T14:56:33.251Z",
+      "completedAt": 1783522572988,
+      "durationMs": 64251
     }
   ],
-  "updatedAt": "2026-07-08T14:40:42.764Z"
+  "updatedAt": "2026-07-08T14:56:33.251Z"
 }
