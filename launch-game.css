@@ -472,6 +472,17 @@ font-weight: 800;
 line-height: 1.35;
 }
 
+.rules-tip {
+grid-column: 1 / -1;
+margin: 0;
+padding: 12px 14px;
+border-left: 5px solid var(--accent);
+background: #fff9db;
+color: var(--ink);
+font-weight: 800;
+line-height: 1.4;
+}
+
 .score-strip {
 position: relative;
 z-index: 5;
