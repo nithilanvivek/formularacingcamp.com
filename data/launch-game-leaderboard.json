@@ -104,7 +104,28 @@
       "submittedAt": "2026-07-08T14:28:53.469Z",
       "completedAt": 1783520925348,
       "durationMs": 52838
+    },
+    {
+      "id": "c839288b-e6b9-448f-8a18-03ee518ebd20",
+      "username": "test_shaurya",
+      "score": 2264,
+      "scores": {
+        "reaction": 804,
+        "dash": 645,
+        "strategy": 815
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "test_leaderboard",
+      "testLeaderboard": true,
+      "submittedAt": "2026-07-08T14:40:42.764Z",
+      "completedAt": 1783521613047,
+      "durationMs": 73452
     }
   ],
-  "updatedAt": "2026-07-08T14:28:53.469Z"
+  "updatedAt": "2026-07-08T14:40:42.764Z"
 }
