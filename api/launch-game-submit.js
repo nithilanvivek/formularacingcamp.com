@@ -128,6 +128,7 @@ const recipients = adminRecipients();
 const body = {
 from: process.env.LAUNCH_GAME_EMAIL_FROM || DEFAULT_EMAIL_FROM,
 to: [entry.email],
+reply_to: process.env.LAUNCH_GAME_REPLY_TO || 'authors@formularacingcamp.com',
 subject: receiptSubject(entry),
 html: receiptHtml(entry),
 text: receiptText(entry)
