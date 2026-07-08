@@ -41,7 +41,28 @@
       "submittedAt": "2026-07-08T14:11:23.810Z",
       "completedAt": 1783519864461,
       "durationMs": 74370
+    },
+    {
+      "id": "be3ad8da-eb19-4ad9-8bb9-4f70fb6d7e50",
+      "username": "test_Nandana",
+      "score": 670,
+      "scores": {
+        "reaction": 0,
+        "dash": 245,
+        "strategy": 425
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "test_leaderboard",
+      "testLeaderboard": true,
+      "submittedAt": "2026-07-08T14:26:04.278Z",
+      "completedAt": 1783520749811,
+      "durationMs": 364079
     }
   ],
-  "updatedAt": "2026-07-08T14:11:23.810Z"
+  "updatedAt": "2026-07-08T14:26:04.278Z"
 }
