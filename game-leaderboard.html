@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Grand Prix Leaderboard | Formula Racing Camp</title>
+<meta name="description" content="View the Formula Racing Camp Launch Grand Prix leaderboard.">
+<link rel="canonical" href="https://www.formularacingcamp.com/game-leaderboard">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="launch-game.css">
+</head>
+<body class="leaderboard-body">
+<main class="leaderboard-page">
+<nav class="leaderboard-nav" aria-label="Leaderboard navigation">
+<a href="/" class="brand-link">
+<img src="assets/site/f1-camp-logo.webp" alt="" width="44" height="44">
+<span>Formula Racing Camp</span>
+</a>
+<div class="nav-links">
+<a href="/game">Play Game</a>
+<a href="/">Home</a>
+</div>
+</nav>
+<section class="leaderboard-hero" aria-labelledby="leaderboard-title">
+<p class="eyebrow" id="leaderboard-eyebrow">Launch-week standings</p>
+<h1 id="leaderboard-title">Launch Grand Prix Leaderboard</h1>
+<p id="leaderboard-note">Scores are shown after successful submission and may still be reviewed before prizes are emailed.</p>
+</section>
+<section class="leaderboard-board" aria-live="polite">
+<div class="leaderboard-board-head">
+<h2 id="leaderboard-list-title">Top Runs</h2>
+<a class="secondary-action" href="/game">Back to Game</a>
+</div>
+<p class="leaderboard-status" id="leaderboard-status">Loading leaderboard...</p>
+<ol class="leaderboard-list" id="leaderboard-list"></ol>
+</section>
+</main>
+<script src="game-leaderboard.js"></script>
+</body>
+</html>

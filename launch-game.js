@@ -1,18 +1,11 @@
 const GAME_ENDPOINT = '/api/launch-game-submit';
+const LEADERBOARD_PAGE = '/game-leaderboard';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const DASH_DURATION_MS = 20000;
 const FOCUS_POLL_MS = 250;
 const DISQUALIFICATION_MESSAGE = 'This attempt ended because you opened another tab, window, or browser tool. Everyone gets one attempt.';
 const DRY_RUN_USERNAME = 'test_nalihtin';
-const TEST_LEADERBOARD_USERNAMES = new Set([
-'test_nihira',
-'test_nithilan',
-'test_jaskirat',
-'test_tejas',
-'test_nandana',
-'test_shaurya'
-]);
 const DASH_ITEM_SCRIPT = [
 { at: 300, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
 { at: 900, kind: 'helmet', label: 'HELM', lane: 0, speed: 350 },
@@ -128,7 +121,8 @@ strategyMessage: document.getElementById('strategy-message'),
 entryPanel: document.getElementById('entry-panel'),
 entryForm: document.getElementById('entry-form'),
 entrySubmitBtn: document.getElementById('entry-submit-btn'),
-entryMessage: document.getElementById('entry-message')
+entryMessage: document.getElementById('entry-message'),
+leaderboardLink: document.getElementById('leaderboard-link')
 };
 
 const ctx = elements.dashCanvas.getContext('2d');
@@ -393,7 +387,7 @@ return false;
 state.player.username = username;
 const normalizedUsername = username.toLowerCase();
 state.player.testMode = normalizedUsername === DRY_RUN_USERNAME;
-state.player.testLeaderboard = TEST_LEADERBOARD_USERNAMES.has(normalizedUsername);
+state.player.testLeaderboard = normalizedUsername.startsWith('test_');
 recordEvent('username_entered', {
 testMode: state.player.testMode,
 testLeaderboard: state.player.testLeaderboard
@@ -416,6 +410,19 @@ elements.usernameModeNote.textContent = '';
 }
 
 return true;
+}
+
+function leaderboardBucket() {
+return state.player.testMode || state.player.testLeaderboard ? 'test' : 'main';
+}
+
+function showLeaderboardLink() {
+if (!elements.leaderboardLink) {
+return;
+}
+
+elements.leaderboardLink.href = `${LEADERBOARD_PAGE}?bucket=${leaderboardBucket()}`;
+elements.leaderboardLink.hidden = false;
 }
 
 function showLevel(level) {
@@ -932,6 +939,7 @@ state.submitted = true;
 elements.entryMessage.textContent = 'Entry checked.';
 elements.entrySubmitBtn.disabled = true;
 elements.entrySubmitBtn.textContent = 'Entry Checked';
+showLeaderboardLink();
 updateScoreboard();
 return;
 }
@@ -952,6 +960,9 @@ throw new Error('Launch game endpoint unavailable');
 
 const result = await response.json();
 state.submitted = true;
+if (result.entryBucket === 'test_leaderboard') {
+state.player.testLeaderboard = true;
+}
 if (result.emailStatus === 'sent') {
 elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent. Winners will be reviewed after launch week and emailed one-time Amazon promo codes.';
 } else if (result.emailStatus === 'failed') {
@@ -966,6 +977,7 @@ elements.entryMessage.textContent = 'Local preview saved this entry in your brow
 } finally {
 elements.entrySubmitBtn.disabled = true;
 elements.entrySubmitBtn.textContent = 'Entry Recorded';
+showLeaderboardLink();
 updateScoreboard();
 }
 }

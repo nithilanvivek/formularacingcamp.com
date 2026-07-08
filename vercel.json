@@ -32,6 +32,11 @@
       "source": "/game.html",
       "destination": "/game",
       "permanent": true
+    },
+    {
+      "source": "/game-leaderboard.html",
+      "destination": "/game-leaderboard",
+      "permanent": true
     }
   ],
   "headers": [
