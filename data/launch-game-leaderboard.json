@@ -62,7 +62,28 @@
       "submittedAt": "2026-07-08T14:26:04.278Z",
       "completedAt": 1783520749811,
       "durationMs": 364079
+    },
+    {
+      "id": "f65f3fa1-6bfc-4885-8251-1ad9bf23bc72",
+      "username": "tejtest",
+      "score": 1290,
+      "scores": {
+        "reaction": 0,
+        "dash": 605,
+        "strategy": 685
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-08T14:26:29.850Z",
+      "completedAt": 1783520757571,
+      "durationMs": 69013
     }
   ],
-  "updatedAt": "2026-07-08T14:26:04.278Z"
+  "updatedAt": "2026-07-08T14:26:29.850Z"
 }
