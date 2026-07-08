@@ -447,3 +447,41 @@ Required Vercel setup:
 
 - Add `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN` with permission to write repository contents.
 - Optional overrides: `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`, and `LAUNCH_GAME_LEADERBOARD_PATH`.
+
+## Launch Game Testing And Email Wrap-Up
+
+Date: 2026-07-08
+
+Completed:
+
+- Verified Resend domain sending through `mail.formularacingcamp.com` and set production sender to `Formula Racing Camp <game@mail.formularacingcamp.com>`.
+- Added `LAUNCH_GAME_REPLY_TO` so game receipt replies go to `authors@formularacingcamp.com`.
+- Replaced the homepage Formspree contact flow with `/api/contact-submit`, using Resend and setting Reply-To to the visitor's submitted email.
+- Updated Launch Grand Prix test handling so any username beginning with `test_` is saved to the test leaderboard, while `test_nalihtin` remains the no-save dry run.
+- Added `/game-leaderboard` with separate main and test views, a first-screen `See Leaderboard` link, post-submit leaderboard links, and visible Main/Test switches.
+- Confirmed saved test entries for `test_nithilan` and `Test__Jaskirat`; the main leaderboard is still empty.
+- Fixed the hero `See Leaderboard` button text rendering by removing inherited text shadow from action buttons.
+
+Validation performed:
+
+- `node --check app.js`
+- `node --check api/contact-submit.js`
+- `node --check api/launch-game-submit.js`
+- `node --check api/launch-game-leaderboard.js`
+- `node --check launch-game.js`
+- `node --check game-leaderboard.js`
+- Live smoke checks for `/api/launch-game-leaderboard?bucket=test` and `/api/launch-game-leaderboard?bucket=main`.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Production domain: `https://www.formularacingcamp.com`.
+- Launch game: `https://www.formularacingcamp.com/game`.
+- Leaderboard page: `https://www.formularacingcamp.com/game-leaderboard`.
+- Vercel production env vars in use include `RESEND_API_KEY`, `LAUNCH_GAME_GITHUB_TOKEN`, `LAUNCH_GAME_EMAIL_FROM`, and `LAUNCH_GAME_REPLY_TO`.
+
+Recommended next steps:
+
+- Continue production testing with `test_` usernames for test leaderboard runs and regular usernames for main leaderboard runs.
+- Check Resend delivery logs if a participant reports not receiving a game receipt.
+- Before launch, decide how and when to send final leaderboard placements and Amazon promo codes after review.
