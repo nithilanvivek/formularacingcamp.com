@@ -147,19 +147,21 @@ statusDiv.textContent = 'Sending your message...';
 statusDiv.style.color = '#0096FF';
 
 try {
-const formData = new FormData(form);
-formData.set('_subject', `Formula Racing Camp: ${subject}`);
-
 const response = await fetch(form.action, {
 method: 'POST',
-body: formData,
 headers: {
+ 'Content-Type': 'application/json',
 Accept: 'application/json'
-}
+},
+body: JSON.stringify({
+email,
+subject,
+message
+})
 });
 
 if (!response.ok) {
-throw new Error('Formspree submission failed');
+throw new Error('Contact submission failed');
 }
 
 statusDiv.textContent = '✓ Message sent! Thanks for getting in touch.';

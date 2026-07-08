@@ -56,7 +56,7 @@ The exported page includes:
 - "Did You Know?" fact section.
 - Character profile section.
 - Authors section for the student author group.
-- Contact form that submits messages through Formspree without opening an email client.
+- Contact form that submits through `/api/contact-submit` and sends mail with Reply-To set to the visitor's submitted email.
 
 ## Dependencies
 
@@ -150,6 +150,8 @@ Player receipt emails are sent through Resend after valid, non-dry-run submissio
 - `RESEND_API_KEY`
 - `LAUNCH_GAME_EMAIL_FROM`, default fallback: `Formula Racing Camp <game@formularacingcamp.com>`
 - `LAUNCH_GAME_ADMIN_EMAIL`, optional comma-separated BCC recipients
+
+The homepage contact form also uses Resend through `/api/contact-submit`. It sends messages to `CONTACT_TO`, falling back to `LAUNCH_GAME_REPLY_TO` and then `authors@formularacingcamp.com`, with `reply_to` set to the visitor's email.
 
 ## Near-Term Tasks
 
