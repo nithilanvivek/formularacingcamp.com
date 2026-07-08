@@ -20,7 +20,28 @@
       "submittedAt": "2026-07-08T13:41:38.850Z",
       "completedAt": 1783518084706,
       "durationMs": 61300
+    },
+    {
+      "id": "d550af24-6323-445f-a897-1d3a4dea4235",
+      "username": "Test__Jaskirat",
+      "score": 2474,
+      "scores": {
+        "reaction": 649,
+        "dash": 945,
+        "strategy": 880
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "test_leaderboard",
+      "testLeaderboard": true,
+      "submittedAt": "2026-07-08T14:11:23.810Z",
+      "completedAt": 1783519864461,
+      "durationMs": 74370
     }
   ],
-  "updatedAt": "2026-07-08T13:41:38.850Z"
+  "updatedAt": "2026-07-08T14:11:23.810Z"
 }
