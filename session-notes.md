@@ -430,3 +430,20 @@ Completed:
 - Added active focus polling during live runs to catch missed Chrome/incognito window switches.
 - Blocked context-menu use during live runs to catch browser tools such as Google Lens.
 - Updated rules and disqualification wording to mention tabs, windows, incognito, and browser tools.
+
+## GitHub Leaderboard Storage
+
+Date: 2026-07-08
+
+Completed:
+
+- Added `data/launch-game-leaderboard.json` as the public-safe leaderboard store.
+- Added server-side GitHub Contents API saving from `/api/launch-game-submit`.
+- Saved only public-safe fields: username, score, level scores, review status, bucket, test-leaderboard flag, and timestamps.
+- Kept emails, notes, user agent, anti-cheat events, and private payload details out of the public JSON file.
+- Added a one-time retry for GitHub write conflicts when submissions arrive close together.
+
+Required Vercel setup:
+
+- Add `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN` with permission to write repository contents.
+- Optional overrides: `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`, and `LAUNCH_GAME_LEADERBOARD_PATH`.

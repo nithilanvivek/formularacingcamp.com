@@ -137,6 +137,14 @@ https://www.formularacingcamp.com/game
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. To keep testing entries separate, configure `LAUNCH_GAME_TEST_WEBHOOK_URL`; the saved test leaderboard usernames are `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
 
+The launch-game API can also save a public-safe leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, score, level scores, review status, bucket, and timestamps only; it does not store email, notes, user agent, or event logs. Configure these Vercel environment variables to enable it:
+
+- `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN`
+- `GITHUB_OWNER`, default fallback: `nithilanvivek`
+- `GITHUB_REPO`, default fallback: `formularacingcamp.com`
+- `GITHUB_BRANCH`, default fallback: `main`
+- `LAUNCH_GAME_LEADERBOARD_PATH`, default fallback: `data/launch-game-leaderboard.json`
+
 Player receipt emails are sent through Resend after valid, non-dry-run submissions. Configure these Vercel environment variables before relying on receipts:
 
 - `RESEND_API_KEY`
@@ -146,8 +154,9 @@ Player receipt emails are sent through Resend after valid, non-dry-run submissio
 ## Near-Term Tasks
 
 1. Confirm remaining CTA destinations: buy link, puzzles, YouTube, and contact email.
-2. Configure the launch game submission webhook before judging real winners.
-3. Configure Resend receipt-email environment variables before broad launch-game testing.
-4. Confirm Amazon promo code fulfillment copy and winner email workflow.
-5. Verify the launch-week game on production Chrome/Safari after deployment.
-6. Consider replacing the Tailwind CDN with a build step if the project grows.
+2. Configure the GitHub leaderboard token before broad launch-game testing.
+3. Configure the launch game submission webhook before judging real winners.
+4. Configure Resend receipt-email environment variables before broad launch-game testing.
+5. Confirm Amazon promo code fulfillment copy and winner email workflow.
+6. Verify the launch-week game on production Chrome/Safari after deployment.
+7. Consider replacing the Tailwind CDN with a build step if the project grows.
