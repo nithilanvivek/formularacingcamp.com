@@ -1,3 +1,26 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "id": "129886a5-4b44-4181-8698-b5210a050ee9",
+      "username": "test_nithilan",
+      "score": 2140,
+      "scores": {
+        "reaction": 575,
+        "dash": 945,
+        "strategy": 620
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "test_leaderboard",
+      "testLeaderboard": true,
+      "submittedAt": "2026-07-08T13:41:38.850Z",
+      "completedAt": 1783518084706,
+      "durationMs": 61300
+    }
+  ],
+  "updatedAt": "2026-07-08T13:41:38.850Z"
 }
