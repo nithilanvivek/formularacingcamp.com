@@ -1,7 +1,17 @@
 const LEADERBOARD_ENDPOINT = '/api/launch-game-leaderboard';
+const LEADERBOARD_BUCKET_KEY = 'frcLaunchLeaderboardBucket';
 
 const params = new URLSearchParams(window.location.search);
-const bucket = params.get('bucket') === 'test' ? 'test' : 'main';
+const urlBucket = params.get('bucket');
+let savedBucket = '';
+try {
+savedBucket = sessionStorage.getItem(LEADERBOARD_BUCKET_KEY) || '';
+} catch (error) {
+savedBucket = '';
+}
+const bucket = urlBucket === 'test' || urlBucket === 'main'
+? urlBucket
+: savedBucket === 'test' ? 'test' : 'main';
 
 const elements = {
 eyebrow: document.getElementById('leaderboard-eyebrow'),
@@ -9,7 +19,9 @@ title: document.getElementById('leaderboard-title'),
 note: document.getElementById('leaderboard-note'),
 listTitle: document.getElementById('leaderboard-list-title'),
 status: document.getElementById('leaderboard-status'),
-list: document.getElementById('leaderboard-list')
+list: document.getElementById('leaderboard-list'),
+mainLink: document.getElementById('main-leaderboard-link'),
+testLink: document.getElementById('test-leaderboard-link')
 };
 
 function formatScore(value) {
@@ -35,6 +47,14 @@ minute: '2-digit'
 }
 
 function setPageCopy() {
+try {
+sessionStorage.setItem(LEADERBOARD_BUCKET_KEY, bucket);
+} catch (error) {
+}
+
+elements.mainLink.classList.toggle('active', bucket === 'main');
+elements.testLink.classList.toggle('active', bucket === 'test');
+
 if (bucket === 'test') {
 elements.eyebrow.textContent = 'Testing standings';
 elements.title.textContent = 'Test Leaderboard';

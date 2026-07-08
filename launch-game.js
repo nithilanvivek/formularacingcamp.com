@@ -1,5 +1,6 @@
 const GAME_ENDPOINT = '/api/launch-game-submit';
 const LEADERBOARD_PAGE = '/game-leaderboard';
+const LEADERBOARD_BUCKET_KEY = 'frcLaunchLeaderboardBucket';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const DASH_DURATION_MS = 20000;
@@ -421,7 +422,14 @@ if (!elements.leaderboardLink) {
 return;
 }
 
-elements.leaderboardLink.href = `${LEADERBOARD_PAGE}?bucket=${leaderboardBucket()}`;
+const bucket = leaderboardBucket();
+try {
+sessionStorage.setItem(LEADERBOARD_BUCKET_KEY, bucket);
+} catch (error) {
+recordEvent('leaderboard_bucket_storage_failed');
+}
+
+elements.leaderboardLink.href = `${LEADERBOARD_PAGE}?bucket=${bucket}`;
 elements.leaderboardLink.hidden = false;
 }
 
