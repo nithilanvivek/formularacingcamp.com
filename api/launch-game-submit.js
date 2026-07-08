@@ -1,13 +1,5 @@
 const MAX_SCORE = 4000;
 const DRY_RUN_USERNAME = 'test_nalihtin';
-const TEST_LEADERBOARD_USERNAMES = new Set([
-'test_nihira',
-'test_nithilan',
-'test_jaskirat',
-'test_tejas',
-'test_nandana',
-'test_shaurya'
-]);
 const DEFAULT_EMAIL_FROM = 'Formula Racing Camp <game@formularacingcamp.com>';
 const RESEND_EMAIL_ENDPOINT = 'https://api.resend.com/emails';
 const DEFAULT_LEADERBOARD_PATH = 'data/launch-game-leaderboard.json';
@@ -325,7 +317,7 @@ const payload = req.body || {};
 const review = reviewStatus(payload);
 const username = normalizedUsername(payload);
 const isDryRun = payload.testMode === true || username === DRY_RUN_USERNAME;
-const isTestLeaderboard = payload.testLeaderboard === true || TEST_LEADERBOARD_USERNAMES.has(username);
+const isTestLeaderboard = payload.testLeaderboard === true || username.startsWith('test_');
 
 if (isDryRun) {
 res.status(200).json({
