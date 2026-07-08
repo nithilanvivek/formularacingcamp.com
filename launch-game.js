@@ -317,7 +317,7 @@ return ['tab_changed', 'focus_lost', 'page_left'].includes(reason);
 }
 
 function returnToHomeAfterDisqualification() {
-window.location.assign('index.html');
+window.location.assign('/');
 }
 
 function showAttentionFlash(message) {

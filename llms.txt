@@ -1,0 +1,14 @@
+# Formula Racing Camp
+
+Formula Racing Camp is a student-created educational Formula 1 book for kids. It blends racing with science, engineering, history, geography, maths, puzzles, and character-driven learning.
+
+## Important Pages
+
+- Home: https://www.formularacingcamp.com/
+- Book preview: https://www.formularacingcamp.com/preview
+- Puzzles: https://www.formularacingcamp.com/puzzles
+- Launch Grand Prix game: https://www.formularacingcamp.com/game
+
+## Summary
+
+The site presents the Formula Racing Camp book, sample preview pages, character profiles, educational chapter topics, contact information, puzzles, and the launch-week game.

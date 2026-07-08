@@ -1,6 +1,39 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "formularacingcamp.com"
+        }
+      ],
+      "destination": "https://www.formularacingcamp.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/formularacingcamp.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/puzzles.html",
+      "destination": "/puzzles",
+      "permanent": true
+    },
+    {
+      "source": "/game.html",
+      "destination": "/game",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
