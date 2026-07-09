@@ -108,6 +108,39 @@ if (bookAnnouncementClose) {
 bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
 }
 
+const buyBookFlip = document.querySelector('[data-buy-book-flip]');
+const buyBookButton = document.getElementById('cta-button');
+
+function closeBuyBookFlip() {
+if (!buyBookFlip || !buyBookButton) {
+return;
+}
+
+buyBookFlip.classList.remove('is-flipped');
+buyBookButton.setAttribute('aria-expanded', 'false');
+}
+
+if (buyBookFlip && buyBookButton) {
+buyBookButton.addEventListener('click', () => {
+const isFlipped = buyBookFlip.classList.toggle('is-flipped');
+buyBookButton.setAttribute('aria-expanded', String(isFlipped));
+});
+
+document.addEventListener('click', (event) => {
+if (!buyBookFlip.classList.contains('is-flipped') || buyBookFlip.contains(event.target)) {
+return;
+}
+
+closeBuyBookFlip();
+});
+
+document.addEventListener('keydown', (event) => {
+if (event.key === 'Escape') {
+closeBuyBookFlip();
+}
+});
+}
+
 
 // Contact Form Functionality
 async function handleContactSubmit(event) {
