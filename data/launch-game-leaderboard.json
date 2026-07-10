@@ -146,7 +146,28 @@
       "submittedAt": "2026-07-08T14:56:33.251Z",
       "completedAt": 1783522572988,
       "durationMs": 64251
+    },
+    {
+      "id": "a213537d-e838-42a0-8869-8e70d97da852",
+      "username": "avyukt better at life",
+      "score": 1502,
+      "scores": {
+        "reaction": 427,
+        "dash": 520,
+        "strategy": 555
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-10T06:25:56.072Z",
+      "completedAt": 1783664705401,
+      "durationMs": 103520
     }
   ],
-  "updatedAt": "2026-07-08T14:56:33.251Z"
+  "updatedAt": "2026-07-10T06:25:56.072Z"
 }
