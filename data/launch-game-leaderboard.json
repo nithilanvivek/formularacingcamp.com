@@ -167,7 +167,28 @@
       "submittedAt": "2026-07-10T06:25:56.072Z",
       "completedAt": 1783664705401,
       "durationMs": 103520
+    },
+    {
+      "id": "440591d6-d34f-4631-a53d-0f346b0b3baf",
+      "username": "Poornima",
+      "score": 1385,
+      "scores": {
+        "reaction": 0,
+        "dash": 830,
+        "strategy": 555
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-11T04:54:52.763Z",
+      "completedAt": 1783745695866,
+      "durationMs": 95238
     }
   ],
-  "updatedAt": "2026-07-10T06:25:56.072Z"
+  "updatedAt": "2026-07-11T04:54:52.763Z"
 }
