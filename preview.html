@@ -42,6 +42,42 @@ border: 2px solid #d1d5db;
 border-radius: 8px;
 background: #ffffff;
 }
+
+.preview-shell {
+position: relative;
+}
+
+.preview-loading {
+position: absolute;
+inset: 2px;
+display: grid;
+place-items: center;
+border-radius: 6px;
+background: #ffffff;
+transition: opacity 180ms ease;
+pointer-events: none;
+}
+
+.preview-loading::before {
+content: "";
+width: 44px;
+height: 44px;
+border: 5px solid #dbeafe;
+border-top-color: #0096ff;
+border-radius: 50%;
+animation: preview-spin 800ms linear infinite;
+}
+
+.preview-shell.is-loaded .preview-loading {
+opacity: 0;
+visibility: hidden;
+}
+
+@keyframes preview-spin {
+to {
+transform: rotate(360deg);
+}
+}
 </style>
 </head>
 <body>
@@ -49,9 +85,12 @@ background: #ffffff;
 <p><a href="/">Formula Racing Camp</a></p>
 <h1>Formula Racing Camp Book Preview</h1>
 <p>Read sample pages from the Formula Racing Camp educational racing book for kids.</p>
-<object class="preview-frame" data="/assets/site/formula-racing-camp-book-preview.pdf" type="application/pdf">
+<div class="preview-shell" id="preview-shell">
+<object class="preview-frame" data="/assets/site/formula-racing-camp-book-preview.pdf" type="application/pdf" onload="document.getElementById('preview-shell').classList.add('is-loaded')">
 <p>The preview PDF is embedded on this page.</p>
 </object>
+<div class="preview-loading" aria-label="Loading preview"></div>
+</div>
 </main>
 </body>
 </html>
