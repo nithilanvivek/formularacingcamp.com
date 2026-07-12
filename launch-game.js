@@ -7,6 +7,28 @@ const DASH_DURATION_MS = 20000;
 const FOCUS_POLL_MS = 250;
 const DISQUALIFICATION_MESSAGE = 'This attempt ended because you opened another tab, window, or browser tool. Everyone gets one attempt.';
 const DRY_RUN_USERNAME = 'test_nalihtin';
+
+function updateViewportMetrics() {
+  const viewport = window.visualViewport;
+  const width = Math.round(viewport?.width || window.innerWidth || document.documentElement.clientWidth || screen.width);
+  const height = Math.round(viewport?.height || window.innerHeight || document.documentElement.clientHeight || screen.height);
+  const root = document.documentElement;
+
+  root.style.setProperty('--game-vw', `${width}px`);
+  root.style.setProperty('--game-vh', `${height}px`);
+  root.dataset.viewportWidth = String(width);
+  root.dataset.viewportHeight = String(height);
+  root.classList.toggle('compact-game-hero', width >= 821 && height <= 900);
+  root.classList.toggle('ultra-compact-game-hero', width >= 821 && height <= 740);
+}
+
+updateViewportMetrics();
+window.addEventListener('resize', updateViewportMetrics);
+window.addEventListener('orientationchange', updateViewportMetrics);
+if (window.visualViewport) {
+window.visualViewport.addEventListener('resize', updateViewportMetrics);
+}
+
 const DASH_ITEM_SCRIPT = [
 { at: 300, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
 { at: 900, kind: 'helmet', label: 'HELM', lane: 0, speed: 350 },
