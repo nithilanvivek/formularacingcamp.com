@@ -209,7 +209,28 @@
       "submittedAt": "2026-07-15T15:58:02.258Z",
       "completedAt": 1784131074791,
       "durationMs": 66337
+    },
+    {
+      "id": "20806dd8-5a66-4223-aa0d-8988b1adf191",
+      "username": "abby",
+      "score": 1959,
+      "scores": {
+        "reaction": 554,
+        "dash": 655,
+        "strategy": 750
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-15T16:04:25.564Z",
+      "completedAt": 1784131446798,
+      "durationMs": 61088
     }
   ],
-  "updatedAt": "2026-07-15T15:58:02.258Z"
+  "updatedAt": "2026-07-15T16:04:25.564Z"
 }
