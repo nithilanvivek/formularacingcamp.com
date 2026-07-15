@@ -188,7 +188,28 @@
       "submittedAt": "2026-07-11T04:54:52.763Z",
       "completedAt": 1783745695866,
       "durationMs": 95238
+    },
+    {
+      "id": "8689e969-1398-4569-bd10-6cb704f7fae6",
+      "username": "tejas.N",
+      "score": 2146,
+      "scores": {
+        "reaction": 551,
+        "dash": 910,
+        "strategy": 685
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-15T15:58:02.258Z",
+      "completedAt": 1784131074791,
+      "durationMs": 66337
     }
   ],
-  "updatedAt": "2026-07-11T04:54:52.763Z"
+  "updatedAt": "2026-07-15T15:58:02.258Z"
 }
