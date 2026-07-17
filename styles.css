@@ -442,7 +442,7 @@ transition: width 0.28s ease;
 }
 
 .buy-flip.is-flipped {
-width: min(100%, 520px);
+width: min(100%, 680px);
 }
 
 .buy-flip-inner {
@@ -512,6 +512,11 @@ background: #0077c8;
 color: #ffffff;
 }
 
+.retailer-flipkart {
+background: #2874f0;
+color: #ffffff;
+}
+
 .retailer-notion {
 background: #111827;
 color: #ffffff;
@@ -545,6 +550,7 @@ transform: rotate(-5deg);
 }
 
 .kindle-logo span,
+.flipkart-logo span,
 .notion-logo span {
 display: inline-grid;
 place-items: center;
@@ -558,6 +564,11 @@ font-weight: 900;
 .kindle-logo span {
 background: #ffffff;
 color: #0077c8;
+}
+
+.flipkart-logo span {
+background: #ffe500;
+color: #2874f0;
 }
 
 .notion-logo span {
@@ -720,7 +731,7 @@ display: none;
 .buy-flip,
 .buy-flip.is-flipped {
 width: min(100%, 520px);
-min-height: 174px;
+min-height: 226px;
 }
 
 .buy-flip:not(.is-flipped) {
