@@ -1,26 +1,4 @@
 {
-  "entries": [
-    {
-      "id": "d9c7764b-8013-4bb7-aa01-84b874c5220a",
-      "username": "meena",
-      "score": 1585,
-      "scores": {
-        "reaction": 0,
-        "dash": 900,
-        "strategy": 685
-      },
-      "levelsComplete": {
-        "reaction": true,
-        "dash": true,
-        "strategy": true
-      },
-      "reviewStatus": "clean",
-      "entryBucket": "production",
-      "testLeaderboard": false,
-      "submittedAt": "2026-07-19T14:34:57.338Z",
-      "completedAt": 1784471683061,
-      "durationMs": 46778
-    }
-  ],
-  "updatedAt": "2026-07-19T14:34:57.338Z"
+  "entries": [],
+  "updatedAt": "2026-07-19T14:36:00.000Z"
 }
