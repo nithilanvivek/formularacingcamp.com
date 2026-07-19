@@ -137,7 +137,7 @@ https://www.formularacingcamp.com/game
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 
-The launch-game API can also save a public-safe leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, score, level scores, review status, bucket, and timestamps only; it does not store email, notes, user agent, or event logs. Configure these Vercel environment variables to enable it:
+The launch-game API can also save a leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, email, score, level scores, review status, bucket, and timestamps. The public leaderboard API never returns email addresses, and `vercel.json` blocks direct website access to the raw JSON file. Configure these Vercel environment variables to enable it:
 
 - `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN`
 - `GITHUB_OWNER`, default fallback: `nithilanvivek`
@@ -152,6 +152,8 @@ Player receipt emails are sent through Resend after valid, non-dry-run submissio
 - `RESEND_API_KEY`
 - `LAUNCH_GAME_EMAIL_FROM`, default fallback: `Formula Racing Camp <game@formularacingcamp.com>`
 - `LAUNCH_GAME_ADMIN_EMAIL`, optional comma-separated BCC recipients
+
+Player receipt emails always use `authors@formularacingcamp.com` as Reply-To.
 
 The homepage contact form also uses Resend through `/api/contact-submit`. It sends messages to `CONTACT_TO`, falling back to `LAUNCH_GAME_REPLY_TO` and then `authors@formularacingcamp.com`, with `reply_to` set to the visitor's email.
 

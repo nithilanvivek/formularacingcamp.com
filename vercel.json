@@ -39,6 +39,12 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    {
+      "source": "/data/launch-game-leaderboard.json",
+      "destination": "/api/not-found"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

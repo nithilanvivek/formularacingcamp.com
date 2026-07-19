@@ -7,6 +7,7 @@ const DEFAULT_GITHUB_BRANCH = 'main';
 const NOTION_PRESS_BOOK_URL = 'https://notionpress.com/in/read/formula-racing-camp';
 const HARDCOVER_COUPON = 'FORMULA40';
 const PAPERBACK_COUPON = 'FORMULA25';
+const PLAYER_EMAIL_REPLY_TO = 'authors@formularacingcamp.com';
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -41,6 +42,10 @@ return String(value ?? '')
 
 function formatScore(value) {
 return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+}
+
+function normalizedEmail(value) {
+return String(value || '').trim().toLowerCase();
 }
 
 function adminRecipients() {
@@ -134,7 +139,7 @@ const recipients = adminRecipients();
 const body = {
 from: process.env.LAUNCH_GAME_EMAIL_FROM || DEFAULT_EMAIL_FROM,
 to: [entry.email],
-reply_to: process.env.LAUNCH_GAME_REPLY_TO || 'authors@formularacingcamp.com',
+reply_to: PLAYER_EMAIL_REPLY_TO,
 subject: receiptSubject(entry),
 html: receiptHtml(entry),
 text: receiptText(entry)
@@ -185,6 +190,7 @@ function leaderboardEntry(entry) {
 return {
 id: entry.sessionId,
 username: publicUsername(entry.username),
+email: normalizedEmail(entry.email),
 score: formatScore(entry.score),
 scores: {
 reaction: formatScore(entry.scores?.reaction),
