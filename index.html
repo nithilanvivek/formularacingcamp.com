@@ -88,7 +88,7 @@
 </script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260719-1">
+<link rel="stylesheet" href="styles.css?v=20260719-2">
 
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -699,9 +699,9 @@ FORMULA RACING CAMP
 </div>
 </footer>
 </div>
-<div id="book-announcement" class="book-announcement" role="dialog" aria-live="polite" aria-label="Book publishing announcement" aria-hidden="true">
+<div id="book-announcement" class="book-announcement" role="dialog" aria-live="polite" aria-label="First month of release announcement" aria-hidden="true">
 <button id="book-announcement-close" class="book-announcement-close" type="button" aria-label="Close announcement">&times;</button>
-<p class="book-announcement-text">We are publishing the book this week!</p>
+<p class="book-announcement-text">First Month of Release</p>
 <div class="announcement-scene" aria-hidden="true">
 <div class="announcement-road"></div>
 <div class="announcement-bookstore">
@@ -710,8 +710,13 @@ FORMULA RACING CAMP
 <div class="announcement-bookstore-window"></div>
 <div class="announcement-bookstore-door"></div>
 </div>
+<div class="announcement-house">
+<div class="announcement-house-roof"></div>
+<div class="announcement-house-window"></div>
+<div class="announcement-house-door"></div>
+</div>
 <div class="announcement-car">
-<svg viewBox="0 0 360 150" role="img" aria-label="Formula Racing Camp car carrying the book to a bookstore">
+<svg viewBox="0 0 360 150" role="img" aria-label="Formula Racing Camp car delivering the book from a bookstore to a house">
 <defs>
 <clipPath id="announcement-car-livery-clip">
 <path d="M92 93c16-28 48-43 98-45l34 17h49c27 0 49 14 63 39l-41 14H91z"></path>
@@ -743,6 +748,10 @@ FORMULA RACING CAMP
 <path d="M35 76h67l13 11H31z"></path>
 <circle cx="206" cy="87" r="9"></circle>
 </g>
+<g class="announcement-car-coupon">
+<rect x="143" y="82" width="62" height="25" rx="7"></rect>
+<text x="174" y="101" text-anchor="middle">25%</text>
+</g>
 <path class="announcement-car-outline" d="M92 93c16-28 48-43 98-45l34 17h49c27 0 49 14 63 39l-41 14H91z"></path>
 <path class="announcement-car-outline" d="M239 74l90 14 17 16-70 10z"></path>
 <path class="announcement-car-outline" d="M34 73h62l22 17-23 18H31z"></path>
@@ -763,6 +772,6 @@ FORMULA RACING CAMP
 </div>
 </div>
 </div>
-<script src="app.js?v=20260704-announcement-dom-ready"></script>
+<script src="app.js?v=20260719-release-animation"></script>
 </body>
 </html>

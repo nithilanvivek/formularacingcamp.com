@@ -77,7 +77,7 @@ document.body.classList.add('announcement-visible');
 bookAnnouncement.classList.add('active');
 bookAnnouncement.setAttribute('aria-hidden', 'false');
 clearTimeout(bookAnnouncementTimer);
-bookAnnouncementTimer = setTimeout(hideBookAnnouncement, 4500);
+bookAnnouncementTimer = setTimeout(hideBookAnnouncement, 6800);
 }
 
 

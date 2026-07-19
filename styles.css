@@ -154,7 +154,7 @@ animation: roadStripes 0.5s linear infinite;
 
 .announcement-bookstore {
 position: absolute;
-right: clamp(1rem, 5vw, 5rem);
+left: clamp(1rem, 5vw, 5rem);
 bottom: clamp(18px, 3vw, 30px);
 width: clamp(82px, 13vw, 150px);
 height: clamp(72px, 11vw, 125px);
@@ -215,6 +215,52 @@ border-radius: 6px 6px 0 0;
 background: #7C3AED;
 }
 
+.announcement-house {
+position: absolute;
+right: clamp(1rem, 5vw, 5rem);
+bottom: clamp(18px, 3vw, 30px);
+width: clamp(86px, 13vw, 155px);
+height: clamp(72px, 11vw, 126px);
+border: clamp(3px, 0.35vw, 5px) solid var(--announcement-outline, #06111F);
+border-radius: 8px 8px 4px 4px;
+background: linear-gradient(180deg, #EAF5FF 0%, #A7D8FF 100%);
+box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+}
+
+.announcement-house-roof {
+position: absolute;
+left: -12%;
+right: -12%;
+top: -30%;
+height: 35%;
+background: #D7A72F;
+clip-path: polygon(50% 0, 100% 100%, 0 100%);
+filter: drop-shadow(0 4px 0 var(--announcement-outline, #06111F));
+}
+
+.announcement-house-window,
+.announcement-house-door {
+position: absolute;
+bottom: 8%;
+border: 3px solid var(--announcement-outline, #06111F);
+}
+
+.announcement-house-window {
+left: 12%;
+width: 30%;
+height: 28%;
+border-radius: 5px;
+background: #FFF45F;
+}
+
+.announcement-house-door {
+right: 14%;
+width: 26%;
+height: 43%;
+border-radius: 6px 6px 0 0;
+background: #FF6B35;
+}
+
 .announcement-car {
 position: absolute;
 left: 0;
@@ -225,7 +271,7 @@ filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
 }
 
 .book-announcement.active .announcement-car {
-animation: carToBookstore 3s linear forwards;
+animation: carToHouse 4.8s cubic-bezier(0.42, 0, 0.2, 1) forwards;
 }
 
 .announcement-car svg {
@@ -330,6 +376,23 @@ font-weight: 700;
 letter-spacing: 0;
 }
 
+.announcement-car-coupon rect {
+fill: #FF3B30;
+stroke: #ffffff;
+stroke-width: 4;
+}
+
+.announcement-car-coupon text {
+fill: #ffffff;
+stroke: var(--announcement-outline, #06111F);
+stroke-width: 3;
+paint-order: stroke fill;
+font-family: Fredoka, sans-serif;
+font-size: 19px;
+font-weight: 700;
+letter-spacing: 0;
+}
+
 .announcement-car-wheel {
 fill: #05070A;
 stroke: #ffffff;
@@ -372,9 +435,12 @@ text-shadow:
 }
 }
 
-@keyframes carToBookstore {
-0%, 50% {
+@keyframes carToHouse {
+0%, 18% {
 transform: translateX(clamp(1rem, 4vw, 4rem)) translateY(0) rotate(-1deg);
+}
+64% {
+transform: translateX(calc(50vw - clamp(85px, 12vw, 160px))) translateY(-8px) rotate(0.75deg);
 }
 94% {
 transform: translateX(calc(100vw - clamp(170px, 24vw, 320px) - clamp(1rem, 5vw, 5rem))) translateY(-3px) rotate(0.5deg);
