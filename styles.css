@@ -376,21 +376,28 @@ font-weight: 700;
 letter-spacing: 0;
 }
 
-.announcement-car-coupon rect {
-fill: #FF3B30;
-stroke: #ffffff;
-stroke-width: 4;
-}
-
-.announcement-car-coupon text {
-fill: #ffffff;
-stroke: var(--announcement-outline, #06111F);
-stroke-width: 3;
-paint-order: stroke fill;
+.announcement-car-coupon {
+position: absolute;
+left: 50%;
+top: clamp(-54px, -5.4vw, -36px);
+z-index: 2;
+padding: 0.18em 0.5em 0.12em;
+border: clamp(3px, 0.35vw, 5px) solid #ffffff;
+border-radius: 999px;
+background: #FF3B30;
+color: #ffffff;
+box-shadow: 0 6px 0 var(--announcement-outline, #06111F), 0 16px 28px rgba(0, 0, 0, 0.36);
+transform: translateX(-50%) rotate(-4deg);
 font-family: Fredoka, sans-serif;
-font-size: 19px;
+font-size: clamp(2rem, 5vw, 4.8rem);
+line-height: 0.92;
 font-weight: 700;
 letter-spacing: 0;
+text-shadow:
+2px 2px 0 var(--announcement-outline, #06111F),
+-2px 2px 0 var(--announcement-outline, #06111F),
+2px -2px 0 var(--announcement-outline, #06111F),
+-2px -2px 0 var(--announcement-outline, #06111F);
 }
 
 .announcement-car-wheel {
