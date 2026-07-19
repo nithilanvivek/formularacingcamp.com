@@ -436,7 +436,7 @@ return true;
 }
 
 function leaderboardBucket() {
-return state.player.testMode || state.player.testLeaderboard ? 'test' : 'main';
+return 'main';
 }
 
 function showLeaderboardLink() {
@@ -994,11 +994,11 @@ if (result.entryBucket === 'test_leaderboard') {
 state.player.testLeaderboard = true;
 }
 if (result.emailStatus === 'sent') {
-elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent. Winners will be reviewed after launch week and emailed one-time Amazon promo codes.';
+elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent with the Notion Press coupon codes. Top 3 valid players are reviewed for free books after launch week.';
 } else if (result.emailStatus === 'failed') {
 elements.entryMessage.textContent = 'Entry submitted. The receipt email could not be sent, but your run was recorded for review.';
 } else {
-elements.entryMessage.textContent = 'Entry submitted. Winners will be reviewed after launch week and emailed one-time Amazon promo codes.';
+elements.entryMessage.textContent = 'Entry submitted. Top 3 valid players are reviewed for free books after launch week.';
 }
 } catch (error) {
 saveLocalPreviewEntry(payload);

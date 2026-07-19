@@ -441,6 +441,35 @@ perspective: 900px;
 transition: width 0.28s ease;
 }
 
+.buy-flip::after {
+content: attr(data-coupon-caption);
+position: absolute;
+left: 50%;
+top: calc(100% + 10px);
+z-index: 20;
+width: min(360px, 92vw);
+padding: 10px 14px;
+border: 3px solid #111827;
+border-radius: 8px;
+background: #ffffff;
+color: #111827;
+box-shadow: 0 12px 28px rgba(17, 24, 39, 0.18);
+font-size: 0.86rem;
+font-weight: 900;
+line-height: 1.25;
+text-align: center;
+opacity: 0;
+pointer-events: none;
+transform: translate(-50%, -4px);
+transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.buy-flip:hover::after,
+.buy-flip:focus-within::after {
+opacity: 1;
+transform: translate(-50%, 0);
+}
+
 .buy-flip.is-flipped {
 width: min(100%, 680px);
 }

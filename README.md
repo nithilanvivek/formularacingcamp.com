@@ -135,7 +135,7 @@ With clean URLs enabled, `game.html` is served at:
 https://www.formularacingcamp.com/game
 ```
 
-Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. To keep testing entries separate, configure `LAUNCH_GAME_TEST_WEBHOOK_URL`; the saved test leaderboard usernames are `test_nihira`, `test_nithilan`, `test_jaskirat`, `test_tejas`, `test_nandana`, and `test_shaurya`.
+Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 
 The launch-game API can also save a public-safe leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, score, level scores, review status, bucket, and timestamps only; it does not store email, notes, user agent, or event logs. Configure these Vercel environment variables to enable it:
 
@@ -159,6 +159,6 @@ The homepage contact form also uses Resend through `/api/contact-submit`. It sen
 2. Configure the GitHub leaderboard token before broad launch-game testing.
 3. Configure the launch game submission webhook before judging real winners.
 4. Configure Resend receipt-email environment variables before broad launch-game testing.
-5. Confirm Amazon promo code fulfillment copy and winner email workflow.
+5. Confirm free-book fulfillment for the first 3 valid players after August 15.
 6. Verify the launch-week game on production Chrome/Safari after deployment.
 7. Consider replacing the Tailwind CDN with a build step if the project grows.

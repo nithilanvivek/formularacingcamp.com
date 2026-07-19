@@ -4,6 +4,9 @@ const DEFAULT_EMAIL_FROM = 'Formula Racing Camp <game@formularacingcamp.com>';
 const RESEND_EMAIL_ENDPOINT = 'https://api.resend.com/emails';
 const DEFAULT_LEADERBOARD_PATH = 'data/launch-game-leaderboard.json';
 const DEFAULT_GITHUB_BRANCH = 'main';
+const NOTION_PRESS_BOOK_URL = 'https://notionpress.com/in/read/formula-racing-camp';
+const HARDCOVER_COUPON = 'FORMULA40';
+const PAPERBACK_COUPON = 'FORMULA25';
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -78,8 +81,13 @@ return [
 `Level 3 - Strategy Calls: ${formatScore(scores.strategy)}`,
 `Review status: ${emailReviewLabel(entry)}`,
 '',
-'Leaderboard places and Amazon promo codes are sent after launch-week review.',
-'Amazon promo codes are one-time use. If someone else uses your code first, it cannot be replaced.',
+'Discount campaign coupons:',
+`Hardcover: ${HARDCOVER_COUPON}`,
+`Paperback: ${PAPERBACK_COUPON}`,
+`Use them only in the Notion Press Store: ${NOTION_PRESS_BOOK_URL}`,
+'',
+'The first 3 valid players get a free book, not a discount.',
+'If you think you can win the game, you can wait until August 15 before buying.',
 '',
 'Formula Racing Camp'
 ].join('\n');
@@ -100,8 +108,14 @@ return `
     <tr><td style="padding: 6px 12px; border: 1px solid #d1d5db;"><strong>Level 3 - Strategy Calls</strong></td><td style="padding: 6px 12px; border: 1px solid #d1d5db;">${formatScore(scores.strategy)}</td></tr>
     <tr><td style="padding: 6px 12px; border: 1px solid #d1d5db;"><strong>Review status</strong></td><td style="padding: 6px 12px; border: 1px solid #d1d5db;">${escapeHtml(emailReviewLabel(entry))}</td></tr>
   </table>
-  <p>Leaderboard places and Amazon promo codes are sent after launch-week review.</p>
-  <p><strong>Amazon promo codes are one-time use.</strong> If someone else uses your code first, it cannot be replaced.</p>
+  <p><strong>Discount campaign coupons:</strong></p>
+  <ul>
+    <li>Hardcover: <strong>${HARDCOVER_COUPON}</strong></li>
+    <li>Paperback: <strong>${PAPERBACK_COUPON}</strong></li>
+  </ul>
+  <p>These coupon codes work only in the Notion Press Store: <a href="${NOTION_PRESS_BOOK_URL}">${NOTION_PRESS_BOOK_URL}</a></p>
+  <p><strong>The first 3 valid players get a free book, not a discount.</strong></p>
+  <p>If you think you can win the game, you can wait until August 15 before buying.</p>
   <p>Formula Racing Camp</p>
 </div>`.trim();
 }
@@ -243,6 +257,10 @@ throw error;
 async function savePublicLeaderboardEntry(entry, review) {
 if (review.status === 'invalid') {
 return 'skipped_invalid';
+}
+
+if (entry.testLeaderboard) {
+return 'skipped_test';
 }
 
 const config = githubConfig();

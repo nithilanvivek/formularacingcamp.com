@@ -86,7 +86,12 @@ res.status(405).json({ ok: false, error: 'method_not_allowed' });
 return;
 }
 
-const bucket = req.query?.bucket === 'test' ? 'test_leaderboard' : 'production';
+if (req.query?.bucket === 'test') {
+res.status(404).json({ ok: false, error: 'leaderboard_not_public' });
+return;
+}
+
+const bucket = 'production';
 
 try {
 const document = await readLeaderboard();

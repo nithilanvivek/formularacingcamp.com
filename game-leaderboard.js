@@ -1,17 +1,7 @@
 const LEADERBOARD_ENDPOINT = '/api/launch-game-leaderboard';
 const LEADERBOARD_BUCKET_KEY = 'frcLaunchLeaderboardBucket';
 
-const params = new URLSearchParams(window.location.search);
-const urlBucket = params.get('bucket');
-let savedBucket = '';
-try {
-savedBucket = sessionStorage.getItem(LEADERBOARD_BUCKET_KEY) || '';
-} catch (error) {
-savedBucket = '';
-}
-const bucket = urlBucket === 'test' || urlBucket === 'main'
-? urlBucket
-: savedBucket === 'test' ? 'test' : 'main';
+const bucket = 'main';
 
 const elements = {
 eyebrow: document.getElementById('leaderboard-eyebrow'),
@@ -20,8 +10,7 @@ note: document.getElementById('leaderboard-note'),
 listTitle: document.getElementById('leaderboard-list-title'),
 status: document.getElementById('leaderboard-status'),
 list: document.getElementById('leaderboard-list'),
-mainLink: document.getElementById('main-leaderboard-link'),
-testLink: document.getElementById('test-leaderboard-link')
+mainLink: document.getElementById('main-leaderboard-link')
 };
 
 function formatScore(value) {
@@ -53,15 +42,6 @@ sessionStorage.setItem(LEADERBOARD_BUCKET_KEY, bucket);
 }
 
 elements.mainLink.classList.toggle('active', bucket === 'main');
-elements.testLink.classList.toggle('active', bucket === 'test');
-
-if (bucket === 'test') {
-elements.eyebrow.textContent = 'Testing standings';
-elements.title.textContent = 'Test Leaderboard';
-elements.note.textContent = 'Test usernames are shown here so trial runs stay separate from the launch-week leaderboard.';
-elements.listTitle.textContent = 'Test Runs';
-return;
-}
 
 elements.eyebrow.textContent = 'Launch-week standings';
 elements.title.textContent = 'Launch Grand Prix Leaderboard';
@@ -83,9 +63,7 @@ function renderEntries(entries) {
 elements.list.textContent = '';
 
 if (!entries.length) {
-elements.status.textContent = bucket === 'test'
-? 'No test runs have been recorded yet.'
-: 'No leaderboard runs have been recorded yet.';
+elements.status.textContent = 'No leaderboard runs have been recorded yet.';
 return;
 }
 
