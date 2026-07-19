@@ -485,3 +485,57 @@ Recommended next steps:
 - Continue production testing with `test_` usernames for test leaderboard runs and regular usernames for main leaderboard runs.
 - Check Resend delivery logs if a participant reports not receiving a game receipt.
 - Before launch, decide how and when to send final leaderboard placements and Amazon promo codes after review.
+
+## Launch Day Endday Wrap-Up
+
+Date: 2026-07-19
+
+Completed today:
+
+- Updated the homepage launch animation to say `First Month of Release` and show an F1 delivery car carrying the book from a bookstore to a house.
+- Moved the `25%` label above the animated F1 car so the discount is readable.
+- Updated launch game campaign copy for Notion Press coupons:
+  - `FORMULA40` for hardcover.
+  - `FORMULA25` for paperback.
+  - Top valid winners receive free books rather than discounts.
+- Cleared the public leaderboard after the `meena` test entry and confirmed `data/launch-game-leaderboard.json` currently has an empty `entries` array.
+- Removed the public Test Leaderboard view and kept the leaderboard API production-only.
+- Added free-book winner cutoff logic to `/api/launch-game-leaderboard`: top 3 with ties at the cutoff. Removed entries do not count because only the current leaderboard JSON is used.
+- Created approval cards for August 15, 2026 at 11:59 AM IST winner-email automation and a follow-up reply monitor.
+- Pushed code to store submitted player emails in the leaderboard JSON for later prize fulfillment, block direct website access to the raw JSON file, and force player receipt Reply-To to `authors@formularacingcamp.com`.
+
+Important current caveat:
+
+- Commit `c562d0d` (`Store leaderboard emails privately`) is pushed to GitHub but was **not deployed to production**. The deploy was blocked because storing full participant emails in a GitHub-backed leaderboard file is private data export risk. Production currently does not have this email-storage behavior unless that deployment is explicitly approved or a safer private storage path is implemented.
+- Because the live leaderboard JSON remains public-sensitive, future winner email automation needs a durable private source for winner email addresses before August 15. Safer options include a private webhook/database, private spreadsheet, or mailbox-based lookup rather than raw public repo JSON.
+
+Validation performed:
+
+- `node --check api/launch-game-submit.js`
+- `node --check api/launch-game-leaderboard.js`
+- `node --check api/not-found.js`
+- `node --check launch-game.js`
+- `node --check game-leaderboard.js`
+- `node --check app.js`
+- `node -e "JSON.parse(require('fs').readFileSync('data/launch-game-leaderboard.json','utf8'))"`
+- `node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8'))"`
+- `git diff --check`
+
+Preview servers:
+
+- No local preview servers were found on common ports `3000`, `4173`, `5173`, `8000`, `8080`, or `8787`.
+
+Current repository state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest pushed code commit before this wrap note: `c562d0d Store leaderboard emails privately`.
+- Production domain: `https://www.formularacingcamp.com`.
+- Launch game: `https://www.formularacingcamp.com/game`.
+- Public leaderboard: `https://www.formularacingcamp.com/game-leaderboard`.
+
+Resume points:
+
+- Decide whether to deploy `c562d0d` despite the email-in-GitHub risk or replace it with safer private storage for participant emails.
+- If using safer private storage, adjust `/api/launch-game-submit` so full emails go only to the private destination while the GitHub leaderboard remains public-safe.
+- Confirm August 15 automation approval cards are accepted in Codex.
+- Confirm how Codex will access replies to `authors@formularacingcamp.com` for mailing-address extraction, or plan to review those replies manually.
