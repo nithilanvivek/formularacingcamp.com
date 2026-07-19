@@ -1,5 +1,6 @@
 const DEFAULT_LEADERBOARD_PATH = 'data/launch-game-leaderboard.json';
 const DEFAULT_GITHUB_BRANCH = 'main';
+const FREE_BOOK_WINNER_LIMIT = 3;
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -42,6 +43,15 @@ entryBucket: entry.entryBucket === 'test_leaderboard' ? 'test_leaderboard' : 'pr
 testLeaderboard: entry.testLeaderboard === true,
 submittedAt: entry.submittedAt || null
 };
+}
+
+function freeBookCutoffScore(entries) {
+if (!entries.length) {
+return null;
+}
+
+const cutoffIndex = Math.min(FREE_BOOK_WINNER_LIMIT, entries.length) - 1;
+return entries[cutoffIndex].score;
 }
 
 async function readLeaderboard() {
@@ -95,19 +105,27 @@ const bucket = 'production';
 
 try {
 const document = await readLeaderboard();
-const entries = document.entries
+const sortedEntries = document.entries
 .map(publicEntry)
 .filter((entry) => entry.entryBucket === bucket)
 .sort((a, b) => {
 if (b.score !== a.score) return b.score - a.score;
 return String(a.submittedAt || '').localeCompare(String(b.submittedAt || ''));
-})
-.slice(0, 25);
+});
+const cutoffScore = freeBookCutoffScore(sortedEntries);
+const entries = sortedEntries
+.slice(0, 25)
+.map((entry) => ({
+...entry,
+freeBookWinner: cutoffScore !== null && entry.score >= cutoffScore
+}));
 
 res.status(200).json({
 ok: true,
 bucket,
 entries,
+freeBookWinnerRule: 'top_3_with_ties_at_cutoff',
+freeBookCutoffScore: cutoffScore,
 updatedAt: document.updatedAt || null
 });
 } catch (error) {

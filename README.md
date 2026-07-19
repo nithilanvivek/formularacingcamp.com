@@ -145,6 +145,8 @@ The launch-game API can also save a public-safe leaderboard entry to `data/launc
 - `GITHUB_BRANCH`, default fallback: `main`
 - `LAUNCH_GAME_LEADERBOARD_PATH`, default fallback: `data/launch-game-leaderboard.json`
 
+Free-book winners are calculated from the current leaderboard file only, so removed test entries do not count. On August 15, use the top 3 valid scores with ties at the cutoff: if the 3rd-place cutoff is tied, everyone at that score wins a free book; no lower-score entries win.
+
 Player receipt emails are sent through Resend after valid, non-dry-run submissions. Configure these Vercel environment variables before relying on receipts:
 
 - `RESEND_API_KEY`
