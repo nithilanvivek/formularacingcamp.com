@@ -539,3 +539,29 @@ Resume points:
 - If using safer private storage, adjust `/api/launch-game-submit` so full emails go only to the private destination while the GitHub leaderboard remains public-safe.
 - Confirm August 15 automation approval cards are accepted in Codex.
 - Confirm how Codex will access replies to `authors@formularacingcamp.com` for mailing-address extraction, or plan to review those replies manually.
+
+## Continuation Handoff
+
+Date: 2026-07-21
+
+Continuation prompt for the next Codex session:
+
+```text
+This is the continuation of Add game prize discounts.
+```
+
+Current production state:
+
+- The latest pushed branch is `main`.
+- Vercel production should be treated as separate from GitHub push: after future pushes, confirm the production deployment picked up the pushed commit; if it did not, run `vercel deploy --prod`.
+- The email-storage change from `c562d0d` has been deployed to production after explicit approval. Future valid launch-game submissions store the participant email in `data/launch-game-leaderboard.json`.
+- The public leaderboard API and UI still do not expose stored email addresses.
+- Direct website access to `data/launch-game-leaderboard.json` is blocked by `vercel.json`.
+- Player receipt emails are sent through Resend and use `authors@formularacingcamp.com` as Reply-To.
+- The main leaderboard was cleaned after the `meena` test entry; removed entries do not count for August 15 winner logic because the current leaderboard JSON is the source of truth.
+
+Recommended next steps:
+
+- In the new session, verify the first real/test post-deployment submission writes `email` into the GitHub-backed leaderboard file.
+- Continue using `test_` usernames only for tests; `test_nalihtin` remains the no-save dry run.
+- Before any production change, remember the agreed workflow: push to GitHub, confirm Vercel production, deploy manually if needed, then verify live behavior.
