@@ -145,7 +145,7 @@ The launch-game API can also save a leaderboard entry to `data/launch-game-leade
 - `GITHUB_BRANCH`, default fallback: `main`
 - `LAUNCH_GAME_LEADERBOARD_PATH`, default fallback: `data/launch-game-leaderboard.json`
 
-Free-book winners are calculated from the current leaderboard file only, so removed test entries do not count. On August 15, use the top 3 valid scores with ties at the cutoff: if the 3rd-place cutoff is tied, everyone at that score wins a free book; no lower-score entries win.
+Podium placements are calculated from the current leaderboard file only, so removed test entries do not count. Entries are ordered by score, then earliest valid submission for tied scores. First place receives a free book and must reply with a delivery address. Second place receives separate one-time Notion Press codes for 50% off paperback and 59% off hardcover. Third place receives separate one-time codes for 40% off paperback and 49% off hardcover. Second- and third-place winners may buy both editions, but each edition code works only once. Keep the unique winner codes outside public repository files.
 
 Player receipt emails are sent through Resend after valid, non-dry-run submissions. Configure these Vercel environment variables before relying on receipts:
 
@@ -163,6 +163,6 @@ The homepage contact form also uses Resend through `/api/contact-submit`. It sen
 2. Configure the GitHub leaderboard token before broad launch-game testing.
 3. Configure the launch game submission webhook before judging real winners.
 4. Configure Resend receipt-email environment variables before broad launch-game testing.
-5. Confirm free-book fulfillment for the first 3 valid players after August 15.
+5. After August 15, ask the first-place winner for a delivery address and send the unique second- and third-place codes in the email body without attaching the source CSV files.
 6. Verify the launch-week game on production Chrome/Safari after deployment.
 7. Consider replacing the Tailwind CDN with a build step if the project grows.

@@ -1015,11 +1015,11 @@ if (result.entryBucket === 'test_leaderboard') {
 state.player.testLeaderboard = true;
 }
 if (result.emailStatus === 'sent') {
-elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent with the Notion Press coupon codes. Top 3 valid players are reviewed for free books after launch week.';
+elements.entryMessage.textContent = 'Entry submitted. A receipt email has been sent with the Notion Press campaign coupons and updated podium prizes. Placements are reviewed after launch week.';
 } else if (result.emailStatus === 'failed') {
 elements.entryMessage.textContent = 'Entry submitted. The receipt email could not be sent, but your run was recorded for review.';
 } else {
-elements.entryMessage.textContent = 'Entry submitted. Top 3 valid players are reviewed for free books after launch week.';
+elements.entryMessage.textContent = 'Entry submitted. Podium placements and prizes are reviewed after launch week.';
 }
 } catch (error) {
 saveLocalPreviewEntry(payload);

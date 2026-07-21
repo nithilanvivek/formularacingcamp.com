@@ -85,6 +85,9 @@ const score = document.createElement('div');
 score.className = 'leaderboard-score';
 addText(score, 'strong', '', String(formatScore(entry.score)));
 addText(score, 'span', '', `L1 ${formatScore(entry.scores?.reaction)} / L2 ${formatScore(entry.scores?.dash)} / L3 ${formatScore(entry.scores?.strategy)}`);
+if (entry.prize) {
+addText(score, 'span', 'leaderboard-prize', entry.prize);
+}
 item.appendChild(score);
 
 elements.list.appendChild(item);

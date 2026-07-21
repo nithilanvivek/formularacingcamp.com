@@ -565,3 +565,14 @@ Recommended next steps:
 - In the new session, verify the first real/test post-deployment submission writes `email` into the GitHub-backed leaderboard file.
 - Continue using `test_` usernames only for tests; `test_nalihtin` remains the no-save dry run.
 - Before any production change, remember the agreed workflow: push to GitHub, confirm Vercel production, deploy manually if needed, then verify live behavior.
+
+## Updated Launch Grand Prix Prizes
+
+Date: 2026-07-21
+
+- First place receives a free book; the winner email must ask for a complete delivery address and delivery phone number.
+- Second place receives separate one-time Notion Press codes for 50% off paperback and 59% off hardcover, and may buy both editions.
+- Third place receives separate one-time Notion Press codes for 40% off paperback and 49% off hardcover, and may buy both editions.
+- Each edition code can be used only once. Do not attach the source CSV files to winner emails, and do not commit the unique codes to the public repository.
+- Placements are ordered by score, then earliest valid submission for tied scores, giving exactly one first, second, and third place.
+- An August 15, 2026 at 11:59 AM IST prize-email automation approval card was created with the updated podium emails and the FORMULA25/FORMULA40 non-winner email. It still needs user approval in Codex before it becomes active.

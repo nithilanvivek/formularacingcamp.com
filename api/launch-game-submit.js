@@ -91,8 +91,12 @@ return [
 `Paperback: ${PAPERBACK_COUPON}`,
 `Use them only in the Notion Press Store: ${NOTION_PRESS_BOOK_URL}`,
 '',
-'The first 3 valid players get a free book, not a discount.',
-'If you think you can win the game, you can wait until August 15 before buying.',
+'Podium prizes after review:',
+'1st place: a free book. We will email the winner to ask for a delivery address.',
+'2nd place: 50% off paperback and 59% off hardcover. The winner may buy both.',
+'3rd place: 40% off paperback and 49% off hardcover. The winner may buy both.',
+'Each podium discount code works once and only in the Notion Press Store.',
+'Placements are ordered by score, then earliest valid submission for tied scores.',
 '',
 'Formula Racing Camp'
 ].join('\n');
@@ -119,8 +123,13 @@ return `
     <li>Paperback: <strong>${PAPERBACK_COUPON}</strong></li>
   </ul>
   <p>These coupon codes work only in the Notion Press Store: <a href="${NOTION_PRESS_BOOK_URL}">${NOTION_PRESS_BOOK_URL}</a></p>
-  <p><strong>The first 3 valid players get a free book, not a discount.</strong></p>
-  <p>If you think you can win the game, you can wait until August 15 before buying.</p>
+  <p><strong>Podium prizes after review:</strong></p>
+  <ol>
+    <li><strong>1st place:</strong> a free book. We will email the winner to ask for a delivery address.</li>
+    <li><strong>2nd place:</strong> 50% off paperback and 59% off hardcover. The winner may buy both.</li>
+    <li><strong>3rd place:</strong> 40% off paperback and 49% off hardcover. The winner may buy both.</li>
+  </ol>
+  <p>Each podium discount code works once and only in the Notion Press Store. Placements are ordered by score, then earliest valid submission for tied scores.</p>
   <p>Formula Racing Camp</p>
 </div>`.trim();
 }

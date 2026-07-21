@@ -1,6 +1,5 @@
 const DEFAULT_LEADERBOARD_PATH = 'data/launch-game-leaderboard.json';
 const DEFAULT_GITHUB_BRANCH = 'main';
-const FREE_BOOK_WINNER_LIMIT = 3;
 
 function setCors(res) {
 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -45,13 +44,11 @@ submittedAt: entry.submittedAt || null
 };
 }
 
-function freeBookCutoffScore(entries) {
-if (!entries.length) {
+function podiumPrize(place) {
+if (place === 1) return 'Free book; winner will be asked for a delivery address';
+if (place === 2) return '50% off paperback and 59% off hardcover; both may be purchased';
+if (place === 3) return '40% off paperback and 49% off hardcover; both may be purchased';
 return null;
-}
-
-const cutoffIndex = Math.min(FREE_BOOK_WINNER_LIMIT, entries.length) - 1;
-return entries[cutoffIndex].score;
 }
 
 async function readLeaderboard() {
@@ -112,20 +109,20 @@ const sortedEntries = document.entries
 if (b.score !== a.score) return b.score - a.score;
 return String(a.submittedAt || '').localeCompare(String(b.submittedAt || ''));
 });
-const cutoffScore = freeBookCutoffScore(sortedEntries);
 const entries = sortedEntries
 .slice(0, 25)
-.map((entry) => ({
+.map((entry, index) => ({
 ...entry,
-freeBookWinner: cutoffScore !== null && entry.score >= cutoffScore
+place: index < 3 ? index + 1 : null,
+prize: podiumPrize(index + 1),
+freeBookWinner: index === 0
 }));
 
 res.status(200).json({
 ok: true,
 bucket,
 entries,
-freeBookWinnerRule: 'top_3_with_ties_at_cutoff',
-freeBookCutoffScore: cutoffScore,
+placementRule: 'score_desc_then_earliest_submission',
 updatedAt: document.updatedAt || null
 });
 } catch (error) {

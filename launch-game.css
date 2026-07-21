@@ -956,6 +956,10 @@ color: var(--muted);
 text-align: right;
 }
 
+.leaderboard-score .leaderboard-prize {
+color: #7c3aed;
+}
+
 @media (max-width: 820px) {
 .podium-panel,
 .form-grid {
