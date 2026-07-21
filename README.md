@@ -137,7 +137,7 @@ https://www.formularacingcamp.com/game
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 
-The launch-game API can also save a leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, email, score, level scores, review status, bucket, and timestamps. The public leaderboard API never returns email addresses, and `vercel.json` blocks direct website access to the raw JSON file. Configure these Vercel environment variables to enable it:
+The launch-game API can also save a leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, email, score, level scores, review status, bucket, and timestamps. The public leaderboard API never returns email addresses. The raw JSON file is excluded from Vercel deployments by `.vercelignore`, with the `vercel.json` not-found rewrite retained as defense in depth. Configure these Vercel environment variables to enable it:
 
 - `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN`
 - `GITHUB_OWNER`, default fallback: `nithilanvivek`
