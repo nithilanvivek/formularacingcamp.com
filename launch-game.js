@@ -4,6 +4,9 @@ const LEADERBOARD_BUCKET_KEY = 'frcLaunchLeaderboardBucket';
 const LOCAL_PREVIEW_KEY = 'frcLaunchGamePreviewEntries';
 const ATTEMPT_KEY = 'frcLaunchGrandPrixAttemptUsed';
 const DASH_DURATION_MS = 20000;
+const DASH_NORMAL_STEER_RATE = 0.24;
+const DASH_SLICK_STEER_RATE = 0.075;
+const DASH_SLICK_SLOW_MS = 2600;
 const FOCUS_POLL_MS = 250;
 const DISQUALIFICATION_MESSAGE = 'This attempt ended because you opened another tab, window, or browser tool. Everyone gets one attempt.';
 const DRY_RUN_USERNAME = 'test_nalihtin';
@@ -31,32 +34,40 @@ window.visualViewport.addEventListener('resize', updateViewportMetrics);
 
 const DASH_ITEM_SCRIPT = [
 { at: 300, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
+{ at: 600, kind: 'oil', label: 'OIL', lane: 1, speed: 380 },
 { at: 900, kind: 'helmet', label: 'HELM', lane: 0, speed: 350 },
 { at: 1500, kind: 'oil', label: 'OIL', lane: 2, speed: 370 },
 { at: 2100, kind: 'tyre', label: 'TYRE', lane: 1, speed: 345 },
+{ at: 2400, kind: 'oil', label: 'OIL', lane: 1, speed: 395 },
 { at: 2700, kind: 'book', label: 'BOOK', lane: 2, speed: 385 },
 { at: 3300, kind: 'oil', label: 'OIL', lane: 0, speed: 365 },
 { at: 3900, kind: 'helmet', label: 'HELM', lane: 1, speed: 355 },
+{ at: 4200, kind: 'oil', label: 'OIL', lane: 2, speed: 385 },
 { at: 4500, kind: 'tyre', label: 'TYRE', lane: 0, speed: 375 },
 { at: 5100, kind: 'book', label: 'BOOK', lane: 2, speed: 350 },
 { at: 5700, kind: 'oil', label: 'OIL', lane: 1, speed: 390 },
 { at: 6300, kind: 'helmet', label: 'HELM', lane: 2, speed: 370 },
+{ at: 6600, kind: 'oil', label: 'OIL', lane: 0, speed: 400 },
 { at: 6900, kind: 'tyre', label: 'TYRE', lane: 1, speed: 360 },
 { at: 7500, kind: 'book', label: 'BOOK', lane: 0, speed: 380 },
 { at: 8100, kind: 'oil', label: 'OIL', lane: 2, speed: 355 },
 { at: 8700, kind: 'helmet', label: 'HELM', lane: 0, speed: 395 },
+{ at: 9000, kind: 'oil', label: 'OIL', lane: 1, speed: 390 },
 { at: 9300, kind: 'tyre', label: 'TYRE', lane: 2, speed: 370 },
 { at: 9900, kind: 'book', label: 'BOOK', lane: 1, speed: 360 },
 { at: 10500, kind: 'oil', label: 'OIL', lane: 0, speed: 385 },
 { at: 11100, kind: 'helmet', label: 'HELM', lane: 2, speed: 355 },
+{ at: 11400, kind: 'oil', label: 'OIL', lane: 1, speed: 405 },
 { at: 11700, kind: 'tyre', label: 'TYRE', lane: 0, speed: 400 },
 { at: 12300, kind: 'book', label: 'BOOK', lane: 2, speed: 370 },
 { at: 12900, kind: 'oil', label: 'OIL', lane: 1, speed: 365 },
 { at: 13500, kind: 'helmet', label: 'HELM', lane: 1, speed: 385 },
+{ at: 13800, kind: 'oil', label: 'OIL', lane: 0, speed: 395 },
 { at: 14100, kind: 'tyre', label: 'TYRE', lane: 2, speed: 355 },
 { at: 14700, kind: 'book', label: 'BOOK', lane: 0, speed: 395 },
 { at: 15300, kind: 'oil', label: 'OIL', lane: 2, speed: 375 },
 { at: 15900, kind: 'helmet', label: 'HELM', lane: 0, speed: 365 },
+{ at: 16200, kind: 'oil', label: 'OIL', lane: 0, speed: 405 },
 { at: 16500, kind: 'tyre', label: 'TYRE', lane: 1, speed: 385 }
 ];
 
@@ -99,6 +110,7 @@ lastFrameAt: 0,
 scriptIndex: 0,
 carLane: 1,
 targetLane: 1,
+slowUntil: 0,
 items: [],
 animationId: null,
 keys: new Set()
@@ -658,6 +670,12 @@ ctx.fillStyle = '#ffffff';
 ctx.font = 'bold 24px Arial';
 ctx.fillText(`Score ${state.dash.score}`, 24, 38);
 ctx.fillText(`Time ${Math.ceil(state.dash.remainingMs / 1000)}s`, canvas.width - 130, 38);
+if (performance.now() < state.dash.slowUntil) {
+ctx.fillStyle = '#ffb000';
+ctx.textAlign = 'center';
+ctx.fillText('OIL HIT — STEERING SLOWED', canvas.width / 2, 38);
+ctx.textAlign = 'start';
+}
 
 state.dash.items.forEach((item) => {
 ctx.save();
@@ -756,7 +774,8 @@ state.dash.keys.delete('ArrowRight');
 state.dash.keys.delete('d');
 }
 
-state.dash.carLane += (state.dash.targetLane - state.dash.carLane) * 0.24;
+const steerRate = now < state.dash.slowUntil ? DASH_SLICK_STEER_RATE : DASH_NORMAL_STEER_RATE;
+state.dash.carLane += (state.dash.targetLane - state.dash.carLane) * steerRate;
 
 while (
 state.dash.scriptIndex < DASH_ITEM_SCRIPT.length &&
@@ -777,8 +796,9 @@ const hit = sameLane && Math.abs(item.y - carY) < 48;
 
 if (hit && item.kind === 'oil') {
 state.dash.penalty += 35;
-elements.dashMessage.textContent = 'Oil slick hit. Penalty added.';
-recordEvent('dash_oil');
+state.dash.slowUntil = Math.max(state.dash.slowUntil, now + DASH_SLICK_SLOW_MS);
+elements.dashMessage.textContent = 'Oil slick hit. Steering slowed for 2.6 seconds and a penalty was added.';
+recordEvent('dash_oil', { slowMs: DASH_SLICK_SLOW_MS });
 return false;
 }
 
@@ -813,11 +833,12 @@ state.dash.remainingMs = DASH_DURATION_MS;
 state.dash.scriptIndex = 0;
 state.dash.carLane = 1;
 state.dash.targetLane = 1;
+state.dash.slowUntil = 0;
 state.dash.items = [];
 elements.dashNextBtn.hidden = true;
 elements.dashStartBtn.textContent = 'Dash Running';
 elements.dashStartBtn.disabled = true;
-elements.dashMessage.textContent = 'Drive clean. Same item set, faster pace.';
+elements.dashMessage.textContent = 'Drive clean. Oil slicks are packed in tighter and slow your steering.';
 recordEvent('dash_start', { itemScript: DASH_ITEM_SCRIPT.length });
 state.dash.lastFrameAt = performance.now();
 state.dash.animationId = requestAnimationFrame(dashLoop);
