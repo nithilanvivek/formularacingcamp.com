@@ -1,4 +1,27 @@
 {
-  "entries": [],
-  "updatedAt": "2026-07-19T14:36:00.000Z"
+  "entries": [
+    {
+      "id": "f9d12cf9-7945-4ec7-95dc-e3e86efe4403",
+      "username": "Lewis Hamilton",
+      "email": "manansawnani@ekyaschools.com",
+      "score": 1391,
+      "scores": {
+        "reaction": 336,
+        "dash": 175,
+        "strategy": 880
+      },
+      "levelsComplete": {
+        "reaction": true,
+        "dash": true,
+        "strategy": true
+      },
+      "reviewStatus": "clean",
+      "entryBucket": "production",
+      "testLeaderboard": false,
+      "submittedAt": "2026-07-23T12:31:11.705Z",
+      "completedAt": 1784809854175,
+      "durationMs": 98877
+    }
+  ],
+  "updatedAt": "2026-07-23T12:31:11.705Z"
 }
