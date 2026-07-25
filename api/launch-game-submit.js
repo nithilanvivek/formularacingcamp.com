@@ -44,10 +44,6 @@ function formatScore(value) {
 return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
 }
 
-function normalizedEmail(value) {
-return String(value || '').trim().toLowerCase();
-}
-
 function adminRecipients() {
 return String(process.env.LAUNCH_GAME_ADMIN_EMAIL || '')
 .split(',')
@@ -199,7 +195,6 @@ function leaderboardEntry(entry) {
 return {
 id: entry.sessionId,
 username: publicUsername(entry.username),
-email: normalizedEmail(entry.email),
 score: formatScore(entry.score),
 scores: {
 reaction: formatScore(entry.scores?.reaction),
@@ -393,7 +388,12 @@ res.status(502).json({ ok: false, error: 'submission_webhook_failed' });
 return;
 }
 } else {
-console.log('Launch game entry received without webhook configured', entry);
+console.log('Launch game entry received without webhook configured', {
+sessionId: entry.sessionId,
+entryBucket: entry.entryBucket,
+reviewStatus: entry.serverReviewStatus,
+score: formatScore(entry.score)
+});
 }
 
 let leaderboardStatus = 'skipped_invalid';
