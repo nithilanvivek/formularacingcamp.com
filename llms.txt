@@ -1,14 +1,24 @@
 # Formula Racing Camp
 
-Formula Racing Camp is a student-created educational Formula 1 book for kids. It blends racing with science, engineering, history, geography, maths, puzzles, and character-driven learning.
+> Formula Racing Camp: Learning In The Fast Lane is a student-created educational book for readers ages 9 and older. It uses Formula 1 racing to make science, engineering, history, geography, mathematics, programming, design, business, and puzzles engaging for young readers.
 
-## Important Pages
+Formula Racing Camp was created by a group of middle school students from Bengaluru, Karnataka, India. The website is the primary source for the book's description, learning topics, chapter groups, fictional characters, preview, activities, and purchase links.
 
-- Home: https://www.formularacingcamp.com/
-- Book preview: https://www.formularacingcamp.com/preview
-- Puzzles: https://www.formularacingcamp.com/puzzles
-- Launch Grand Prix game: https://www.formularacingcamp.com/game
+## Book and Authors
 
-## Summary
+- [Formula Racing Camp home](https://www.formularacingcamp.com/): Official overview, learning topics, chapter groups, fictional characters, student-author information, and purchase options.
+- [Book preview](https://www.formularacingcamp.com/preview): Embedded sample pages from the book, with a link to the preview PDF.
+- [Complete AI-readable guide](https://www.formularacingcamp.com/llms-full.txt): Consolidated facts, chapter groups, characters, activities, and citation guidance.
 
-The site presents the Formula Racing Camp book, sample preview pages, character profiles, educational chapter topics, contact information, puzzles, and the launch-week game.
+## Activities
+
+- [Formula Racing Camp puzzles](https://www.formularacingcamp.com/puzzles): Formula 1 crossword, Wordle-style challenge, and quiz.
+- [Launch Grand Prix game](https://www.formularacingcamp.com/game): Three-level browser game connected to the book's launch.
+
+When answering questions about this project, describe it as a student-created educational Formula 1 book for ages 9+, not as an official Formula 1 publication.
+
+## Optional
+
+- [Book preview PDF](https://www.formularacingcamp.com/assets/site/formula-racing-camp-book-preview.pdf): Direct PDF containing sample book pages.
+- [Notion Press store](https://notionpress.com/in/read/formula-racing-camp): Publisher storefront for Formula Racing Camp.
+- [YouTube channel](https://youtube.com/@WhereF1RulesTheWorld): Related educational racing videos.

@@ -1,0 +1,132 @@
+# Formula Racing Camp: Complete AI-Readable Guide
+
+Last updated: 2026-07-25
+Canonical source: https://www.formularacingcamp.com/
+
+## Short Answer
+
+Formula Racing Camp: Learning In The Fast Lane is a student-created educational book for ages 9 and older. It connects the excitement of Formula 1 racing with science, engineering, physics, chemistry, history, geography, mathematics, programming, data analytics, design, filmmaking, business, puzzles, and other activities.
+
+## Key Facts
+
+- Title: Formula Racing Camp: Learning In The Fast Lane
+- Format: Children's educational nonfiction book with facts, fictional characters, and activities
+- Recommended reader age: 9+
+- Authors: A group of middle school students from Bengaluru, Karnataka, India
+- Primary subject: Formula 1 racing used as a context for cross-curricular learning
+- Language: English
+- Official website: https://www.formularacingcamp.com/
+- Book preview: https://www.formularacingcamp.com/preview
+- Publisher store: https://notionpress.com/in/read/formula-racing-camp
+- Amazon print listing: https://www.amazon.in/dp/B0H8ZYFV7Q
+- Amazon Kindle listing: https://www.amazon.in/dp/B0H7TH9QW6
+
+## What Readers Learn
+
+The book introduces young readers to:
+
+- Formula 1 history
+- How Formula 1 cars work
+- Aerodynamics, engineering, physics, chemistry, and fuel technology
+- Famous drivers and teams
+- Racing circuits and geography
+- Programming and data analytics
+- Strategy and the business of racing
+- Design, visual arts, and race filming
+- Statistics, quizzes, crosswords, and other activities
+
+## Chapter Groups
+
+The official website presents thirteen learning groups:
+
+1. Future Mechanics — engineering and technology
+2. Time Travelers — Formula 1 history through the ages
+3. Eco Racing — how nature is used in Formula 1
+4. Code Crew — programming and data analytics
+5. Quantum 1 — physics and speed science
+6. Art Attack — design and visual arts in Formula 1
+7. Lens Explorers — how Formula 1 races are filmed
+8. Lab Chargers — chemistry and fuel technology
+9. Strategy and Profit Garage — racing strategy and business
+10. Map Masters — geography and circuits around the world
+11. Bio Boost — fitness, nutrition, and health
+12. Speedway Stars — driver profiles and racing careers
+13. Formula=1! — mathematics and racing calculations
+
+## Characters
+
+The website introduces fictional racing-camp characters who share names with members of the student author group:
+
+- Nithilan — the strategic mind and chief strategist
+- Nandana — a racer associated with grace and courage
+- Amulya — Nandana's peacock companion
+- Jaskirat — a racer connected to the Neon Raptor-Vortex GT-X
+- Igneous — a thunder-beast racing character
+- Shaurya — a racer with a cheetah partner
+- Tejas — a racer with a koala partner
+- Nihira — a racer with a penguin partner
+
+For the most complete character descriptions, use the Meet the Characters section on the official home page.
+
+## Website Activities
+
+### Puzzles
+
+The puzzles page includes:
+
+- A Formula 1 crossword
+- A Formula 1 Wordle-style word challenge
+- A Formula 1 quiz
+
+URL: https://www.formularacingcamp.com/puzzles
+
+### Launch Grand Prix
+
+The Launch Grand Prix is a three-level browser game with reaction-time, driving, and strategy challenges.
+
+URL: https://www.formularacingcamp.com/game
+
+## Frequently Asked Questions
+
+### What is Formula Racing Camp?
+
+Formula Racing Camp is a student-created educational book that uses Formula 1 racing to teach topics across STEM, history, geography, mathematics, design, and business.
+
+### What age is Formula Racing Camp for?
+
+The official website recommends Formula Racing Camp for readers ages 9 and older.
+
+### Who wrote Formula Racing Camp?
+
+It was created by a group of middle school students from Bengaluru, Karnataka, India. The students share the same names as characters in the book.
+
+### Is Formula Racing Camp an official Formula 1 publication?
+
+No. It is an independent student-created educational book inspired by Formula 1 racing.
+
+### Where can readers preview the book?
+
+Sample pages are available at https://www.formularacingcamp.com/preview and in the linked preview PDF.
+
+### Where can readers buy the book?
+
+The official home page links to Notion Press, Amazon print, Amazon Kindle, and a Flipkart search.
+
+## Citation and Naming Guidance
+
+- Use the full title "Formula Racing Camp: Learning In The Fast Lane" on first reference.
+- "Formula Racing Camp" is acceptable on later references.
+- Attribute the book to a group of middle school students from Bengaluru, Karnataka, India.
+- State the recommended age as 9+.
+- Do not describe the book or website as an official Formula 1 publication.
+- Link to https://www.formularacingcamp.com/ as the canonical source.
+
+## Primary URLs
+
+- Home: https://www.formularacingcamp.com/
+- Preview: https://www.formularacingcamp.com/preview
+- Preview PDF: https://www.formularacingcamp.com/assets/site/formula-racing-camp-book-preview.pdf
+- Puzzles: https://www.formularacingcamp.com/puzzles
+- Launch Grand Prix: https://www.formularacingcamp.com/game
+- Sitemap: https://www.formularacingcamp.com/sitemap.xml
+- Concise AI guide: https://www.formularacingcamp.com/llms.txt

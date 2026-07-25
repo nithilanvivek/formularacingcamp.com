@@ -18,6 +18,10 @@ The website has been converted from the original Canva AI Code exports into a st
 - `api/launch-game-submit.js` - Vercel Function endpoint for launch game submissions and review flags.
 - `assets/` - local optimized images, including the book cover and character bio WebP files.
 - `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
+- `llms.txt` - concise AI-readable site guide following the llms.txt proposal.
+- `llms-full.txt` - expanded book facts, chapter groups, characters, FAQs, and citation guidance.
+- `robots.txt` - explicit search and AI crawler access policy.
+- `sitemap.xml` - canonical discovery list for public pages and AI-readable guides.
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
@@ -105,6 +109,12 @@ session-notes.md
 ```
 
 Homepage images are served from local optimized WebP files in `assets/site/` and `assets/characters/` to keep the page fast.
+
+## AI and Answer Engine Discovery
+
+The site exposes a concise `/llms.txt` guide and an expanded `/llms-full.txt` reference. The home page also contains visible answer-focused FAQs with matching Schema.org `FAQPage` data, while the preview, puzzles, and game pages include page-specific JSON-LD.
+
+`robots.txt` explicitly allows OpenAI, Anthropic, Perplexity, Google Extended, and general crawlers. The wildcard rule also permits other standards-compliant crawlers. Change the individual rules if the project later needs a different policy for search retrieval versus model training.
 
 ## Deployment Notes
 
