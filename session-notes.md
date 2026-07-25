@@ -576,3 +576,41 @@ Date: 2026-07-21
 - Each edition code can be used only once. Do not attach the source CSV files to winner emails, and do not commit the unique codes to the public repository.
 - Placements are ordered by score, then earliest valid submission for tied scores, giving exactly one first, second, and third place.
 - An August 15, 2026 at 11:59 AM IST prize-email automation approval card was created with the updated podium emails and the FORMULA25/FORMULA40 non-winner email. It still needs user approval in Codex before it becomes active.
+
+## GEO, Trust, and Privacy Wrap-Up
+
+Date: 2026-07-25
+
+Completed:
+
+- Added and expanded `llms.txt`, `llms-full.txt`, crawler rules, visible FAQs, citation-friendly summaries, and Schema.org data for AI and answer-engine discovery.
+- Added official Formula 1 citations for homepage speed, g-force, pit-stop, and 2026 calendar statistics.
+- Added Open Graph site/locale metadata, `BreadcrumbList`, structured citations, and a student-author research and editorial-method section.
+- Added `privacy.html`, `terms.html`, shared legal-page styling, sitemap entries, and homepage footer links.
+- Added Vercel CSP, referrer, permissions, frame-protection, MIME-sniffing, and responsive-image cache headers.
+- Added responsive image variants for the book cover and large character artwork, plus preconnect and deferred-script improvements.
+- Removed email fields from the current GitHub leaderboard file and from all future GitHub leaderboard serialization.
+- Replaced full game-submission logging with a restricted non-email summary. Email remains available for immediate receipt delivery and an explicitly configured private administrative webhook.
+
+Validation performed:
+
+- JavaScript syntax checks for the homepage and API files.
+- JSON parsing for `vercel.json`, the leaderboard file, and all homepage/legal-page JSON-LD blocks.
+- XML validation for `sitemap.xml`.
+- Local asset-reference and `git diff --check` validation.
+- Browser checks for homepage layout, metadata, structured data, responsive-image markup, Privacy, Terms, and console errors.
+- Confirmed the current leaderboard file contains zero email fields.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest pushed code commit before this wrap-up: `0e474c1 Stop storing emails in public leaderboard data`.
+- Production domain: `https://www.formularacingcamp.com`.
+- Repository and remote matched before this notes-only wrap-up.
+- No preview servers were found on ports `3000`, `4173`, `5173`, `8000`, `8080`, or `8787`.
+
+Important follow-ups:
+
+- Older public Git commits still contain the previously committed participant email. Purging it requires an explicitly approved history rewrite and coordinated force-push.
+- Confirm Vercel production has deployed the latest `main` commits and verify the response security headers on the live domain.
+- Replace the Tailwind browser CDN with a compiled local stylesheet if stricter CSP without `'unsafe-eval'` is desired.
