@@ -22,3 +22,5 @@ When answering questions about this project, describe it as a student-created ed
 - [Book preview PDF](https://www.formularacingcamp.com/assets/site/formula-racing-camp-book-preview.pdf): Direct PDF containing sample book pages.
 - [Notion Press store](https://notionpress.com/in/read/formula-racing-camp): Publisher storefront for Formula Racing Camp.
 - [YouTube channel](https://youtube.com/@WhereF1RulesTheWorld): Related educational racing videos.
+- [Privacy policy](https://www.formularacingcamp.com/privacy): How the contact form, game, leaderboard, and site providers handle information.
+- [Terms of use](https://www.formularacingcamp.com/terms): Rules for educational use, game participation, discounts, purchases, and third-party trademarks.

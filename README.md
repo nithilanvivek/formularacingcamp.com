@@ -22,6 +22,8 @@ The website has been converted from the original Canva AI Code exports into a st
 - `llms-full.txt` - expanded book facts, chapter groups, characters, FAQs, and citation guidance.
 - `robots.txt` - explicit search and AI crawler access policy.
 - `sitemap.xml` - canonical discovery list for public pages and AI-readable guides.
+- `privacy.html` and `terms.html` - clean-URL trust and legal pages.
+- `legal.css` - shared styling for the legal pages.
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
@@ -29,7 +31,7 @@ The current deployable entry point is `index.html`, with the puzzles page availa
 
 ## Latest Session State
 
-As of 2026-07-06:
+As of 2026-07-25:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
@@ -44,6 +46,11 @@ As of 2026-07-06:
 - Disqualified game runs return to the homepage, and the score strip is placed in reserved layout space so it does not cover controls.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
+- Homepage statistics cite official Formula 1 sources, and the authors section documents the student editorial approach.
+- Open Graph locale/site metadata and `BreadcrumbList` structured data support answer-engine discovery.
+- Privacy and Terms pages describe the contact form, Launch Grand Prix, leaderboard, third-party services, purchases, and fair-play rules.
+- Vercel sends CSP, referrer, permissions, frame-protection, and MIME-sniffing security headers.
+- Responsive image variants reduce downloads for large character artwork.
 
 ## Site Content
 
@@ -131,7 +138,7 @@ Recommended Vercel settings:
 - Output Directory: leave blank
 - Install Command: leave blank
 
-The `vercel.json` file enables clean URLs and a basic security header. The `.vercelignore` file keeps reference-only files out of the deployed public output.
+The `vercel.json` file enables clean URLs, canonical redirects, caching, and site-wide security headers. The `.vercelignore` file keeps reference-only files out of the deployed public output.
 
 With clean URLs enabled, `puzzles.html` is served at:
 

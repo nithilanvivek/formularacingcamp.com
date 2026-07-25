@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light;
+  --blue: #0077cc;
+  --dark: #18212b;
+  --muted: #56616d;
+  --border: #dbe4ec;
+  --surface: #f6f9fc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--dark);
+  background: #ffffff;
+  font-family: Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.7;
+}
+
+header,
+footer {
+  background: #111827;
+  color: #ffffff;
+}
+
+header {
+  padding: 1rem 1.25rem;
+}
+
+header nav,
+main,
+footer div {
+  width: min(100% - 2rem, 880px);
+  margin-inline: auto;
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+header a,
+footer a {
+  color: #ffffff;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+main {
+  padding: 3rem 0 4rem;
+}
+
+h1,
+h2 {
+  line-height: 1.2;
+}
+
+h1 {
+  color: var(--blue);
+  font-size: clamp(2rem, 7vw, 3.25rem);
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  margin-top: 2.5rem;
+}
+
+a {
+  color: #005ea8;
+}
+
+.effective-date,
+.summary {
+  color: var(--muted);
+}
+
+.summary {
+  background: var(--surface);
+  border-left: 4px solid var(--blue);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+
+li + li {
+  margin-top: 0.5rem;
+}
+
+footer {
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+footer p {
+  margin: 0.4rem 0;
+}
+
+@media (max-width: 560px) {
+  header nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

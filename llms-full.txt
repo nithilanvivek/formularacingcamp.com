@@ -13,6 +13,7 @@ Formula Racing Camp: Learning In The Fast Lane is a student-created educational 
 - Format: Children's educational nonfiction book with facts, fictional characters, and activities
 - Recommended reader age: 9+
 - Authors: A group of middle school students from Bengaluru, Karnataka, India
+- Editorial approach: Student-created explanations are organized for ages 9+, reviewed for clarity and consistency, and linked to authoritative sources for selected current statistics
 - Primary subject: Formula 1 racing used as a context for cross-curricular learning
 - Language: English
 - Official website: https://www.formularacingcamp.com/
@@ -130,3 +131,5 @@ The official home page links to Notion Press, Amazon print, Amazon Kindle, and a
 - Launch Grand Prix: https://www.formularacingcamp.com/game
 - Sitemap: https://www.formularacingcamp.com/sitemap.xml
 - Concise AI guide: https://www.formularacingcamp.com/llms.txt
+- Privacy policy: https://www.formularacingcamp.com/privacy
+- Terms of use: https://www.formularacingcamp.com/terms

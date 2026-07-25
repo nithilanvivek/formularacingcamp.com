@@ -17,13 +17,19 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.formularacingcamp.com">
 <meta property="og:image" content="https://www.formularacingcamp.com/assets/site/book-cover.webp">
+<meta property="og:site_name" content="Formula Racing Camp">
+<meta property="og:locale" content="en_IN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Formula Racing Camp Book for Kids | F1 STEM Learning">
 <meta name="twitter:description" content="A fun Formula 1 book for kids, blending racing with STEM, history, geography, puzzles, and student-created characters.">
 <meta name="twitter:image" content="https://www.formularacingcamp.com/assets/site/book-cover.webp">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -34,6 +40,7 @@
       "name": "Formula Racing Camp",
       "url": "https://www.formularacingcamp.com/",
       "logo": "https://www.formularacingcamp.com/assets/site/f1-camp-logo.webp",
+      "publishingPrinciples": "https://www.formularacingcamp.com/#research-method",
       "sameAs": [
         "https://youtube.com/@WhereF1RulesTheWorld",
         "https://nithi.land/projects/f1-camp/"
@@ -117,6 +124,9 @@
       "isPartOf": {
         "@id": "https://www.formularacingcamp.com/#website"
       },
+      "breadcrumb": {
+        "@id": "https://www.formularacingcamp.com/#breadcrumb"
+      },
       "about": {
         "@id": "https://www.formularacingcamp.com/#book"
       },
@@ -124,7 +134,25 @@
         "@type": "ImageObject",
         "url": "https://www.formularacingcamp.com/assets/site/book-cover.webp"
       },
+      "citation": [
+        "https://www.formula1.com/en/latest/article/drivers-teams-cars-circuits-and-more-everything-you-need-to-know-about.7iQfL3Rivf1comzdqV5jwc.7iQfL3Rivf1comzdqV5jwc",
+        "https://www.formula1.com/en/latest/article/neck-workouts-cardio-sessions-and-mental-exercises-how-to-train-like-an-f1.6c5HZRQvQv2MALjFF295Aq.6c5HZRQvQv2MALjFF295Aq",
+        "https://www.formula1.com/en/latest/article/watch-mclaren-set-new-f1-pit-stop-record-with-spectacularly-quick-tyre.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm",
+        "https://www.formula1.com/en/latest/article/formula-1-reveals-calendar-for-2026-season.YctbMZWqBvrgyddrnauo8"
+      ],
       "inLanguage": "en"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.formularacingcamp.com/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Formula Racing Camp",
+          "item": "https://www.formularacingcamp.com/"
+        }
+      ]
     },
     {
       "@type": "FAQPage",
@@ -183,7 +211,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20260719-2">
 
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
 </head>
 <body class="h-full flex flex-col">
 <div id="app-wrapper" class="h-full w-full" style="background-color: #ffffff;"><!-- Navigation -->
@@ -203,7 +231,7 @@
 <div class="max-w-6xl mx-auto">
 <div class="grid md:grid-cols-2 gap-12 items-center"><!-- Book Cover -->
 <div class="flex justify-center">
-<div class="relative"><img src="assets/site/book-cover.webp" alt="Formula Racing Camp Coverpage" class="w-72 h-auto rounded-lg book-shadow hover-lift" width="450" height="639" decoding="async" fetchpriority="high" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"> <!-- Fallback cover if image fails -->
+<figure class="relative"><img src="assets/site/book-cover.webp" srcset="assets/responsive/book-cover-288.jpg 288w, assets/site/book-cover.webp 450w" sizes="288px" alt="Cover of Formula Racing Camp: Learning In The Fast Lane" class="w-72 h-auto rounded-lg book-shadow hover-lift" width="450" height="639" decoding="async" fetchpriority="high" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"> <!-- Fallback cover if image fails -->
 <div class="w-72 h-96 rounded-lg book-shadow" style="background: linear-gradient(135deg, #0096FF 0%, #0066cc 100%); display: none;">
 <div class="absolute inset-6 rounded flex flex-col items-center justify-center text-center p-6" style="background-color: #ffffff;">
 <div class="text-6xl mb-4">
@@ -214,7 +242,8 @@
 <p class="text-sm font-semibold" style="color: #333333;">Learning In The Fast Lane</p>
 </div>
 </div>
-</div>
+<figcaption class="sr-only">Formula Racing Camp: Learning In The Fast Lane, a student-created educational Formula 1 book for readers ages 9 and older.</figcaption>
+</figure>
 </div><!-- Book Info -->
 <div>
 <h1 id="hero-title" class="font-fredoka text-5xl md:text-6xl font-bold mb-4" style="color: #0096FF;">FORMULA RACING CAMP BOOK</h1>
@@ -497,29 +526,34 @@
 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
 <div class="p-6">
 <div class="font-fredoka text-5xl font-bold mb-2" style="color: #ffffff;">
-230
+370+
 </div>
-<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">mph top speed</p>
-</div>
-<div class="p-6">
-<div class="font-fredoka text-5xl font-bold mb-2" style="color: #ffffff;">
-5G
-</div>
-<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">force in corners</p>
+<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">km/h top speed</p>
+<cite class="text-sm not-italic"><a href="https://www.formula1.com/en/latest/article/drivers-teams-cars-circuits-and-more-everything-you-need-to-know-about.7iQfL3Rivf1comzdqV5jwc.7iQfL3Rivf1comzdqV5jwc" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">Formula 1 source</a></cite>
 </div>
 <div class="p-6">
 <div class="font-fredoka text-5xl font-bold mb-2" style="color: #ffffff;">
-2.5
+4–5g
 </div>
-<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">sec pit stop</p>
+<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">sustained cornering load</p>
+<cite class="text-sm not-italic"><a href="https://www.formula1.com/en/latest/article/neck-workouts-cardio-sessions-and-mental-exercises-how-to-train-like-an-f1.6c5HZRQvQv2MALjFF295Aq.6c5HZRQvQv2MALjFF295Aq" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">Formula 1 source</a></cite>
 </div>
 <div class="p-6">
 <div class="font-fredoka text-5xl font-bold mb-2" style="color: #ffffff;">
-23
+1.80
 </div>
-<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">races per season</p>
+<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">second record pit stop</p>
+<cite class="text-sm not-italic"><a href="https://www.formula1.com/en/latest/article/watch-mclaren-set-new-f1-pit-stop-record-with-spectacularly-quick-tyre.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">Formula 1 source</a></cite>
+</div>
+<div class="p-6">
+<div class="font-fredoka text-5xl font-bold mb-2" style="color: #ffffff;">
+24
+</div>
+<p class="font-semibold" style="color: #ffffff; opacity: 0.9;">races announced for 2026</p>
+<cite class="text-sm not-italic"><a href="https://www.formula1.com/en/latest/article/formula-1-reveals-calendar-for-2026-season.YctbMZWqBvrgyddrnauo8" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: underline;">Formula 1 source</a></cite>
 </div>
 </div>
+<p class="text-sm mb-4" style="color: #ffffff; opacity: 0.85;">Figures were reviewed on July 25, 2026. Racing records and calendars can change; follow the linked official sources for current information.</p>
 <p class="text-xl font-semibold" style="color: #ffffff;">📚 Read the book to find out more fun facts! 🏎️✨</p>
 </div>
 </section><!-- Character Bios Section -->
@@ -546,7 +580,7 @@
 <p class="italic font-semibold text-lg" style="color: #c4b5fd;">"Believe in yourself &amp; the track, &amp; you'll soon find the finish line."</p>
 </div>
 </div>
-<div class="flex justify-center"><img src="assets/characters/nithilan-pcsr-5.webp" alt="Nithilan and PCSR 5 - The Strategic Mind" class="w-full max-w-sm rounded-xl hover-lift" width="640" height="615" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center"><img src="assets/characters/nithilan-pcsr-5.webp" srcset="assets/responsive/nithilan-pcsr-5-384.jpg 384w, assets/characters/nithilan-pcsr-5.webp 640w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Nithilan and PCSR 5 - The Strategic Mind" class="w-full max-w-sm rounded-xl hover-lift" width="640" height="615" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);" onerror="this.style.display='none';">
 </div>
 </div>
 <div class="mt-6 p-6 rounded-lg" style="background-color: rgba(10, 10, 10, 0.5);">
@@ -563,7 +597,7 @@
 </div><!-- Nandana Bio -->
 <div class="mb-16 p-8 rounded-2xl character-card" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); box-shadow: 0 0 40px rgba(236, 72, 153, 0.5);">
 <div class="grid md:grid-cols-2 gap-8 items-center">
-<div class="flex justify-center order-2 md:order-1"><img src="assets/characters/nandana.webp" alt="Nandana - Racing with Grace" class="w-full max-w-sm rounded-xl hover-lift" width="770" height="1036" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(244, 114, 182, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center order-2 md:order-1"><img src="assets/characters/nandana.webp" srcset="assets/responsive/nandana-384.jpg 384w, assets/characters/nandana.webp 770w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Nandana - Racing with Grace" class="w-full max-w-sm rounded-xl hover-lift" width="770" height="1036" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(244, 114, 182, 0.4);" onerror="this.style.display='none';">
 </div>
 <div class="order-1 md:order-2">
 <div class="flex items-center gap-3 mb-4">
@@ -595,7 +629,7 @@ and she brings that joy to every race. 🌸</p>
 a peacock representing the pride and beauty of India. 🦚🇮🇳</p>
 <p class="leading-relaxed mb-3" style="color: #ffffff;">Amulya gives Nandana courage when the race gets tough. With feathers that shimmer in the sun and eyes that see every turn ahead, Amulya is the best companion a racer could ask for. Together, they embody tradition meeting speed, heritage meeting innovation.</p>
 </div>
-<div class="flex justify-center items-start"><img src="assets/characters/amulya.webp" alt="Amulya - The Peacock" class="w-full max-w-xs rounded-xl hover-lift" width="640" height="512" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(244, 114, 182, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center items-start"><img src="assets/characters/amulya.webp" srcset="assets/responsive/amulya-384.jpg 384w, assets/characters/amulya.webp 640w" sizes="(max-width: 767px) calc(100vw - 80px), 320px" alt="Amulya - The Peacock" class="w-full max-w-xs rounded-xl hover-lift" width="640" height="512" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(244, 114, 182, 0.4);" onerror="this.style.display='none';">
 </div>
 </div>
 <p class="leading-relaxed mb-3 text-center font-bold text-xl" style="color: #fbb6ce;">She doesn't just race to win—<br>
@@ -627,14 +661,14 @@ With every race, she proves that happiness is the greatest fuel of all. 🌟⚡<
 <p class="italic font-semibold text-lg" style="color: #00ff88;">"I don't chase the lead. I am the lead."</p>
 </div>
 </div>
-<div class="flex flex-col gap-4 justify-center items-center"><img src="assets/characters/jaskirat.webp" alt="Jaskirat Racing Action" class="w-full max-w-lg rounded-xl hover-lift" width="640" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);" onerror="this.style.display='none';">
+<div class="flex flex-col gap-4 justify-center items-center"><img src="assets/characters/jaskirat.webp" srcset="assets/responsive/jaskirat-384.jpg 384w, assets/characters/jaskirat.webp 640w" sizes="(max-width: 767px) calc(100vw - 80px), 512px" alt="Jaskirat Racing Action" class="w-full max-w-lg rounded-xl hover-lift" width="640" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);" onerror="this.style.display='none';">
 </div>
 </div>
 <div class="mt-6 p-6 rounded-lg" style="background-color: rgba(10, 10, 10, 0.5);">
 <p class="leading-relaxed mb-3" style="color: #ffffff;"><strong style="color: #00ff88;">Jaskirat doesn't race for position. He starts &amp; ends in the lead. 🥇🏁</strong></p>
 <div class="grid md:grid-cols-2 gap-6 items-center mb-3">
 <p class="leading-relaxed" style="color: #ffffff;">His green machine, <strong style="color: #00ff88;">Neon Raptor-Vortex GT-X ⚡</strong>, crackles with raw electricity as stadium lights ripple across its body and reflect off Jaskirat's suit. Though there are no ramps, the car flies with its rainbow holy power Volt Viper Wings letting the car soar through the night sky in the stadium at lighting speed 🏎️⚡🌈. Energy hums beneath the chassis, waiting. Jaskirat sits calm, a confident smile on his face, hands steady on the wheel. Where others feel pressure closing in, he feels clarity. Control. Timing.</p>
-<div class="flex justify-center"><img src="assets/characters/neon-raptor-vortex.webp" alt="Neon Raptor-Vortex GT-X" class="w-full max-w-md rounded-lg hover-lift" width="446" height="247" loading="lazy" decoding="async" style="box-shadow: 0 8px 30px rgba(0, 255, 136, 0.3);" onerror="this.style.display='none';">
+<div class="flex justify-center"><img src="assets/characters/neon-raptor-vortex.webp" srcset="assets/responsive/neon-raptor-vortex-384.jpg 384w, assets/characters/neon-raptor-vortex.webp 446w" sizes="(max-width: 767px) calc(100vw - 80px), 448px" alt="Neon Raptor-Vortex GT-X" class="w-full max-w-md rounded-lg hover-lift" width="446" height="247" loading="lazy" decoding="async" style="box-shadow: 0 8px 30px rgba(0, 255, 136, 0.3);" onerror="this.style.display='none';">
 </div>
 </div>
 <p class="leading-relaxed mb-3 text-center font-bold text-xl" style="color: #00ff88;">The stadium lights go out, darkness, the crowd's noise echoes... 🏟🌑<br>
@@ -657,7 +691,7 @@ victory chases them! 🏆💨🆒🏁</p>
 </div><!-- Igneous Bio -->
 <div class="mb-16 p-8 rounded-2xl character-card" style="background: linear-gradient(135deg, #ff6b35 0%, #ffdd00 100%); box-shadow: 0 0 40px rgba(255, 107, 53, 0.5);">
 <div class="grid md:grid-cols-2 gap-8 items-center">
-<div class="flex justify-center order-2 md:order-1"><img src="assets/characters/igneous.webp" alt="Igneous - Thunder Beast" class="w-full max-w-sm rounded-xl hover-lift" width="576" height="373" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(255, 221, 0, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center order-2 md:order-1"><img src="assets/characters/igneous.webp" srcset="assets/responsive/igneous-384.jpg 384w, assets/characters/igneous.webp 576w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Igneous - Thunder Beast" class="w-full max-w-sm rounded-xl hover-lift" width="576" height="373" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(255, 221, 0, 0.4);" onerror="this.style.display='none';">
 </div>
 <div class="order-1 md:order-2">
 <div class="flex items-center gap-3 mb-4">
@@ -703,7 +737,7 @@ On the finish line, his glow fades—victory complete, like always! 🌟🏆🔥
 <p class="italic font-semibold text-lg" style="color: #93c5fd;">"He doesn't follow the pack. He makes them follow him."</p>
 </div>
 </div>
-<div class="flex justify-center"><img src="assets/characters/shaurya-cheetah.webp" alt="Shaurya and Cheetah" class="w-full max-w-sm rounded-xl hover-lift" width="640" height="393" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(29, 78, 216, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center"><img src="assets/characters/shaurya-cheetah.webp" srcset="assets/responsive/shaurya-cheetah-384.jpg 384w, assets/characters/shaurya-cheetah.webp 640w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Shaurya and Cheetah" class="w-full max-w-sm rounded-xl hover-lift" width="640" height="393" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(29, 78, 216, 0.4);" onerror="this.style.display='none';">
 </div>
 </div>
 <div class="mt-6 p-6 rounded-lg" style="background-color: rgba(10, 10, 10, 0.5);">
@@ -716,7 +750,7 @@ Where others panic, he feels perfect timing.</p>
 <p class="leading-relaxed mb-3" style="color: #ffffff;">Inside, SHAURYA sits calm with a confident smile. Hands steady on the wheel. The noise of the crowd becomes a blur as the race track ripples across his mind. The car doesn't just sit on the track… he commands it.</p>
 <p class="leading-relaxed text-center font-bold text-lg" style="color: #93c5fd;">He doesn't follow the pack.<br>
 He makes them follow him. 🐆💨</p>
-<div class="flex justify-center mt-6"><img src="assets/characters/shaurya-f1-partner.webp" alt="Shaurya F1 partner Cheetah" class="w-full max-w-md rounded-lg hover-lift" width="483" height="640" loading="lazy" decoding="async" style="box-shadow: 0 8px 30px rgba(147, 197, 253, 0.3);" onerror="this.style.display='none';">
+<div class="flex justify-center mt-6"><img src="assets/characters/shaurya-f1-partner.webp" srcset="assets/responsive/shaurya-f1-partner-384.jpg 384w, assets/characters/shaurya-f1-partner.webp 483w" sizes="(max-width: 767px) calc(100vw - 80px), 448px" alt="Shaurya F1 partner Cheetah" class="w-full max-w-md rounded-lg hover-lift" width="483" height="640" loading="lazy" decoding="async" style="box-shadow: 0 8px 30px rgba(147, 197, 253, 0.3);" onerror="this.style.display='none';">
 </div>
 </div>
 <div class="mt-4 p-4 rounded-lg text-center" style="background-color: rgba(255, 255, 255, 0.1);">
@@ -737,7 +771,7 @@ He makes them follow him. 🐆💨</p>
 <p class="text-xl font-bold text-center" style="color: #c4b5fd;">Full Bio Coming Soon! 🌟</p>
 </div>
 </div>
-<div class="flex justify-center"><img src="assets/characters/tejas-koala.webp" alt="Tejas and Koala" class="w-full max-w-sm rounded-xl hover-lift" width="427" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);" onerror="this.style.display='none';">
+<div class="flex justify-center"><img src="assets/characters/tejas-koala.webp" srcset="assets/responsive/tejas-koala-384.jpg 384w, assets/characters/tejas-koala.webp 427w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Tejas and Koala" class="w-full max-w-sm rounded-xl hover-lift" width="427" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);" onerror="this.style.display='none';">
 </div>
 </div>
 </div><!-- Nihira Bio -->
@@ -756,7 +790,7 @@ He makes them follow him. 🐆💨</p>
 <p class="text-xl font-bold text-center" style="color: #cffafe;">Full Bio Coming Soon! 🌟</p>
 </div>
 </div>
-<div class="flex justify-center"><img src="assets/characters/nihira-penguin.webp" alt="Nihira and Penguin" class="w-full max-w-sm rounded-xl hover-lift" width="512" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(6, 182, 212, 0.4);" onerror="console.error('Image failed to load:', this.src); this.style.background='#0891b2'; this.alt='Image unavailable';">
+<div class="flex justify-center"><img src="assets/characters/nihira-penguin.webp" srcset="assets/responsive/nihira-penguin-384.jpg 384w, assets/characters/nihira-penguin.webp 512w" sizes="(max-width: 767px) calc(100vw - 80px), 384px" alt="Nihira and Penguin" class="w-full max-w-sm rounded-xl hover-lift" width="512" height="640" loading="lazy" decoding="async" style="box-shadow: 0 10px 40px rgba(6, 182, 212, 0.4);" onerror="console.error('Image failed to load:', this.src); this.style.background='#0891b2'; this.alt='Image unavailable';">
 </div>
 </div>
 </div>
@@ -770,6 +804,22 @@ He makes them follow him. 🐆💨</p>
 <div class="p-8 rounded-xl" style="background-color: #F8F9FA;">
 <p class="text-base italic" style="color: #666666;">"We wanted to create a book that combines the thrill of Formula 1 racing with real learning - covering science, geography, history, and maths in a way that's actually fun!"</p>
 </div>
+<article id="research-method" class="mt-8 p-8 rounded-xl text-left" style="background-color: #F8F9FA; border-left: 4px solid #00A86B;">
+<h3 class="font-fredoka text-2xl font-bold mb-4" style="color: #333333;">Research and Editorial Approach</h3>
+<ol class="list-decimal pl-6 space-y-3" style="color: #555555;">
+<li><strong>Research:</strong> Factual claims are checked against primary or authoritative references where practical, including official Formula 1 material for current racing statistics.</li>
+<li><strong>Learning design:</strong> The student authors connect racing examples to science, engineering, history, geography, mathematics, technology, health, design, and business.</li>
+<li><strong>Editing:</strong> Explanations are rewritten in clear language for readers ages 9+, then reviewed for clarity, consistency, and source attribution before publication on this site.</li>
+</ol>
+<p class="mt-5" style="color: #555555;"><strong>Contributor privacy:</strong> Because the creators are students, this site identifies them collectively and does not publish unnecessary personal or school information.</p>
+<h4 class="font-fredoka text-xl font-bold mt-6 mb-3" style="color: #333333;">Selected authoritative references</h4>
+<ul class="list-disc pl-6 space-y-2" style="color: #555555;">
+<li><a href="https://www.formula1.com/en/latest/article/drivers-teams-cars-circuits-and-more-everything-you-need-to-know-about.7iQfL3Rivf1comzdqV5jwc.7iQfL3Rivf1comzdqV5jwc" target="_blank" rel="noopener noreferrer" style="color: #0066CC;">Formula 1 beginner’s guide and speed overview</a></li>
+<li><a href="https://www.formula1.com/en/latest/article/neck-workouts-cardio-sessions-and-mental-exercises-how-to-train-like-an-f1.6c5HZRQvQv2MALjFF295Aq.6c5HZRQvQv2MALjFF295Aq" target="_blank" rel="noopener noreferrer" style="color: #0066CC;">Formula 1 driver training and g-force guide</a></li>
+<li><a href="https://www.formula1.com/en/latest/article/watch-mclaren-set-new-f1-pit-stop-record-with-spectacularly-quick-tyre.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm.5ZBn7RJxE9iTVmSGfeeVHm" target="_blank" rel="noopener noreferrer" style="color: #0066CC;">Formula 1 pit-stop record report</a></li>
+<li><a href="https://www.formula1.com/en/latest/article/formula-1-reveals-calendar-for-2026-season.YctbMZWqBvrgyddrnauo8" target="_blank" rel="noopener noreferrer" style="color: #0066CC;">Official 2026 Formula 1 calendar announcement</a></li>
+</ul>
+</article>
 </div>
 </section><!-- Frequently Asked Questions -->
 <section id="faq" class="py-16 px-6" style="background-color: #F8F9FA;">
@@ -832,7 +882,7 @@ He makes them follow him. 🐆💨</p>
 FORMULA RACING CAMP
 </div>
 <p class="text-sm" style="color: #999999;">© 2026 Formula Racing Camp. All rights reserved.</p>
-<p class="text-xs mt-3" style="color: #BBBBBB;"><a href="/llms.txt" style="color: #BBBBBB;">AI-readable guide</a> · <a href="/sitemap.xml" style="color: #BBBBBB;">Sitemap</a> · <a href="/robots.txt" style="color: #BBBBBB;">Crawler policy</a></p>
+<p class="text-xs mt-3" style="color: #BBBBBB;"><a href="/privacy" style="color: #BBBBBB;">Privacy</a> · <a href="/terms" style="color: #BBBBBB;">Terms</a> · <a href="/llms.txt" style="color: #BBBBBB;">AI-readable guide</a> · <a href="/sitemap.xml" style="color: #BBBBBB;">Sitemap</a> · <a href="/robots.txt" style="color: #BBBBBB;">Crawler policy</a></p>
 </div>
 </footer>
 </div>
@@ -906,6 +956,6 @@ FORMULA RACING CAMP
 </div>
 </div>
 </div>
-<script src="app.js?v=20260719-release-animation"></script>
+<script defer src="app.js?v=20260725-geo"></script>
 </body>
 </html>
