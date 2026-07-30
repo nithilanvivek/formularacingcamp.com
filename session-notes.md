@@ -614,3 +614,35 @@ Important follow-ups:
 - Older public Git commits still contain the previously committed participant email. Purging it requires an explicitly approved history rewrite and coordinated force-push.
 - Confirm Vercel production has deployed the latest `main` commits and verify the response security headers on the live domain.
 - Replace the Tailwind browser CDN with a compiled local stylesheet if stricter CSP without `'unsafe-eval'` is desired.
+
+## Analytics and Homepage Navigation Wrap-Up
+
+Date: 2026-07-30
+
+Completed:
+
+- Added the deferred Vercel Web Analytics script to all eight public HTML entry points and verified the production script endpoint returns `200`.
+- Reworked the homepage hero so the cover starts at the top, the glowing action buttons precede the book details, and official publication metadata appears in a quieter full-width row.
+- Renamed the visible FAQ heading to `FAQs Section` and added in-site navigation links to the footer.
+- Replaced the desktop section navigation with an all-screen hamburger drawer. The fixed header now exposes Preview, Puzzles, Discount Game, and Purchase actions at desktop, tablet, and mobile sizes.
+- Corrected the hamburger close icon, added accessible menu state and Escape-key handling, and offset section anchors so headings remain visible below the fixed header.
+- Kept the site on the framework-free analytics integration. The unused local `@vercel/analytics` package files are excluded through `.gitignore` and `.vercelignore`.
+
+Validation performed:
+
+- JavaScript syntax checks, JSON parsing for `vercel.json`, and `git diff --check`.
+- Desktop, tablet, and mobile browser checks for header layout, hamburger behavior, fixed positioning, anchor offsets, footer navigation, button placement, and horizontal overflow.
+- Verified the live production HTML and CSS contain the final header, FAQ, analytics, and responsive-navigation changes.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest pushed commit before this wrap-up: `d9200f7 Ignore unused analytics package files`.
+- Latest manual Vercel production deployment: `99976f0 Polish fixed header interactions`, aliased to `https://www.formularacingcamp.com`.
+- The two later ignore-only commits do not alter the public site output.
+
+Next steps:
+
+- Confirm Web Analytics begins reporting after eligible human visits; automated or headless verification visits are intentionally excluded.
+- Keep the direct script while the site remains static. If custom button events are later required, evaluate Vercel Pro and an intentional `@vercel/analytics` bundling setup.
+- Consider replacing the Tailwind browser CDN with a compiled local stylesheet if stricter CSP without `'unsafe-eval'` is desired.

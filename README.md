@@ -140,6 +140,8 @@ Recommended Vercel settings:
 
 The `vercel.json` file enables clean URLs, canonical redirects, caching, and site-wide security headers. The `.vercelignore` file keeps reference-only files out of the deployed public output.
 
+Vercel Web Analytics is loaded directly from `/_vercel/insights/script.js` on every public HTML page. This static site does not require the `@vercel/analytics` npm package or a JavaScript build step. The unused local package files are excluded by both `.gitignore` and `.vercelignore`; if the project later adopts the package API, remove those exclusions and add an intentional bundling workflow.
+
 With clean URLs enabled, `puzzles.html` is served at:
 
 ```text
