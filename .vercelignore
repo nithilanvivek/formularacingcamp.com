@@ -2,6 +2,11 @@
 .vercel
 *.log
 
+# Unused package files; this static site loads Vercel Analytics directly.
+node_modules/
+package.json
+package-lock.json
+
 # Reference/source notes that do not need to be public deployment files.
 README.md
 formularacingcamp.html
