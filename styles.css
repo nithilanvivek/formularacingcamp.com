@@ -14,6 +14,123 @@ font-family: Poppins, sans-serif;
 overflow-x: hidden;
 }
 
+.hero-glance {
+order: 6;
+padding: 1.5rem;
+border-radius: 0.75rem;
+background: #F8F9FA;
+}
+
+.hero-book-info {
+display: flex;
+flex-direction: column;
+}
+
+.hero-actions {
+order: 5;
+margin-bottom: 2rem;
+}
+
+.hero-actions > a,
+.hero-actions > .buy-flip .buy-flip-front button {
+animation: heroButtonGlow 2.4s ease-in-out infinite;
+}
+
+.hero-actions > a:nth-child(1) {
+--hero-glow: rgba(0, 150, 255, 0.72);
+}
+
+.hero-actions > .buy-flip .buy-flip-front button {
+--hero-glow: rgba(255, 107, 53, 0.72);
+}
+
+.hero-actions > a:nth-child(3) {
+--hero-glow: rgba(0, 150, 255, 0.72);
+}
+
+.hero-actions > a:nth-child(4) {
+--hero-glow: rgba(0, 255, 136, 0.68);
+}
+
+.hero-actions > a:nth-child(5) {
+--hero-glow: rgba(255, 0, 0, 0.62);
+}
+
+@keyframes heroButtonGlow {
+0%,
+100% {
+box-shadow: 0 0 0 2px var(--hero-glow), 0 0 10px var(--hero-glow);
+}
+50% {
+box-shadow: 0 0 0 3px var(--hero-glow), 0 0 22px var(--hero-glow);
+}
+}
+
+.official-book-meta {
+display: flex;
+align-items: baseline;
+justify-content: space-between;
+gap: 1rem 2rem;
+padding: 1rem 1.25rem;
+border-top: 1px solid #DCE7F0;
+border-bottom: 1px solid #DCE7F0;
+color: #666666;
+font-size: 0.875rem;
+}
+
+.official-book-meta .byline {
+color: #444444;
+}
+
+.official-book-meta p:last-child {
+flex: 0 0 auto;
+}
+
+.footer-site-links {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+gap: 0.55rem 1.25rem;
+position: static;
+top: auto;
+z-index: auto;
+background: transparent;
+box-shadow: none;
+}
+
+.footer-site-links a {
+color: #E5E7EB;
+font-size: 0.875rem;
+font-weight: 600;
+text-decoration: none;
+}
+
+.footer-site-links a:hover,
+.footer-site-links a:focus-visible {
+color: #48B5FF;
+text-decoration: underline;
+text-underline-offset: 0.25rem;
+}
+
+@media (max-width: 767px) {
+.official-book-meta {
+align-items: flex-start;
+flex-direction: column;
+}
+
+.official-book-meta p:last-child {
+flex: none;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.hero-actions > a,
+.hero-actions > .buy-flip .buy-flip-front button {
+animation: none;
+box-shadow: 0 0 0 2px var(--hero-glow), 0 0 12px var(--hero-glow);
+}
+}
+
 .font-fredoka {
 font-family: Fredoka, sans-serif;
 }
