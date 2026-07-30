@@ -6,9 +6,12 @@ const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
 
 
 function toggleMenu() {
-hamburgerBtn.classList.toggle('active');
-mobileMenu.classList.toggle('active');
-mobileOverlay.classList.toggle('active');
+const isOpen = mobileMenu.classList.toggle('active');
+hamburgerBtn.classList.toggle('active', isOpen);
+mobileOverlay.classList.toggle('active', isOpen);
+hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
+hamburgerBtn.setAttribute('aria-label', isOpen ? 'Close sections menu' : 'Open sections menu');
+mobileMenu.setAttribute('aria-hidden', String(!isOpen));
 }
 
 
@@ -16,6 +19,9 @@ function closeMenu() {
 hamburgerBtn.classList.remove('active');
 mobileMenu.classList.remove('active');
 mobileOverlay.classList.remove('active');
+hamburgerBtn.setAttribute('aria-expanded', 'false');
+hamburgerBtn.setAttribute('aria-label', 'Open sections menu');
+mobileMenu.setAttribute('aria-hidden', 'true');
 }
 
 
@@ -25,6 +31,12 @@ mobileOverlay.addEventListener('click', closeMenu);
 }
 mobileMenuLinks.forEach(link => {
 link.addEventListener('click', closeMenu);
+});
+document.addEventListener('keydown', event => {
+if (event.key === 'Escape' && mobileMenu.classList.contains('active')) {
+closeMenu();
+hamburgerBtn.focus();
+}
 });
 
 
