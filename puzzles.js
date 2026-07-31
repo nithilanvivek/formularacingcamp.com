@@ -481,6 +481,7 @@ document.getElementById(`option-${selectedIndex}`).classList.add('incorrect');
 document.getElementById(`option-${q.correct}`).classList.add('correct');
 document.getElementById('quiz-message').innerHTML = '<div class="message error">✗ Incorrect. The correct answer is: ' + q.options[q.correct] + '</div>';
 }
+
 }
 
 

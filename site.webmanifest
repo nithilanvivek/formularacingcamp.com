@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "Formula Racing Camp",
+  "short_name": "F1 Camp",
+  "description": "Formula Racing Camp: Learning In The Fast Lane",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#071225",
+  "theme_color": "#0096ff",
+  "icons": [
+    {
+      "src": "/assets/site/app-icon-maskable-1024.webp",
+      "sizes": "1024x1024",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/site/app-icon-maskable-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

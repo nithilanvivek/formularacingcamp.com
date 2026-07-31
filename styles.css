@@ -34,6 +34,21 @@ display: flex;
 flex-direction: column;
 }
 
+.hero-cover-frame {
+width: min(100%, 450px);
+}
+
+.hero-cover {
+display: block;
+width: 100%;
+height: auto;
+}
+
+.hero-cover-fallback {
+width: 100%;
+aspect-ratio: 450 / 639;
+}
+
 .hero-actions {
 order: 5;
 margin-bottom: 2rem;

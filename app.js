@@ -4,7 +4,6 @@ const mobileMenu = document.getElementById('mobile-menu');
 const mobileOverlay = document.getElementById('mobile-overlay');
 const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
 
-
 function toggleMenu() {
 const isOpen = mobileMenu.classList.toggle('active');
 hamburgerBtn.classList.toggle('active', isOpen);
@@ -152,7 +151,6 @@ closeBuyBookFlip();
 }
 });
 }
-
 
 // Contact Form Functionality
 async function handleContactSubmit(event) {

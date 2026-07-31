@@ -646,3 +646,46 @@ Next steps:
 - Confirm Web Analytics begins reporting after eligible human visits; automated or headless verification visits are intentionally excluded.
 - Keep the direct script while the site remains static. If custom button events are later required, evaluate Vercel Pro and an intentional `@vercel/analytics` bundling setup.
 - Consider replacing the Tailwind browser CDN with a compiled local stylesheet if stricter CSP without `'unsafe-eval'` is desired.
+
+## Cover, Error Page, and Private Analytics Pause
+
+Date: 2026-07-31
+
+Completed today:
+
+- Enlarged the homepage book cover without changing the accompanying text layout.
+- Added the racing-themed custom 404 page, responsive light/dark mode support, remembered theme selection, and homepage navigation.
+- Replaced the site, favicon, social-preview, and app-icon artwork with transparent-background Formula Racing Camp assets, including WebP variants where supported.
+- Added the private `/analytics` dashboard with password and API authentication, 7/30/90-day filters, traffic totals, daily chart, pages, referrers, devices, browsers, and tracked outbound actions.
+- Confirmed the Vercel team is on Hobby. Removed all custom-event calls and custom-event API queries because Hobby does not support them.
+- Added browser-recorded transition pages for `/go/book/`, `/go/puzzles/`, and `/go/youtube/`; each has a visible Continue link, automatic continuation, and the standard Vercel Web Analytics script.
+- Limited the dashboard API to the official visits aggregate, official dimensions, and limits of at most 100. Production never displays sample data; localhost sample data is explicitly labeled.
+- Added automated analytics/authentication/route/noindex tests and updated the privacy disclosure.
+
+Validation performed:
+
+- `npm test`: 8 tests passed.
+- `npx vercel build`: passed.
+- `git diff --check`: passed before the day-end notes update.
+- Desktop and mobile local browser QA passed for the dashboard, transitions, and all date filters.
+- Production checks confirmed `/analytics` returns `200` with private/no-store and `X-Robots-Tag`, the unauthenticated API returns `401`, and all three transition pages return `200`.
+- The exact Web Analytics queries succeeded through the authenticated Vercel CLI for `day`, `requestPath`, `referrerHostname`, `deviceType`, `browserName`, and the three action-route filters.
+
+Production and credential state:
+
+- Latest production deployment completed and was aliased to `https://www.formularacingcamp.com`.
+- `ANALYTICS_DASHBOARD_PASSWORD`, `VERCEL_ANALYTICS_TOKEN`, `VERCEL_ANALYTICS_PROJECT_ID`, and `VERCEL_ANALYTICS_TEAM_ID` remain server-side Vercel Production variables; no values are committed.
+- The final token is scoped specifically to the `Nithilan Vivek` team and the `formularacingcamp-com` project. The temporary unused full-account token was permanently deleted.
+- Earlier authenticated dashboard checks still returned Vercel `Not authorized` before the correctly project-scoped token was deployed. The final deployment completed after the user chose to pause, so its authenticated data response has not yet been verified.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Local preview on port `4174` was stopped.
+- Work is paused for today and should resume with production verification tomorrow.
+
+Exact resume point:
+
+1. Open `https://www.formularacingcamp.com/analytics`, sign in, and confirm the status changes to real production data or `Waiting for more visitor data` without a 502 error.
+2. If it still fails, inspect the latest `/api/analytics-data` function log. The previously observed upstream message was `Not authorized`; do not recreate custom events or add production sample data.
+3. Confirm `/go/book/`, `/go/puzzles/`, and `/go/youtube/` begin appearing after eligible human page views; Vercel detail panels may lag totals by a few days.
