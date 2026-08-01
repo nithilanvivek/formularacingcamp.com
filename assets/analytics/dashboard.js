@@ -30,6 +30,8 @@
         ? `Showing clearly labeled localhost sample data for the last ${payload.range.days} days`
         : payload.waitingForVisitorData
           ? 'Waiting for more visitor data'
+          : payload.range.limited
+            ? `Showing the latest ${payload.range.availableDays} days available on Vercel Hobby (the ${payload.range.days}-day filter is selected)`
           : `Showing real production data for the last ${payload.range.days} days`;
     } catch (error) {
       dashboardStatus.textContent = error.message;

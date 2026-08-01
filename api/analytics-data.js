@@ -4,6 +4,8 @@ const VERCEL_ANALYTICS_URL = 'https://api.vercel.com/v1/query/web-analytics';
 const COOKIE_NAME = 'frc_analytics_access';
 const ALLOWED_RANGES = new Set([7, 30, 90]);
 const MAX_AGGREGATE_LIMIT = 100;
+const MAX_DAILY_QUERY_DAYS = 62;
+const HOBBY_REPORTING_DAYS = 31;
 const TRACKED_ACTIONS = [
   { requestPath: '/go/book/', name: 'Official book' },
   { requestPath: '/go/puzzles/', name: 'F1 puzzles' },
@@ -38,6 +40,29 @@ function dateRange(days) {
   const since = new Date(until);
   since.setUTCDate(since.getUTCDate() - days + 1);
   return { since: isoDate(since), until: isoDate(until) };
+}
+
+function daysInRange(range) {
+  const since = new Date(`${range.since}T00:00:00.000Z`);
+  const until = new Date(`${range.until}T00:00:00.000Z`);
+  return Math.round((until - since) / 86400000) + 1;
+}
+
+function splitRange(range, maximumDays) {
+  const chunks = [];
+  const finalDate = new Date(`${range.until}T00:00:00.000Z`);
+  let startDate = new Date(`${range.since}T00:00:00.000Z`);
+
+  while (startDate <= finalDate) {
+    const endDate = new Date(startDate);
+    endDate.setUTCDate(endDate.getUTCDate() + maximumDays - 1);
+    if (endDate > finalDate) endDate.setTime(finalDate.getTime());
+    chunks.push({ since: isoDate(startDate), until: isoDate(endDate) });
+    startDate = new Date(endDate);
+    startDate.setUTCDate(startDate.getUTCDate() + 1);
+  }
+
+  return chunks;
 }
 
 function sum(rows, field) {
@@ -112,7 +137,8 @@ module.exports = async function handler(req, res) {
   }
 
   async function query(groupBy, options = {}) {
-    const parameters = new URLSearchParams({ projectId, since: range.since, until: range.until });
+    const queryRange = options.range || range;
+    const parameters = new URLSearchParams({ projectId, since: queryRange.since, until: queryRange.until });
     if (teamId) parameters.set('teamId', teamId);
     if (options.limit) {
       const limit = Math.min(MAX_AGGREGATE_LIMIT, Math.max(1, Number(options.limit) || 1));
@@ -130,19 +156,43 @@ module.exports = async function handler(req, res) {
     return Array.isArray(payload.data) ? payload.data : [];
   }
 
-  try {
-    const actionQueries = TRACKED_ACTIONS.map((action) => query('day', {
-      filter: `requestPath eq ${odataString(action.requestPath)}`,
-      limit: days
+  async function dailyQuery(queryRange, options = {}) {
+    const chunks = splitRange(queryRange, MAX_DAILY_QUERY_DAYS);
+    const rows = await Promise.all(chunks.map((chunk) => query('day', {
+      ...options,
+      range: chunk,
+      limit: daysInRange(chunk)
+    })));
+    return rows.flat().sort((left, right) => String(left.timestamp).localeCompare(String(right.timestamp)));
+  }
+
+  async function loadRange(queryRange) {
+    const actionQueries = TRACKED_ACTIONS.map((action) => dailyQuery(queryRange, {
+      filter: `requestPath eq ${odataString(action.requestPath)}`
     }));
     const [trend, topPages, referrers, devices, browsers, ...actionSeries] = await Promise.all([
-      query('day', { limit: days }),
-      query('requestPath', { limit: 12 }),
-      query('referrerHostname', { limit: 10 }),
-      query('deviceType', { limit: 8 }),
-      query('browserName', { limit: 10 }),
+      dailyQuery(queryRange),
+      query('requestPath', { limit: 12, range: queryRange }),
+      query('referrerHostname', { limit: 10, range: queryRange }),
+      query('deviceType', { limit: 8, range: queryRange }),
+      query('browserName', { limit: 10, range: queryRange }),
       ...actionQueries
     ]);
+    return { trend, topPages, referrers, devices, browsers, actionSeries };
+  }
+
+  try {
+    let queryRange = range;
+    let rangeData;
+    try {
+      rangeData = await loadRange(queryRange);
+    } catch (error) {
+      const hobbyLimit = /hobby plan only grants access to the latest 31 days/i.test(error.message);
+      if (!hobbyLimit || days <= HOBBY_REPORTING_DAYS) throw error;
+      queryRange = dateRange(HOBBY_REPORTING_DAYS);
+      rangeData = await loadRange(queryRange);
+    }
+    const { trend, topPages, referrers, devices, browsers, actionSeries } = rangeData;
     const actions = TRACKED_ACTIONS.map((action, index) => ({
       ...action,
       pageviews: sum(actionSeries[index], 'pageviews'),
@@ -154,7 +204,12 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       sample: false,
       generatedAt: new Date().toISOString(),
-      range: { days, ...range },
+      range: {
+        days,
+        availableDays: daysInRange(queryRange),
+        limited: daysInRange(queryRange) < days,
+        ...queryRange
+      },
       summary: {
         pageviews,
         visitors: sum(trend, 'visitors'),
@@ -180,3 +235,7 @@ module.exports.secureEqual = secureEqual;
 module.exports.sessionToken = sessionToken;
 module.exports.TRACKED_ACTIONS = TRACKED_ACTIONS;
 module.exports.MAX_AGGREGATE_LIMIT = MAX_AGGREGATE_LIMIT;
+module.exports.MAX_DAILY_QUERY_DAYS = MAX_DAILY_QUERY_DAYS;
+module.exports.HOBBY_REPORTING_DAYS = HOBBY_REPORTING_DAYS;
+module.exports.daysInRange = daysInRange;
+module.exports.splitRange = splitRange;

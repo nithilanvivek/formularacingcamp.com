@@ -132,6 +132,52 @@ test('production queries only visit aggregates, official dimensions, and limits 
   analyticsData.TRACKED_ACTIONS.forEach(({ requestPath }) => {
     assert.ok(requestedUrls.some((url) => new URL(url).searchParams.get('filter') === `requestPath eq '${requestPath}'`));
   });
+  const dailyUrls = requestedUrls.map((url) => new URL(url)).filter((url) => url.searchParams.getAll('by').includes('day'));
+  assert.ok(dailyUrls.length >= 8);
+  dailyUrls.forEach((url) => {
+    assert.ok(analyticsData.daysInRange({ since: url.searchParams.get('since'), until: url.searchParams.get('until') }) <= analyticsData.MAX_DAILY_QUERY_DAYS);
+  });
+});
+
+test('90-day filter clearly falls back to Hobby reporting availability', { concurrency: false }, async () => {
+  const restore = saveEnvironment();
+  const originalFetch = global.fetch;
+  const requestedUrls = [];
+  process.env.VERCEL = '1';
+  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
+  process.env.VERCEL_ANALYTICS_TOKEN = 'server-only-test-token';
+  process.env.VERCEL_ANALYTICS_PROJECT_ID = 'project-id';
+  process.env.VERCEL_ANALYTICS_TEAM_ID = 'team-id';
+  global.fetch = async (url) => {
+    requestedUrls.push(String(url));
+    const parsed = new URL(url);
+    const queryRange = { since: parsed.searchParams.get('since'), until: parsed.searchParams.get('until') };
+    if (analyticsData.daysInRange(queryRange) > analyticsData.HOBBY_REPORTING_DAYS) {
+      return {
+        ok: false,
+        status: 400,
+        json: async () => ({ error: { message: 'Invalid request: the hobby plan only grants access to the latest 31 days of data.' } })
+      };
+    }
+    const by = parsed.searchParams.getAll('by')[0];
+    const data = by === 'day'
+      ? [{ timestamp: '2026-07-31T00:00:00.000Z', pageviews: 4, visitors: 3 }]
+      : [{ [by]: by === 'requestPath' ? '/' : 'Unknown', pageviews: 4, visitors: 3 }];
+    return { ok: true, status: 200, json: async () => ({ data }) };
+  };
+
+  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com', cookie: authenticatedCookie('test-password') }, query: { days: '90' } };
+  const res = responseRecorder();
+  await analyticsData(req, res);
+  global.fetch = originalFetch;
+  restore();
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.range.days, 90);
+  assert.equal(res.body.range.availableDays, analyticsData.HOBBY_REPORTING_DAYS);
+  assert.equal(res.body.range.limited, true);
+  assert.ok(requestedUrls.some((url) => analyticsData.daysInRange({ since: new URL(url).searchParams.get('since'), until: new URL(url).searchParams.get('until') }) > analyticsData.HOBBY_REPORTING_DAYS));
+  assert.ok(requestedUrls.some((url) => analyticsData.daysInRange({ since: new URL(url).searchParams.get('since'), until: new URL(url).searchParams.get('until') }) === analyticsData.HOBBY_REPORTING_DAYS));
 });
 
 test('client code has no Hobby-incompatible custom-event calls', () => {
