@@ -31,5 +31,6 @@ Allow: /
 Disallow: /analytics
 Disallow: /analytics/
 Disallow: /api/analytics-data
+Disallow: /api/track-action
 
 Sitemap: https://www.formularacingcamp.com/sitemap.xml

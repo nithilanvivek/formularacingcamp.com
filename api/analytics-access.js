@@ -98,7 +98,7 @@ function loginPage({ invalid = false, unavailable = false } = {}) {
         </div>
         <p class="form-status" role="alert">${message}</p>
       </form>
-      <p class="privacy-note">The password and Vercel access token are checked only on the server.</p>
+      <p class="privacy-note">The password and analytics credentials are checked only on the server.</p>
     </main>`, 'Analytics Access');
 }
 
@@ -131,8 +131,8 @@ function dashboardPage() {
       <div class="metric-grid" aria-label="Analytics summary">
         <article class="metric-card metric-card--blue"><p>Visitors</p><strong id="visitors-total">—</strong><span>Privacy-friendly daily visitors</span></article>
         <article class="metric-card metric-card--orange"><p>Page views</p><strong id="pageviews-total">—</strong><span>Pages opened</span></article>
-        <article class="metric-card metric-card--green"><p>Tracked actions</p><strong id="interactions-total">—</strong><span>Transition page views</span></article>
-        <article class="metric-card metric-card--purple"><p>Action routes</p><strong id="action-types-total">—</strong><span>Distinct routes used</span></article>
+        <article class="metric-card metric-card--green"><p>Tracked actions</p><strong id="interactions-total">—</strong><span>Verified interaction counts</span></article>
+        <article class="metric-card metric-card--purple"><p>Action types</p><strong id="action-types-total">—</strong><span>Distinct actions used</span></article>
       </div>
 
       <section class="panel panel--wide" aria-labelledby="traffic-title">
@@ -148,11 +148,11 @@ function dashboardPage() {
         <section class="panel" aria-labelledby="referrers-title"><header class="panel-heading"><div><p class="panel-kicker">Discovery</p><h2 id="referrers-title">Top referrers</h2></div></header><div class="rank-list" id="referrer-list"></div></section>
         <section class="panel" aria-labelledby="devices-title"><header class="panel-heading"><div><p class="panel-kicker">Technology</p><h2 id="devices-title">Devices</h2></div></header><div class="rank-list" id="device-list"></div></section>
         <section class="panel" aria-labelledby="browsers-title"><header class="panel-heading"><div><p class="panel-kicker">Technology</p><h2 id="browsers-title">Browsers</h2></div></header><div class="rank-list" id="browser-list"></div></section>
-        <section class="panel panel--wide panel--events" aria-labelledby="actions-title"><header class="panel-heading"><div><p class="panel-kicker">Interactions</p><h2 id="actions-title">Tracked actions</h2></div><span class="event-pill">Page-view routes</span></header><div class="event-grid" id="action-list"></div></section>
+        <section class="panel panel--wide panel--events" aria-labelledby="actions-title"><header class="panel-heading"><div><p class="panel-kicker">Interactions</p><h2 id="actions-title">Tracked actions</h2></div><span class="event-pill">Redis counters</span></header><div class="event-grid" id="action-list"></div></section>
       </div>
 
-      <footer class="dashboard-footer"><span id="updated-at">Not refreshed yet</span><span>Private · noindex · Vercel Web Analytics</span></footer>
-    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20260731-hobby1"></script>');
+      <footer class="dashboard-footer"><span id="updated-at">Not refreshed yet</span><span>Private · noindex · Vercel Web Analytics + Upstash Redis</span></footer>
+    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20260801-redis1"></script>');
 }
 
 module.exports = function handler(req, res) {

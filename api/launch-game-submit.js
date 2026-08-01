@@ -1,3 +1,5 @@
+const counters = require('../lib/analytics-counters');
+
 const MAX_SCORE = 4000;
 const DRY_RUN_USERNAME = 'test_nalihtin';
 const DEFAULT_EMAIL_FROM = 'Formula Racing Camp <game@formularacingcamp.com>';
@@ -416,6 +418,21 @@ emailStatus = 'failed';
 }
 }
 
+let analyticsCounterStatus = 'skipped_invalid';
+if (review.status !== 'invalid' && !isTestLeaderboard) {
+if (!counters.redisConfig().configured) {
+analyticsCounterStatus = 'not_configured';
+} else {
+try {
+const counted = await counters.incrementSubmission(entry.sessionId, new Date(entry.serverReceivedAt));
+analyticsCounterStatus = counted ? 'counted' : 'duplicate';
+} catch (error) {
+console.error('Launch game analytics counter failed', error);
+analyticsCounterStatus = 'failed';
+}
+}
+}
+
 res.status(review.status === 'invalid' ? 400 : 200).json({
 ok: review.status !== 'invalid',
 entryId: payload.sessionId,
@@ -423,6 +440,7 @@ entryBucket: entry.entryBucket,
 reviewStatus: review.status,
 flags: review.flags,
 leaderboardStatus,
-emailStatus
+emailStatus,
+analyticsCounterStatus
 });
 }

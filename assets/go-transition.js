@@ -22,6 +22,15 @@
   link.href = destination.url;
   link.setAttribute('aria-label', `Continue to ${destination.name}`);
 
+  if (transition === 'book') {
+    const store = bookDestinations[selectedStore] ? selectedStore : 'notion_press';
+    windowObject.frcTrackAction?.('book_store_selected', { store });
+  } else if (transition === 'puzzles') {
+    windowObject.frcTrackAction?.('puzzles_opened');
+  } else if (transition === 'youtube') {
+    windowObject.frcTrackAction?.('youtube_opened');
+  }
+
   const localPreview = document.documentElement.dataset.preview === 'true';
   if (localPreview) {
     document.getElementById('countdown').textContent = 'Local preview — automatic continuation is paused.';

@@ -26,7 +26,7 @@ function authenticatedCookie(password) {
 }
 
 function saveEnvironment() {
-  const names = ['ANALYTICS_DASHBOARD_PASSWORD', 'VERCEL_ANALYTICS_TOKEN', 'VERCEL_ANALYTICS_PROJECT_ID', 'VERCEL_ANALYTICS_TEAM_ID', 'VERCEL'];
+  const names = ['ANALYTICS_DASHBOARD_PASSWORD', 'VERCEL_ANALYTICS_TOKEN', 'VERCEL_ANALYTICS_PROJECT_ID', 'VERCEL_ANALYTICS_TEAM_ID', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'KV_REST_API_URL', 'KV_REST_API_TOKEN', 'VERCEL'];
   const saved = Object.fromEntries(names.map((name) => [name, process.env[name]]));
   return () => names.forEach((name) => {
     if (saved[name] === undefined) delete process.env[name];
@@ -68,7 +68,7 @@ test('localhost gets clearly labeled transition-route sample data only', { concu
   restore();
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.sample, true);
-  assert.deepEqual(res.body.actions.map(({ name, requestPath }) => ({ name, requestPath })), analyticsData.TRACKED_ACTIONS);
+  assert.deepEqual(res.body.actions.map(({ key, name }) => ({ key, name })), analyticsData.TRACKED_ACTIONS.map(({ key, name }) => ({ key, name })));
   assert.equal('events' in res.body, false);
 });
 
@@ -118,22 +118,21 @@ test('production queries only visit aggregates, official dimensions, and limits 
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.sample, false);
   assert.equal('events' in res.body, false);
-  assert.deepEqual(res.body.actions.map(({ name, requestPath }) => ({ name, requestPath })), analyticsData.TRACKED_ACTIONS);
-  assert.ok(requestedUrls.length >= 8);
+  assert.deepEqual(res.body.actions.map(({ key, name }) => ({ key, name })), analyticsData.TRACKED_ACTIONS.map(({ key, name }) => ({ key, name })));
+  assert.equal(res.body.actionsAvailable, false);
+  assert.equal(requestedUrls.length, 6);
   requestedUrls.forEach((url) => {
     const parsed = new URL(url);
     assert.match(parsed.pathname, /\/visits\/aggregate$/);
     assert.doesNotMatch(parsed.pathname, /\/events\//);
+    assert.equal(parsed.searchParams.has('filter'), false);
     assert.ok(Number(parsed.searchParams.get('limit')) <= 100);
     parsed.searchParams.getAll('by').forEach((dimension) => {
       assert.ok(['requestPath', 'referrerHostname', 'deviceType', 'browserName', 'day'].includes(dimension));
     });
   });
-  analyticsData.TRACKED_ACTIONS.forEach(({ requestPath }) => {
-    assert.ok(requestedUrls.some((url) => new URL(url).searchParams.get('filter') === `requestPath eq '${requestPath}'`));
-  });
   const dailyUrls = requestedUrls.map((url) => new URL(url)).filter((url) => url.searchParams.getAll('by').includes('day'));
-  assert.ok(dailyUrls.length >= 8);
+  assert.equal(dailyUrls.length, 2);
   dailyUrls.forEach((url) => {
     assert.ok(analyticsData.daysInRange({ since: url.searchParams.get('since'), until: url.searchParams.get('until') }) <= analyticsData.MAX_DAILY_QUERY_DAYS);
   });
@@ -186,15 +185,17 @@ test('client code has no Hobby-incompatible custom-event calls', () => {
   assert.doesNotMatch(source, /trackFrcEvent|\btrack\s*\(|window\.va\s*\(\s*['"]event/);
 });
 
-test('transition pages record exact route page views before continuing', () => {
+test('transition pages increment Redis actions before continuing', () => {
   for (const route of ['book', 'puzzles', 'youtube']) {
     const html = fs.readFileSync(path.join(projectRoot, 'go', route, 'index.html'), 'utf8');
     assert.match(html, /\/_vercel\/insights\/script\.js/);
     assert.match(html, new RegExp(`history\\.replaceState\\(null,'','/go/${route}/'\\)`));
     assert.match(html, /id="continue-link"/);
+    assert.match(html, /interaction-counter\.js/);
     assert.match(html, /go-transition\.js/);
   }
   const transitionScript = fs.readFileSync(path.join(projectRoot, 'assets', 'go-transition.js'), 'utf8');
+  assert.match(transitionScript, /frcTrackAction/);
   assert.match(transitionScript, /setTimeout/);
   assert.match(transitionScript, /location\.assign/);
 });

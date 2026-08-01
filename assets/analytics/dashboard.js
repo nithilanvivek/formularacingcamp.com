@@ -28,6 +28,8 @@
       sampleBadge.hidden = !payload.sample;
       dashboardStatus.textContent = payload.sample
         ? `Showing clearly labeled localhost sample data for the last ${payload.range.days} days`
+        : !payload.actionsAvailable
+          ? 'Traffic loaded; interaction counters are temporarily unavailable'
         : payload.waitingForVisitorData
           ? 'Waiting for more visitor data'
           : payload.range.limited
@@ -128,15 +130,15 @@
       title.textContent = valueOf(action, ['name']);
       const count = document.createElement('span');
       count.className = 'event-count';
-      count.textContent = formatNumber(action.pageviews);
+      count.textContent = formatNumber(action.count);
       top.append(title, count);
       const meta = document.createElement('p');
       meta.className = 'event-meta';
-      meta.textContent = `${formatNumber(action.visitors)} visitors · ${formatNumber(action.pageviews)} page views`;
+      meta.textContent = action.detail || 'Tracked interaction';
       card.append(top, meta);
       const route = document.createElement('p');
       route.className = 'action-route';
-      route.textContent = action.requestPath;
+      route.textContent = action.metricLabel || 'actions';
       card.append(route);
       container.append(card);
     });

@@ -1,4 +1,5 @@
 const crypto = require('node:crypto');
+const counters = require('../lib/analytics-counters');
 
 const VERCEL_ANALYTICS_URL = 'https://api.vercel.com/v1/query/web-analytics';
 const COOKIE_NAME = 'frc_analytics_access';
@@ -6,11 +7,7 @@ const ALLOWED_RANGES = new Set([7, 30, 90]);
 const MAX_AGGREGATE_LIMIT = 100;
 const MAX_DAILY_QUERY_DAYS = 62;
 const HOBBY_REPORTING_DAYS = 31;
-const TRACKED_ACTIONS = [
-  { requestPath: '/game', name: 'Discount game' },
-  { requestPath: '/go/puzzles/', name: 'F1 puzzles' },
-  { requestPath: '/go/youtube/', name: 'YouTube channel' }
-];
+const TRACKED_ACTIONS = counters.ACTION_DEFINITIONS;
 
 function secureEqual(left, right) {
   const leftBuffer = Buffer.from(String(left || ''), 'utf8');
@@ -74,10 +71,6 @@ function isLocalRequest(req) {
   return !process.env.VERCEL && ['localhost', '127.0.0.1', '::1'].includes(hostname);
 }
 
-function odataString(value) {
-  return `'${String(value).replace(/'/g, "''")}'`;
-}
-
 function samplePayload(days, range) {
   const trend = Array.from({ length: days }, (_, index) => {
     const date = new Date(`${range.since}T00:00:00.000Z`);
@@ -85,11 +78,8 @@ function samplePayload(days, range) {
     const wave = Math.round(9 + Math.sin(index / 2.4) * 5 + (index % 5));
     return { timestamp: date.toISOString(), pageviews: wave * 3, visitors: wave * 2 };
   });
-  const actions = [
-    { name: 'Discount game', requestPath: '/game', pageviews: 26, visitors: 19 },
-    { name: 'F1 puzzles', requestPath: '/go/puzzles/', pageviews: 18, visitors: 14 },
-    { name: 'YouTube channel', requestPath: '/go/youtube/', pageviews: 12, visitors: 10 }
-  ];
+  const sampleCounts = [8, 26, 7, 5, 3, 11, 18, 12];
+  const actions = TRACKED_ACTIONS.map((action, index) => ({ ...action, count: sampleCounts[index] || 0 }));
   return {
     sample: true,
     generatedAt: new Date().toISOString(),
@@ -97,8 +87,8 @@ function samplePayload(days, range) {
     summary: {
       pageviews: sum(trend, 'pageviews'),
       visitors: sum(trend, 'visitors'),
-      interactions: sum(actions, 'pageviews'),
-      actionTypes: actions.filter((action) => action.pageviews > 0).length
+      interactions: sum(actions, 'count'),
+      actionTypes: actions.filter((action) => action.count > 0).length
     },
     trend,
     topPages: [{ requestPath: '/', pageviews: 248, visitors: 162 }, { requestPath: '/puzzles', pageviews: 91, visitors: 55 }, { requestPath: '/preview', pageviews: 64, visitors: 39 }, { requestPath: '/game', pageviews: 47, visitors: 31 }],
@@ -106,6 +96,7 @@ function samplePayload(days, range) {
     devices: [{ deviceType: 'desktop', pageviews: 226, visitors: 148 }, { deviceType: 'mobile', pageviews: 171, visitors: 107 }, { deviceType: 'tablet', pageviews: 53, visitors: 32 }],
     browsers: [{ browserName: 'Chrome', pageviews: 252, visitors: 166 }, { browserName: 'Safari', pageviews: 132, visitors: 83 }, { browserName: 'Edge', pageviews: 43, visitors: 25 }],
     actions,
+    actionsAvailable: true,
     waitingForVisitorData: false
   };
 }
@@ -167,18 +158,14 @@ module.exports = async function handler(req, res) {
   }
 
   async function loadRange(queryRange) {
-    const actionQueries = TRACKED_ACTIONS.map((action) => dailyQuery(queryRange, {
-      filter: `requestPath eq ${odataString(action.requestPath)}`
-    }));
-    const [trend, topPages, referrers, devices, browsers, ...actionSeries] = await Promise.all([
+    const [trend, topPages, referrers, devices, browsers] = await Promise.all([
       dailyQuery(queryRange),
       query('requestPath', { limit: 12, range: queryRange }),
       query('referrerHostname', { limit: 10, range: queryRange }),
       query('deviceType', { limit: 8, range: queryRange }),
-      query('browserName', { limit: 10, range: queryRange }),
-      ...actionQueries
+      query('browserName', { limit: 10, range: queryRange })
     ]);
-    return { trend, topPages, referrers, devices, browsers, actionSeries };
+    return { trend, topPages, referrers, devices, browsers };
   }
 
   try {
@@ -192,12 +179,15 @@ module.exports = async function handler(req, res) {
       queryRange = dateRange(HOBBY_REPORTING_DAYS);
       rangeData = await loadRange(queryRange);
     }
-    const { trend, topPages, referrers, devices, browsers, actionSeries } = rangeData;
-    const actions = TRACKED_ACTIONS.map((action, index) => ({
-      ...action,
-      pageviews: sum(actionSeries[index], 'pageviews'),
-      visitors: sum(actionSeries[index], 'visitors')
-    }));
+    const { trend, topPages, referrers, devices, browsers } = rangeData;
+    let actionData;
+    try {
+      actionData = await counters.readActions(range);
+    } catch (error) {
+      console.error('Analytics counters could not be loaded:', error.message);
+      actionData = { configured: false, actions: TRACKED_ACTIONS.map((action) => ({ ...action, count: 0 })) };
+    }
+    const actions = actionData.actions;
     const pageviews = sum(trend, 'pageviews');
     const detailsAvailable = [topPages, referrers, devices, browsers].some((rows) => rows.length > 0);
 
@@ -213,8 +203,8 @@ module.exports = async function handler(req, res) {
       summary: {
         pageviews,
         visitors: sum(trend, 'visitors'),
-        interactions: sum(actions, 'pageviews'),
-        actionTypes: actions.filter((action) => action.pageviews > 0).length
+        interactions: sum(actions, 'count'),
+        actionTypes: actions.filter((action) => action.count > 0).length
       },
       trend,
       topPages,
@@ -222,6 +212,7 @@ module.exports = async function handler(req, res) {
       devices,
       browsers,
       actions,
+      actionsAvailable: actionData.configured,
       waitingForVisitorData: pageviews === 0 || !detailsAvailable
     });
   } catch (error) {

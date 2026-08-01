@@ -135,6 +135,9 @@ if (buyBookFlip && buyBookButton) {
 buyBookButton.addEventListener('click', () => {
 const isFlipped = buyBookFlip.classList.toggle('is-flipped');
 buyBookButton.setAttribute('aria-expanded', String(isFlipped));
+if (isFlipped) {
+window.frcTrackAction?.('purchase_opened');
+}
 });
 
 document.addEventListener('click', (event) => {
