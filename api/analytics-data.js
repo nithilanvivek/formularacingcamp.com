@@ -7,7 +7,7 @@ const MAX_AGGREGATE_LIMIT = 100;
 const MAX_DAILY_QUERY_DAYS = 62;
 const HOBBY_REPORTING_DAYS = 31;
 const TRACKED_ACTIONS = [
-  { requestPath: '/go/book/', name: 'Official book' },
+  { requestPath: '/game', name: 'Discount game' },
   { requestPath: '/go/puzzles/', name: 'F1 puzzles' },
   { requestPath: '/go/youtube/', name: 'YouTube channel' }
 ];
@@ -86,7 +86,7 @@ function samplePayload(days, range) {
     return { timestamp: date.toISOString(), pageviews: wave * 3, visitors: wave * 2 };
   });
   const actions = [
-    { name: 'Official book', requestPath: '/go/book/', pageviews: 26, visitors: 19 },
+    { name: 'Discount game', requestPath: '/game', pageviews: 26, visitors: 19 },
     { name: 'F1 puzzles', requestPath: '/go/puzzles/', pageviews: 18, visitors: 14 },
     { name: 'YouTube channel', requestPath: '/go/youtube/', pageviews: 12, visitors: 10 }
   ];

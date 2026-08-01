@@ -199,6 +199,11 @@ test('transition pages record exact route page views before continuing', () => {
   assert.match(transitionScript, /location\.assign/);
 });
 
+test('homepage header includes the tracked YouTube route', () => {
+  const homepage = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
+  assert.match(homepage, /class="header-action header-action-youtube" href="\/go\/youtube"/);
+});
+
 test('analytics routes are excluded from search engines', () => {
   const robots = fs.readFileSync(path.join(projectRoot, 'robots.txt'), 'utf8');
   assert.match(robots, /Disallow: \/analytics\//);
