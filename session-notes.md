@@ -719,3 +719,32 @@ Current state:
 Next step:
 
 - Confirm the production deployment has picked up `51f1ea8` and spot-check the header retailer flip on the live desktop and mobile site.
+
+## Preview Reader Analytics Wrap-Up
+
+Date: 2026-08-04
+
+Completed:
+
+- Added a dedicated Preview readers card to the private analytics dashboard.
+- The metric uses Vercel Web Analytics visitors for `/preview` within the selected 7, 30, or 90-day range.
+- Labeled the card as visitors who opened the preview so it does not imply that analytics can verify every PDF page was read.
+- Added cache-busted dashboard assets and automated coverage for the dashboard card, sample payload, production query filter, and returned preview totals.
+
+Validation performed:
+
+- `npm test`: 16 tests passed.
+- JavaScript syntax checks passed for the analytics API, access page, and dashboard client.
+- `git diff --check` passed.
+- No preview servers were found on ports `3000`, `4173`, `5173`, `8000`, `8080`, or `8787`.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest analytics implementation commit: `0a01206 Add preview readers to analytics`.
+- Remote: `https://github.com/nithilanvivek/formularacingcamp.com.git`.
+- Production domain: `https://www.formularacingcamp.com`.
+
+Next step:
+
+- Confirm production deploys `0a01206`, then sign in at `https://www.formularacingcamp.com/analytics` and verify Preview readers returns the live `/preview` visitor count for each date range.
