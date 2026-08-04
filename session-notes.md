@@ -689,3 +689,33 @@ Exact resume point:
 1. Open `https://www.formularacingcamp.com/analytics`, sign in, and confirm the status changes to real production data or `Waiting for more visitor data` without a 502 error.
 2. If it still fails, inspect the latest `/api/analytics-data` function log. The previously observed upstream message was `Not authorized`; do not recreate custom events or add production sample data.
 3. Confirm `/go/book/`, `/go/puzzles/`, and `/go/youtube/` begin appearing after eligible human page views; Vercel detail panels may lag totals by a few days.
+
+## Header Purchase Flip Wrap-Up
+
+Date: 2026-08-04
+
+Completed:
+
+- Replaced the header Purchase anchor with a compact Buy Book flip control matching the homepage retailer interaction.
+- Added direct Amazon print, Amazon Kindle, Flipkart, and Notion Press options to the flipped header panel.
+- Made the other header actions temporarily hide while the retailer panel is open, then return on outside click or Escape.
+- Kept the header retailer panel on one compact row at mobile sizes and prevented horizontal overflow.
+- Generalized the purchase interaction so the header and homepage controls share open, close, accessibility, and analytics behavior.
+
+Validation performed:
+
+- `npm test`: 15 tests passed.
+- `node --check app.js` and `git diff --check` passed.
+- Local browser checks passed at desktop and phone widths for flipping, responsive sizing, action hiding/restoration, outside-click closing, and horizontal overflow.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest pushed code commit before this wrap-up: `51f1ea8 Add retailer flip to header purchase button`.
+- Remote: `https://github.com/nithilanvivek/formularacingcamp.com.git`.
+- Production domain: `https://www.formularacingcamp.com`.
+- The temporary local preview server on port `4173` was stopped.
+
+Next step:
+
+- Confirm the production deployment has picked up `51f1ea8` and spot-check the header retailer flip on the live desktop and mobile site.
