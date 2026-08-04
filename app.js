@@ -119,38 +119,52 @@ if (bookAnnouncementClose) {
 bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
 }
 
-const buyBookFlip = document.querySelector('[data-buy-book-flip]');
-const buyBookButton = document.getElementById('cta-button');
+const buyBookFlips = Array.from(document.querySelectorAll('[data-buy-book-flip]'));
 
-function closeBuyBookFlip() {
-if (!buyBookFlip || !buyBookButton) {
+function setBuyBookFlipState(buyBookFlip, isFlipped) {
+const buyBookButton = buyBookFlip.querySelector('[data-buy-book-toggle]');
+buyBookFlip.classList.toggle('is-flipped', isFlipped);
+buyBookButton?.setAttribute('aria-expanded', String(isFlipped));
+
+const headerActions = buyBookFlip.closest('.header-actions');
+headerActions?.classList.toggle('is-purchase-open', isFlipped);
+}
+
+function closeBuyBookFlips(exceptFlip) {
+buyBookFlips.forEach((buyBookFlip) => {
+if (buyBookFlip !== exceptFlip) {
+setBuyBookFlipState(buyBookFlip, false);
+}
+});
+}
+
+buyBookFlips.forEach((buyBookFlip) => {
+const buyBookButton = buyBookFlip.querySelector('[data-buy-book-toggle]');
+if (!buyBookButton) {
 return;
 }
 
-buyBookFlip.classList.remove('is-flipped');
-buyBookButton.setAttribute('aria-expanded', 'false');
-}
-
-if (buyBookFlip && buyBookButton) {
 buyBookButton.addEventListener('click', () => {
-const isFlipped = buyBookFlip.classList.toggle('is-flipped');
-buyBookButton.setAttribute('aria-expanded', String(isFlipped));
+const isFlipped = !buyBookFlip.classList.contains('is-flipped');
+closeBuyBookFlips(buyBookFlip);
+setBuyBookFlipState(buyBookFlip, isFlipped);
 if (isFlipped) {
 window.frcTrackAction?.('purchase_opened');
 }
 });
+});
 
+if (buyBookFlips.length) {
 document.addEventListener('click', (event) => {
-if (!buyBookFlip.classList.contains('is-flipped') || buyBookFlip.contains(event.target)) {
-return;
+const activeFlip = buyBookFlips.find((buyBookFlip) => buyBookFlip.classList.contains('is-flipped'));
+if (activeFlip && !activeFlip.contains(event.target)) {
+closeBuyBookFlips();
 }
-
-closeBuyBookFlip();
 });
 
 document.addEventListener('keydown', (event) => {
 if (event.key === 'Escape') {
-closeBuyBookFlip();
+closeBuyBookFlips();
 }
 });
 }
