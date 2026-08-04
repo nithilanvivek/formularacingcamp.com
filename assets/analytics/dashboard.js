@@ -43,6 +43,7 @@
   function render(payload) {
     document.getElementById('visitors-total').textContent = formatNumber(payload.summary.visitors);
     document.getElementById('pageviews-total').textContent = formatNumber(payload.summary.pageviews);
+    document.getElementById('preview-readers-total').textContent = formatNumber(payload.preview?.visitors);
     document.getElementById('interactions-total').textContent = formatNumber(payload.summary.interactions);
     document.getElementById('action-types-total').textContent = formatNumber(payload.summary.actionTypes);
 

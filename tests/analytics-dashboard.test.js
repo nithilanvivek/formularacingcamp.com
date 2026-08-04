@@ -45,6 +45,21 @@ test('dashboard rejects an incorrect password with 401', { concurrency: false },
   assert.match(res.headers['x-robots-tag'], /noindex/);
 });
 
+test('dashboard includes the preview reader metric', { concurrency: false }, () => {
+  const restore = saveEnvironment();
+  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
+  const req = {
+    method: 'GET',
+    headers: { cookie: authenticatedCookie('test-password') }
+  };
+  const res = responseRecorder();
+  analyticsAccess(req, res);
+  restore();
+  assert.equal(res.statusCode, 200);
+  assert.match(res.body, /id="preview-readers-total"/);
+  assert.match(res.body, /Visitors who opened \/preview/);
+});
+
 test('analytics API rejects requests without an authenticated cookie', { concurrency: false }, async () => {
   const restore = saveEnvironment();
   process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
@@ -68,6 +83,7 @@ test('localhost gets clearly labeled transition-route sample data only', { concu
   restore();
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.sample, true);
+  assert.deepEqual(res.body.preview, { requestPath: '/preview', pageviews: 64, visitors: 39 });
   assert.deepEqual(res.body.actions.map(({ key, name }) => ({ key, name })), analyticsData.TRACKED_ACTIONS.map(({ key, name }) => ({ key, name })));
   assert.equal('events' in res.body, false);
 });
@@ -102,7 +118,9 @@ test('production queries only visit aggregates, official dimensions, and limits 
     const filter = parsed.searchParams.get('filter') || '';
     let data = [];
     if (by === 'day') data = [{ timestamp: '2026-07-31T00:00:00.000Z', pageviews: filter ? 2 : 20, visitors: filter ? 1 : 12 }];
-    if (by === 'requestPath') data = [{ requestPath: '/', pageviews: 20, visitors: 12 }];
+    if (by === 'requestPath') data = filter
+      ? [{ requestPath: '/preview', pageviews: 9, visitors: 6 }]
+      : [{ requestPath: '/', pageviews: 20, visitors: 12 }];
     if (by === 'referrerHostname') data = [{ referrerHostname: 'google.com', pageviews: 8, visitors: 6 }];
     if (by === 'deviceType') data = [{ deviceType: 'desktop', pageviews: 12, visitors: 8 }];
     if (by === 'browserName') data = [{ browserName: 'Chrome', pageviews: 10, visitors: 7 }];
@@ -117,20 +135,24 @@ test('production queries only visit aggregates, official dimensions, and limits 
 
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.sample, false);
+  assert.deepEqual(res.body.preview, { requestPath: '/preview', pageviews: 9, visitors: 6 });
   assert.equal('events' in res.body, false);
   assert.deepEqual(res.body.actions.map(({ key, name }) => ({ key, name })), analyticsData.TRACKED_ACTIONS.map(({ key, name }) => ({ key, name })));
   assert.equal(res.body.actionsAvailable, false);
-  assert.equal(requestedUrls.length, 6);
+  assert.equal(requestedUrls.length, 7);
   requestedUrls.forEach((url) => {
     const parsed = new URL(url);
     assert.match(parsed.pathname, /\/visits\/aggregate$/);
     assert.doesNotMatch(parsed.pathname, /\/events\//);
-    assert.equal(parsed.searchParams.has('filter'), false);
     assert.ok(Number(parsed.searchParams.get('limit')) <= 100);
     parsed.searchParams.getAll('by').forEach((dimension) => {
       assert.ok(['requestPath', 'referrerHostname', 'deviceType', 'browserName', 'day'].includes(dimension));
     });
   });
+  const filteredUrls = requestedUrls.map((url) => new URL(url)).filter((url) => url.searchParams.has('filter'));
+  assert.equal(filteredUrls.length, 1);
+  assert.equal(filteredUrls[0].searchParams.get('filter'), "requestPath eq '/preview'");
+  assert.deepEqual(filteredUrls[0].searchParams.getAll('by'), ['requestPath']);
   const dailyUrls = requestedUrls.map((url) => new URL(url)).filter((url) => url.searchParams.getAll('by').includes('day'));
   assert.equal(dailyUrls.length, 2);
   dailyUrls.forEach((url) => {

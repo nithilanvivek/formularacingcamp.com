@@ -7,6 +7,7 @@ const ALLOWED_RANGES = new Set([7, 30, 90]);
 const MAX_AGGREGATE_LIMIT = 100;
 const MAX_DAILY_QUERY_DAYS = 62;
 const HOBBY_REPORTING_DAYS = 31;
+const PREVIEW_PATH = '/preview';
 const TRACKED_ACTIONS = counters.ACTION_DEFINITIONS;
 
 function secureEqual(left, right) {
@@ -71,6 +72,10 @@ function isLocalRequest(req) {
   return !process.env.VERCEL && ['localhost', '127.0.0.1', '::1'].includes(hostname);
 }
 
+function odataString(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
 function samplePayload(days, range) {
   const trend = Array.from({ length: days }, (_, index) => {
     const date = new Date(`${range.since}T00:00:00.000Z`);
@@ -95,6 +100,7 @@ function samplePayload(days, range) {
     referrers: [{ referrerHostname: 'google.com', pageviews: 104, visitors: 78 }, { referrerHostname: 'youtube.com', pageviews: 48, visitors: 34 }, { referrerHostname: 'Direct', pageviews: 42, visitors: 30 }],
     devices: [{ deviceType: 'desktop', pageviews: 226, visitors: 148 }, { deviceType: 'mobile', pageviews: 171, visitors: 107 }, { deviceType: 'tablet', pageviews: 53, visitors: 32 }],
     browsers: [{ browserName: 'Chrome', pageviews: 252, visitors: 166 }, { browserName: 'Safari', pageviews: 132, visitors: 83 }, { browserName: 'Edge', pageviews: 43, visitors: 25 }],
+    preview: { requestPath: PREVIEW_PATH, pageviews: 64, visitors: 39 },
     actions,
     actionsAvailable: true,
     waitingForVisitorData: false
@@ -158,14 +164,19 @@ module.exports = async function handler(req, res) {
   }
 
   async function loadRange(queryRange) {
-    const [trend, topPages, referrers, devices, browsers] = await Promise.all([
+    const [trend, topPages, referrers, devices, browsers, previewRows] = await Promise.all([
       dailyQuery(queryRange),
       query('requestPath', { limit: 12, range: queryRange }),
       query('referrerHostname', { limit: 10, range: queryRange }),
       query('deviceType', { limit: 8, range: queryRange }),
-      query('browserName', { limit: 10, range: queryRange })
+      query('browserName', { limit: 10, range: queryRange }),
+      query('requestPath', {
+        limit: 1,
+        range: queryRange,
+        filter: `requestPath eq ${odataString(PREVIEW_PATH)}`
+      })
     ]);
-    return { trend, topPages, referrers, devices, browsers };
+    return { trend, topPages, referrers, devices, browsers, previewRows };
   }
 
   try {
@@ -179,7 +190,7 @@ module.exports = async function handler(req, res) {
       queryRange = dateRange(HOBBY_REPORTING_DAYS);
       rangeData = await loadRange(queryRange);
     }
-    const { trend, topPages, referrers, devices, browsers } = rangeData;
+    const { trend, topPages, referrers, devices, browsers, previewRows } = rangeData;
     let actionData;
     try {
       actionData = await counters.readActions(range);
@@ -211,6 +222,11 @@ module.exports = async function handler(req, res) {
       referrers,
       devices,
       browsers,
+      preview: {
+        requestPath: PREVIEW_PATH,
+        pageviews: sum(previewRows, 'pageviews'),
+        visitors: sum(previewRows, 'visitors')
+      },
       actions,
       actionsAvailable: actionData.configured,
       waitingForVisitorData: pageviews === 0 || !detailsAvailable
@@ -228,5 +244,6 @@ module.exports.TRACKED_ACTIONS = TRACKED_ACTIONS;
 module.exports.MAX_AGGREGATE_LIMIT = MAX_AGGREGATE_LIMIT;
 module.exports.MAX_DAILY_QUERY_DAYS = MAX_DAILY_QUERY_DAYS;
 module.exports.HOBBY_REPORTING_DAYS = HOBBY_REPORTING_DAYS;
+module.exports.PREVIEW_PATH = PREVIEW_PATH;
 module.exports.daysInRange = daysInRange;
 module.exports.splitRange = splitRange;

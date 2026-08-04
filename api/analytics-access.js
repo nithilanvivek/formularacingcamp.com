@@ -60,7 +60,7 @@ function documentShell(content, title, scripts = '') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/analytics/dashboard.css?v=20260731-hobby1">
+  <link rel="stylesheet" href="/assets/analytics/dashboard.css?v=20260804-preview1">
 </head>
 <body>
   <div class="site-shell">
@@ -131,6 +131,7 @@ function dashboardPage() {
       <div class="metric-grid" aria-label="Analytics summary">
         <article class="metric-card metric-card--blue"><p>Visitors</p><strong id="visitors-total">—</strong><span>Privacy-friendly daily visitors</span></article>
         <article class="metric-card metric-card--orange"><p>Page views</p><strong id="pageviews-total">—</strong><span>Pages opened</span></article>
+        <article class="metric-card metric-card--red"><p>Preview readers</p><strong id="preview-readers-total">—</strong><span>Visitors who opened /preview</span></article>
         <article class="metric-card metric-card--green"><p>Tracked actions</p><strong id="interactions-total">—</strong><span>Verified interaction counts</span></article>
         <article class="metric-card metric-card--purple"><p>Action types</p><strong id="action-types-total">—</strong><span>Distinct actions used</span></article>
       </div>
@@ -152,7 +153,7 @@ function dashboardPage() {
       </div>
 
       <footer class="dashboard-footer"><span id="updated-at">Not refreshed yet</span><span>Private · noindex · Vercel Web Analytics + Upstash Redis</span></footer>
-    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20260801-redis1"></script>');
+    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20260804-preview1"></script>');
 }
 
 module.exports = function handler(req, res) {
