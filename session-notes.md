@@ -748,3 +748,35 @@ Current state:
 Next step:
 
 - Confirm production deploys `0a01206`, then sign in at `https://www.formularacingcamp.com/analytics` and verify Preview readers returns the live `/preview` visitor count for each date range.
+
+## Progressive Preview Performance Wrap-Up
+
+Date: 2026-08-06
+
+Completed:
+
+- Replaced the immediate 17.4 MB embedded preview PDF with a 13-page WebP reader.
+- Configured the first page for eager loading and the remaining pages for native lazy loading, with intrinsic dimensions and deferred off-screen rendering.
+- Reduced the complete WebP page set to about 1.32 MB and the optional web-linearized PDF to about 1.54 MB.
+- Added immutable caching for the preview-page WebP assets and week-long shared caching for the PDF fallback.
+- Pushed code commit `62bf872 Render book preview as optimized page images` to `main`.
+- Deployed Vercel production deployment `dpl_294KqGxSn37yerGceFZtcpTMqnaY`, aliased to `https://www.formularacingcamp.com`.
+
+Validation performed:
+
+- `npm test`: 16 tests passed.
+- `qpdf` syntax and linearization checks passed for the optimized PDF.
+- Confirmed all 13 WebP references exist, use the expected dimensions, and configure lazy loading after the first page.
+- Local desktop and mobile browser checks passed with no horizontal overflow or console errors.
+- Verified the production preview returns `200`, the first WebP is served as `image/webp` with immutable caching, and the PDF is served as `application/pdf` with the configured cache policy.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Production preview: `https://www.formularacingcamp.com/preview`.
+- Production deployment state: `READY`.
+
+Next steps:
+
+- Monitor the private Preview readers analytics card after eligible human visits.
+- Consider replacing the homepage Tailwind browser CDN with compiled local CSS if further first-load improvements are needed.
