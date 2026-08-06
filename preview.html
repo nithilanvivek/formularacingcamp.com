@@ -56,12 +56,12 @@
 body {
 margin: 0;
 font-family: Arial, sans-serif;
-background: #f8f9fa;
+background: #eef2f7;
 color: #1f2937;
 }
 
 main {
-max-width: 960px;
+max-width: 920px;
 margin: 0 auto;
 padding: 2rem 1rem;
 }
@@ -71,47 +71,67 @@ color: #0066cc;
 font-weight: 700;
 }
 
-.preview-frame {
+.preview-intro {
+margin-bottom: 1.5rem;
+}
+
+.preview-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 0.75rem;
+align-items: center;
+margin-top: 1rem;
+}
+
+.preview-actions a {
+display: inline-block;
+padding: 0.7rem 1rem;
+border-radius: 999px;
+background: #0066cc;
+color: #ffffff;
+text-decoration: none;
+}
+
+.preview-actions span {
+color: #4b5563;
+font-size: 0.9rem;
+}
+
+.preview-pages {
+display: grid;
+gap: 1.5rem;
+}
+
+.preview-page {
+margin: 0;
+content-visibility: auto;
+contain-intrinsic-block-size: auto 1260px;
+}
+
+.preview-page img {
+display: block;
 width: 100%;
-height: min(80vh, 920px);
-border: 2px solid #d1d5db;
+height: auto;
+border: 1px solid #d1d5db;
 border-radius: 8px;
 background: #ffffff;
+box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
 }
 
-.preview-shell {
-position: relative;
+.preview-page figcaption {
+padding-top: 0.45rem;
+color: #64748b;
+font-size: 0.85rem;
+text-align: center;
 }
 
-.preview-loading {
-position: absolute;
-inset: 2px;
-display: grid;
-place-items: center;
-border-radius: 6px;
-background: #ffffff;
-transition: opacity 180ms ease;
-pointer-events: none;
+@media (max-width: 640px) {
+main {
+padding: 1.25rem 0.75rem;
 }
 
-.preview-loading::before {
-content: "";
-width: 44px;
-height: 44px;
-border: 5px solid #dbeafe;
-border-top-color: #0096ff;
-border-radius: 50%;
-animation: preview-spin 800ms linear infinite;
-}
-
-.preview-shell.is-loaded .preview-loading {
-opacity: 0;
-visibility: hidden;
-}
-
-@keyframes preview-spin {
-to {
-transform: rotate(360deg);
+h1 {
+font-size: 1.65rem;
 }
 }
 </style>
@@ -121,14 +141,29 @@ transform: rotate(360deg);
 <body>
 <main>
 <p><a href="/">Formula Racing Camp</a></p>
+<div class="preview-intro">
 <h1>Formula Racing Camp Book Preview</h1>
 <p>Read sample pages from the student-created Formula Racing Camp educational racing book for readers ages 9 and older.</p>
-<div class="preview-shell" id="preview-shell">
-<object class="preview-frame" data="/assets/site/formula-racing-camp-book-preview.pdf" type="application/pdf" onload="document.getElementById('preview-shell').classList.add('is-loaded')">
-<p>The preview PDF is embedded on this page. <a href="/assets/site/formula-racing-camp-book-preview.pdf">Open the Formula Racing Camp preview PDF directly</a>.</p>
-</object>
-<div class="preview-loading" aria-label="Loading preview"></div>
+<div class="preview-actions">
+<a href="/assets/site/formula-racing-camp-book-preview.pdf">Open as PDF</a>
+<span>13 pages · 1.6 MB PDF</span>
 </div>
+</div>
+<section class="preview-pages" aria-label="Formula Racing Camp sample pages">
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-01.webp" alt="Formula Racing Camp sample page 1 of 13" width="1191" height="1684" decoding="async" fetchpriority="high"><figcaption>Preview page 1 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-02.webp" alt="Formula Racing Camp sample page 2 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 2 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-03.webp" alt="Formula Racing Camp sample page 3 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 3 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-04.webp" alt="Formula Racing Camp sample page 4 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 4 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-05.webp" alt="Formula Racing Camp sample page 5 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 5 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-06.webp" alt="Formula Racing Camp sample page 6 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 6 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-07.webp" alt="Formula Racing Camp sample page 7 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 7 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-08.webp" alt="Formula Racing Camp sample page 8 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 8 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-09.webp" alt="Formula Racing Camp sample page 9 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 9 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-10.webp" alt="Formula Racing Camp sample page 10 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 10 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-11.webp" alt="Formula Racing Camp sample page 11 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 11 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-12.webp" alt="Formula Racing Camp sample page 12 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 12 of 13</figcaption></figure>
+<figure class="preview-page"><img src="/assets/site/preview-pages/page-13.webp" alt="Formula Racing Camp sample page 13 of 13" width="1191" height="1684" loading="lazy" decoding="async"><figcaption>Preview page 13 of 13</figcaption></figure>
+</section>
 </main>
 </body>
 </html>
