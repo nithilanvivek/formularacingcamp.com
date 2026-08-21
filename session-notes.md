@@ -780,3 +780,35 @@ Next steps:
 
 - Monitor the private Preview readers analytics card after eligible human visits.
 - Consider replacing the homepage Tailwind browser CDN with compiled local CSS if further first-load improvements are needed.
+
+## 404 Pit Lane Game Wrap-Up
+
+Date: 2026-08-21
+
+Completed:
+
+- Added a glowing `Play 404 Game` action between the Go back and Back to home controls on the custom error page.
+- Built the Slipstream Collector canvas game with an F1 car, a growing trail, themed tyre, helmet, trophy, fuel, and chequered-flag pickups, scoring, replay, pausing, and locally remembered best scores.
+- Added keyboard, touch-button, and swipe steering, including dominant-axis gesture detection and short-tap rejection.
+- Added responsive modal layout, reduced-motion handling, background focus isolation, focus restoration, and mobile-friendly controls.
+- Improved the tyre and helmet artwork for clearer small-scale recognition.
+- Made race-over copy distinguish barrier collisions from crashes into the player's own slipstream.
+
+Validation performed:
+
+- Parsed every inline script in `404.html` with Node.js.
+- `npm test`: 16 tests passed.
+- `vercel build`: completed successfully.
+- `git diff --check`: passed.
+- Desktop and 390-by-844 mobile browser checks passed for layout, opening and closing, start, steering, pause and resume, collision, replay, focus handling, and console errors.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Remote: `https://github.com/nithilanvivek/formularacingcamp.com.git`.
+- Production target: `https://www.formularacingcamp.com` through the linked Vercel project `formularacingcamp-com`.
+- No project preview servers were found on common ports during wrap-up.
+
+Next step:
+
+- Monitor production 404-game behavior on real touch devices after deployment.

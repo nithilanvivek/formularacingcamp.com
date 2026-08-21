@@ -14,6 +14,7 @@ The website has been converted from the original Canva AI Code exports into a st
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
 - `preview.html` - progressive WebP book preview with an optimized PDF fallback, available at `/preview`.
 - `game.html` - Launch Grand Prix game page, available at `/game`.
+- `404.html` - custom error page with a built-in F1-themed collection game.
 - `launch-game.css` - Launch Grand Prix styles.
 - `launch-game.js` - Launch Grand Prix browser game logic and test-mode handling.
 - `api/launch-game-submit.js` - Vercel Function endpoint for launch game submissions and review flags.
@@ -32,7 +33,7 @@ The current deployable entry point is `index.html`, with the puzzles page availa
 
 ## Latest Session State
 
-As of 2026-08-06:
+As of 2026-08-21:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
@@ -55,6 +56,7 @@ As of 2026-08-06:
 - The book preview uses 13 lazy-loaded WebP pages instead of immediately embedding the original 17.4 MB PDF.
 - The fallback preview PDF is web-linearized and reduced to about 1.6 MB.
 - The optimized preview is deployed to production at `https://www.formularacingcamp.com/preview`.
+- The custom 404 page includes a responsive F1-car collection game with keyboard, touch-button, and swipe steering, themed pickups, local best-score storage, and collision-specific race-over messages.
 
 ## Site Content
 

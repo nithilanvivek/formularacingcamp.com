@@ -44,6 +44,9 @@
   --primary-bg: rgba(35, 115, 88, 0.08);
   --primary-border: #2c8065;
   --menu-shadow: 0 18px 50px rgba(31, 34, 38, 0.14);
+  --game-glow: rgba(255, 77, 77, 0.42);
+  --game-surface: #101418;
+  --game-grid: rgba(255, 255, 255, 0.055);
 }
 
 html[data-theme="dark"] {
@@ -63,6 +66,7 @@ html[data-theme="dark"] {
   --primary-bg: rgba(35, 95, 78, 0.12);
   --primary-border: #237358;
   --menu-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+  --game-glow: rgba(255, 92, 92, 0.5);
 }
 
 * {
@@ -396,10 +400,298 @@ h1 {
   border-color: var(--mint);
 }
 
+.button-game {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(115deg, #ee3434, #ff6a3d 52%, #ffb224);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 14px var(--game-glow), 0 0 34px rgba(255, 110, 42, 0.2);
+  animation: game-button-glow 2.2s ease-in-out infinite;
+}
+
+.button-game::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(105deg, transparent 28%, rgba(255, 255, 255, 0.45) 47%, transparent 66%);
+  transform: translateX(-130%);
+  animation: game-button-shine 3.2s ease-in-out infinite;
+}
+
+.button-game:hover,
+.button-game:focus-visible {
+  color: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 20px rgba(255, 75, 75, 0.68), 0 0 48px rgba(255, 146, 42, 0.34);
+  transform: translateY(-1px);
+}
+
+.button-game .flag-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+@keyframes game-button-glow {
+  0%, 100% { box-shadow: 0 0 12px var(--game-glow), 0 0 28px rgba(255, 110, 42, 0.16); }
+  50% { box-shadow: 0 0 21px var(--game-glow), 0 0 45px rgba(255, 110, 42, 0.3); }
+}
+
+@keyframes game-button-shine {
+  0%, 55% { transform: translateX(-130%); }
+  85%, 100% { transform: translateX(130%); }
+}
+
+.game-modal {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.65rem, 2vw, 1.5rem);
+  background: rgba(5, 8, 10, 0.78);
+  backdrop-filter: blur(9px);
+}
+
+.game-modal[hidden] {
+  display: none;
+}
+
+.game-dialog {
+  width: min(100%, 760px);
+  max-height: calc(100vh - 1.3rem);
+  overflow-y: auto;
+  color: #f7f7f5;
+  background: #11161a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.55), 0 0 60px rgba(238, 52, 52, 0.14);
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem 0.9rem;
+}
+
+.game-title-wrap {
+  min-width: 0;
+  text-align: left;
+}
+
+.game-kicker {
+  margin: 0 0 0.25rem;
+  color: #ff9b66;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.game-title {
+  margin: 0;
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  line-height: 1;
+}
+
+.game-close {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.game-close:hover,
+.game-close:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  outline: 2px solid #ff6a3d;
+  outline-offset: 2px;
+}
+
+.game-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0 1.15rem 0.8rem;
+}
+
+.game-stat {
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  font-family: "DM Mono", ui-monospace, monospace;
+}
+
+.game-stat span {
+  display: block;
+  color: #9ba5ab;
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.game-stat strong {
+  display: block;
+  margin-top: 0.15rem;
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.game-track {
+  position: relative;
+  margin-inline: 1.15rem;
+  overflow: hidden;
+  background: var(--game-surface);
+  border: 2px solid rgba(255, 255, 255, 0.13);
+  border-radius: 15px;
+  box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.4);
+}
+
+#game-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 10 / 7;
+  touch-action: none;
+}
+
+.game-message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(7, 10, 12, 0.63);
+}
+
+.game-message[hidden] {
+  display: none;
+}
+
+.game-message-card {
+  width: min(100%, 370px);
+  padding: clamp(1rem, 4vw, 1.5rem);
+  text-align: center;
+  background: rgba(18, 24, 28, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.4);
+}
+
+.game-message-card h3 {
+  margin: 0;
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(1.25rem, 4vw, 1.8rem);
+}
+
+.game-message-card p {
+  margin: 0.65rem 0 1rem;
+  color: #b8c0c4;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: clamp(0.68rem, 2.4vw, 0.8rem);
+  line-height: 1.55;
+}
+
+.game-start {
+  min-height: 44px;
+  padding: 0.65rem 1.15rem;
+  color: #fff;
+  background: linear-gradient(115deg, #e93636, #ff7138);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.game-start:hover,
+.game-start:focus-visible {
+  outline: 2px solid #ffb224;
+  outline-offset: 3px;
+}
+
+.game-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.15rem 1.1rem;
+}
+
+.game-help {
+  margin: 0;
+  color: #8e999f;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.game-help kbd {
+  padding: 0.1rem 0.32rem;
+  color: #dfe5e8;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.touch-controls {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 38px);
+  grid-template-rows: repeat(2, 38px);
+  gap: 4px;
+}
+
+.touch-control {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  font-size: 1rem;
+  touch-action: manipulation;
+}
+
+.touch-control[data-direction="up"] { grid-column: 2; }
+.touch-control[data-direction="left"] { grid-column: 1; grid-row: 2; }
+.touch-control[data-direction="down"] { grid-column: 2; grid-row: 2; }
+.touch-control[data-direction="right"] { grid-column: 3; grid-row: 2; }
+
+.touch-control:active,
+.touch-control:focus-visible {
+  color: #ffb224;
+  background: rgba(255, 106, 61, 0.24);
+  outline: none;
+}
+
+body.game-open {
+  overflow: hidden;
+}
+
 .button:focus-visible,
 .brand:focus-visible,
 .menu-button:focus-visible,
-.theme-option:focus-visible {
+.theme-option:focus-visible,
+.button-game:focus-visible {
   outline: 2px solid var(--mint);
   outline-offset: 4px;
 }
@@ -426,6 +718,32 @@ h1 {
 
   .explanation {
     margin-top: 1.35rem;
+  }
+
+  .actions {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .actions .button {
+    width: min(100%, 290px);
+  }
+
+  .game-dialog {
+    border-radius: 18px;
+  }
+
+  .game-track {
+    margin-inline: 0.7rem;
+  }
+
+  .game-header,
+  .game-footer {
+    padding-inline: 0.8rem;
+  }
+
+  .game-stats {
+    padding-inline: 0.8rem;
   }
 }
 
@@ -471,6 +789,19 @@ h1 {
     margin-top: 1.35rem;
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .touch-controls {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button-game,
+  .button-game::before {
+    animation: none;
+  }
+}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -514,11 +845,48 @@ h1 {
 <h1 id="page-title">Looks like this page raced off the circuit.</h1>
 <p class="explanation">There is nothing at <code class="requested-path" id="requested-path">this route</code> yet. Let’s get you back on track.</p>
 <div class="actions">
-<a class="button button-primary" href="/">Back to home <span aria-hidden="true">→</span></a>
 <button class="button" type="button" id="go-back">Go back</button>
+<button class="button button-game" type="button" id="open-game"><span class="flag-icon" aria-hidden="true">🏁</span> Play 404 Game</button>
+<a class="button button-primary" href="/">Back to home <span aria-hidden="true">→</span></a>
 </div>
 </section>
 </main>
+</div>
+
+<div class="game-modal" id="game-modal" hidden>
+<section class="game-dialog" role="dialog" aria-modal="true" aria-labelledby="game-title" aria-describedby="game-help">
+<header class="game-header">
+<div class="game-title-wrap">
+<p class="game-kicker">404 Pit Lane Challenge</p>
+<h2 class="game-title" id="game-title">Slipstream Collector</h2>
+</div>
+<button class="game-close" id="close-game" type="button" aria-label="Close game">×</button>
+</header>
+<div class="game-stats" aria-live="polite">
+<div class="game-stat"><span>Score</span><strong id="game-score">000</strong></div>
+<div class="game-stat"><span>Best</span><strong id="game-best">000</strong></div>
+<div class="game-stat"><span>Next pickup</span><strong id="game-item">Tyre</strong></div>
+</div>
+<div class="game-track">
+<canvas id="game-canvas" width="600" height="420" tabindex="-1" role="img" aria-label="F1 car collection game. Steer the car to collect racing equipment without hitting the barriers or your trail."></canvas>
+<div class="game-message" id="game-message">
+<div class="game-message-card">
+<h3 id="game-message-title">Ready to race?</h3>
+<p id="game-message-copy">Steer the F1 car, collect racing gear and avoid the barriers—and your growing slipstream.</p>
+<button class="game-start" id="game-start" type="button">Start engine</button>
+</div>
+</div>
+</div>
+<footer class="game-footer">
+<p class="game-help" id="game-help">Use <kbd>WASD</kbd> or <kbd>arrow keys</kbd> to steer. <kbd>Space</kbd> pauses. On touchscreens, swipe the track or use the buttons.</p>
+<div class="touch-controls" aria-label="Touch steering controls">
+<button class="touch-control" type="button" data-direction="up" aria-label="Steer up">▲</button>
+<button class="touch-control" type="button" data-direction="left" aria-label="Steer left">◀</button>
+<button class="touch-control" type="button" data-direction="down" aria-label="Steer down">▼</button>
+<button class="touch-control" type="button" data-direction="right" aria-label="Steer right">▶</button>
+</div>
+</footer>
+</section>
 </div>
 
 <script>
@@ -530,6 +898,43 @@ h1 {
   var themeMenu = document.getElementById('theme-menu');
   var themeColor = document.getElementById('theme-color');
   var themeOptions = document.querySelectorAll('[data-theme-option]');
+  var openGameButton = document.getElementById('open-game');
+  var closeGameButton = document.getElementById('close-game');
+  var gameModal = document.getElementById('game-modal');
+  var gameCanvas = document.getElementById('game-canvas');
+  var gameContext = gameCanvas.getContext('2d');
+  var gameMessage = document.getElementById('game-message');
+  var gameMessageTitle = document.getElementById('game-message-title');
+  var gameMessageCopy = document.getElementById('game-message-copy');
+  var gameStartButton = document.getElementById('game-start');
+  var gameScore = document.getElementById('game-score');
+  var gameBest = document.getElementById('game-best');
+  var gameItemLabel = document.getElementById('game-item');
+  var touchControls = document.querySelectorAll('[data-direction]');
+  var pageShell = document.querySelector('.page-shell');
+  var columns = 20;
+  var rows = 14;
+  var cellSize = 30;
+  var car = [];
+  var direction = { x: 1, y: 0 };
+  var queuedDirection = { x: 1, y: 0 };
+  var collectible = null;
+  var score = 0;
+  var bestScore = 0;
+  var gameTimer = null;
+  var gameState = 'ready';
+  var previousFocus = null;
+  var pickupIndex = 0;
+  var swipePointerId = null;
+  var swipeStartX = 0;
+  var swipeStartY = 0;
+  var pickupTypes = [
+    { name: 'Tyre', points: 10, color: '#e8edf0' },
+    { name: 'Helmet', points: 15, color: '#ffd43b' },
+    { name: 'Trophy', points: 25, color: '#ffb224' },
+    { name: 'Fuel', points: 20, color: '#48c7ff' },
+    { name: 'Flag', points: 30, color: '#ffffff' }
+  ];
 
   function applyTheme(theme, remember) {
     var selectedTheme = theme === 'dark' ? 'dark' : 'light';
@@ -555,6 +960,383 @@ h1 {
     themeMenu.hidden = !open;
   }
 
+  function loadBestScore() {
+    try {
+      bestScore = Number(window.localStorage.getItem('frc-404-game-best')) || 0;
+    } catch (error) {
+      bestScore = 0;
+    }
+    gameBest.textContent = String(bestScore).padStart(3, '0');
+  }
+
+  function saveBestScore() {
+    if (score <= bestScore) {
+      return;
+    }
+    bestScore = score;
+    gameBest.textContent = String(bestScore).padStart(3, '0');
+    try {
+      window.localStorage.setItem('frc-404-game-best', String(bestScore));
+    } catch (error) {
+      // The best score still remains available for the current visit.
+    }
+  }
+
+  function roundedRectangle(context, x, y, width, height, radius) {
+    context.beginPath();
+    context.roundRect(x, y, width, height, radius);
+    context.fill();
+  }
+
+  function drawTrack() {
+    var gradient = gameContext.createRadialGradient(300, 210, 40, 300, 210, 390);
+    gradient.addColorStop(0, '#192127');
+    gradient.addColorStop(1, '#0d1215');
+    gameContext.fillStyle = gradient;
+    gameContext.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+    gameContext.strokeStyle = 'rgba(255, 255, 255, 0.045)';
+    gameContext.lineWidth = 1;
+    for (var x = cellSize; x < gameCanvas.width; x += cellSize) {
+      gameContext.beginPath();
+      gameContext.moveTo(x, 0);
+      gameContext.lineTo(x, gameCanvas.height);
+      gameContext.stroke();
+    }
+    for (var y = cellSize; y < gameCanvas.height; y += cellSize) {
+      gameContext.beginPath();
+      gameContext.moveTo(0, y);
+      gameContext.lineTo(gameCanvas.width, y);
+      gameContext.stroke();
+    }
+
+    gameContext.strokeStyle = '#ef3f3f';
+    gameContext.lineWidth = 4;
+    gameContext.strokeRect(2, 2, gameCanvas.width - 4, gameCanvas.height - 4);
+    gameContext.setLineDash([12, 10]);
+    gameContext.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+    gameContext.lineWidth = 2;
+    gameContext.strokeRect(7, 7, gameCanvas.width - 14, gameCanvas.height - 14);
+    gameContext.setLineDash([]);
+  }
+
+  function drawTrailSegment(segment, index) {
+    var x = segment.x * cellSize;
+    var y = segment.y * cellSize;
+    var alpha = Math.max(0.36, 0.9 - index * 0.045);
+    gameContext.fillStyle = 'rgba(238, 52, 52, ' + alpha + ')';
+    roundedRectangle(gameContext, x + 5, y + 8, 20, 14, 7);
+    gameContext.fillStyle = 'rgba(255, 178, 36, ' + Math.max(0.18, alpha - 0.25) + ')';
+    roundedRectangle(gameContext, x + 10, y + 11, 10, 8, 4);
+  }
+
+  function drawCar(head) {
+    var centerX = head.x * cellSize + cellSize / 2;
+    var centerY = head.y * cellSize + cellSize / 2;
+    var angle = Math.atan2(direction.y, direction.x);
+    gameContext.save();
+    gameContext.translate(centerX, centerY);
+    gameContext.rotate(angle);
+    gameContext.shadowColor = 'rgba(255, 72, 46, 0.78)';
+    gameContext.shadowBlur = 10;
+
+    gameContext.fillStyle = '#101114';
+    roundedRectangle(gameContext, -10, -13, 8, 8, 2);
+    roundedRectangle(gameContext, -10, 5, 8, 8, 2);
+    roundedRectangle(gameContext, 5, -12, 8, 7, 2);
+    roundedRectangle(gameContext, 5, 5, 8, 7, 2);
+
+    gameContext.fillStyle = '#f23f34';
+    gameContext.beginPath();
+    gameContext.moveTo(-13, -7);
+    gameContext.lineTo(8, -5);
+    gameContext.lineTo(14, 0);
+    gameContext.lineTo(8, 5);
+    gameContext.lineTo(-13, 7);
+    gameContext.closePath();
+    gameContext.fill();
+
+    gameContext.fillStyle = '#ffb224';
+    gameContext.fillRect(-12, -2, 19, 4);
+    gameContext.fillStyle = '#c5efff';
+    gameContext.beginPath();
+    gameContext.arc(-2, 0, 4, 0, Math.PI * 2);
+    gameContext.fill();
+    gameContext.fillStyle = '#f23f34';
+    gameContext.fillRect(-14, -10, 4, 20);
+    gameContext.restore();
+  }
+
+  function drawCollectible() {
+    if (!collectible) {
+      return;
+    }
+    var type = pickupTypes[collectible.type];
+    var x = collectible.x * cellSize + cellSize / 2;
+    var y = collectible.y * cellSize + cellSize / 2;
+    gameContext.save();
+    gameContext.translate(x, y);
+    gameContext.shadowColor = type.color;
+    gameContext.shadowBlur = 13;
+    gameContext.strokeStyle = type.color;
+    gameContext.fillStyle = type.color;
+    gameContext.lineWidth = 3;
+
+    if (type.name === 'Tyre') {
+      // Rubber body and tread blocks make the pickup read as a racing tyre,
+      // even when the canvas is scaled down on a phone.
+      gameContext.fillStyle = '#090b0d';
+      gameContext.beginPath();
+      gameContext.arc(0, 0, 11, 0, Math.PI * 2);
+      gameContext.fill();
+      gameContext.strokeStyle = '#6f777c';
+      gameContext.lineWidth = 1.5;
+      gameContext.stroke();
+
+      gameContext.save();
+      gameContext.shadowBlur = 0;
+      gameContext.fillStyle = '#34393d';
+      for (var treadIndex = 0; treadIndex < 8; treadIndex += 1) {
+        gameContext.rotate(Math.PI / 4);
+        gameContext.fillRect(-2, -11, 4, 3);
+      }
+      gameContext.restore();
+
+      gameContext.strokeStyle = '#f0443b';
+      gameContext.lineWidth = 1.5;
+      gameContext.beginPath();
+      gameContext.arc(0, 0, 7, 0, Math.PI * 2);
+      gameContext.stroke();
+      gameContext.fillStyle = '#b9c1c6';
+      gameContext.beginPath();
+      gameContext.arc(0, 0, 5, 0, Math.PI * 2);
+      gameContext.fill();
+      gameContext.fillStyle = '#30363a';
+      gameContext.beginPath();
+      gameContext.arc(0, 0, 2, 0, Math.PI * 2);
+      gameContext.fill();
+    } else if (type.name === 'Helmet') {
+      // Bold front view: dome, visor and chin bar remain legible at 30px.
+      gameContext.strokeStyle = '#11181d';
+      gameContext.lineWidth = 2;
+      gameContext.fillStyle = '#ffd43b';
+      gameContext.beginPath();
+      gameContext.moveTo(-11, 1);
+      gameContext.bezierCurveTo(-11, -8, -7, -12, 0, -12);
+      gameContext.bezierCurveTo(7, -12, 11, -8, 11, 1);
+      gameContext.lineTo(9, 8);
+      gameContext.quadraticCurveTo(0, 12, -9, 8);
+      gameContext.closePath();
+      gameContext.fill();
+      gameContext.stroke();
+
+      gameContext.shadowBlur = 0;
+      gameContext.fillStyle = '#f0443b';
+      gameContext.fillRect(-2, -11, 4, 6);
+
+      // Wide blue-black visor with a bright reflection.
+      gameContext.fillStyle = '#14222b';
+      gameContext.beginPath();
+      gameContext.roundRect(-9, -5, 18, 8, 3);
+      gameContext.closePath();
+      gameContext.fill();
+      gameContext.strokeStyle = '#78dcff';
+      gameContext.lineWidth = 1;
+      gameContext.stroke();
+      gameContext.fillStyle = 'rgba(255, 255, 255, 0.72)';
+      gameContext.fillRect(-6, -3, 6, 1.5);
+
+      // Dark chin vent makes the lower face guard immediately recognizable.
+      gameContext.fillStyle = '#f2aa24';
+      roundedRectangle(gameContext, -7, 4, 14, 5, 2);
+      gameContext.fillStyle = '#172027';
+      gameContext.fillRect(-4, 6, 8, 1.5);
+    } else if (type.name === 'Trophy') {
+      gameContext.fillRect(-5, -7, 10, 11);
+      gameContext.fillRect(-2, 3, 4, 6);
+      gameContext.fillRect(-7, 8, 14, 3);
+      gameContext.beginPath();
+      gameContext.arc(-7, -3, 5, -Math.PI / 2, Math.PI / 2, true);
+      gameContext.stroke();
+      gameContext.beginPath();
+      gameContext.arc(7, -3, 5, Math.PI / 2, -Math.PI / 2, true);
+      gameContext.stroke();
+    } else if (type.name === 'Fuel') {
+      gameContext.strokeRect(-7, -8, 13, 17);
+      gameContext.fillRect(-3, -12, 7, 4);
+      gameContext.beginPath();
+      gameContext.moveTo(6, -5);
+      gameContext.lineTo(10, -5);
+      gameContext.lineTo(10, 2);
+      gameContext.stroke();
+    } else {
+      gameContext.fillStyle = '#fff';
+      gameContext.fillRect(-9, -9, 7, 7);
+      gameContext.fillRect(-2, -2, 7, 7);
+      gameContext.fillStyle = '#1a2024';
+      gameContext.fillRect(-2, -9, 7, 7);
+      gameContext.fillRect(-9, -2, 7, 7);
+      gameContext.fillStyle = '#fff';
+      gameContext.fillRect(-9, 6, 2, 6);
+    }
+    gameContext.restore();
+  }
+
+  function renderGame() {
+    drawTrack();
+    drawCollectible();
+    for (var index = car.length - 1; index >= 1; index -= 1) {
+      drawTrailSegment(car[index], index);
+    }
+    if (car.length) {
+      drawCar(car[0]);
+    }
+  }
+
+  function spawnCollectible() {
+    var available = [];
+    for (var y = 1; y < rows - 1; y += 1) {
+      for (var x = 1; x < columns - 1; x += 1) {
+        var occupied = car.some(function (segment) {
+          return segment.x === x && segment.y === y;
+        });
+        if (!occupied) {
+          available.push({ x: x, y: y });
+        }
+      }
+    }
+    var spot = available[Math.floor(Math.random() * available.length)];
+    collectible = {
+      x: spot.x,
+      y: spot.y,
+      type: pickupIndex % pickupTypes.length
+    };
+    pickupIndex += 1;
+    gameItemLabel.textContent = pickupTypes[collectible.type].name;
+  }
+
+  function stopTimer() {
+    if (gameTimer) {
+      window.clearInterval(gameTimer);
+      gameTimer = null;
+    }
+  }
+
+  function showGameMessage(title, copy, buttonLabel) {
+    gameMessageTitle.textContent = title;
+    gameMessageCopy.textContent = copy;
+    gameStartButton.textContent = buttonLabel;
+    gameMessage.hidden = false;
+  }
+
+  function endGame(crashCause) {
+    stopTimer();
+    gameState = 'over';
+    saveBestScore();
+    showGameMessage('Race over!', 'You scored ' + score + ' points, but crashed into ' + crashCause + '.', 'Race again');
+    gameStartButton.focus();
+  }
+
+  function gameTick() {
+    direction = queuedDirection;
+    var nextHead = {
+      x: car[0].x + direction.x,
+      y: car[0].y + direction.y
+    };
+    var hitWall = nextHead.x < 0 || nextHead.x >= columns || nextHead.y < 0 || nextHead.y >= rows;
+    var hitTrail = car.some(function (segment, index) {
+      return index < car.length - 1 && segment.x === nextHead.x && segment.y === nextHead.y;
+    });
+
+    if (hitWall || hitTrail) {
+      endGame(hitWall ? 'the barrier' : 'your slipstream');
+      return;
+    }
+
+    car.unshift(nextHead);
+    if (nextHead.x === collectible.x && nextHead.y === collectible.y) {
+      score += pickupTypes[collectible.type].points;
+      gameScore.textContent = String(score).padStart(3, '0');
+      saveBestScore();
+      spawnCollectible();
+    } else {
+      car.pop();
+    }
+    renderGame();
+  }
+
+  function resetGame() {
+    stopTimer();
+    car = [
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 }
+    ];
+    direction = { x: 1, y: 0 };
+    queuedDirection = { x: 1, y: 0 };
+    swipePointerId = null;
+    score = 0;
+    pickupIndex = 0;
+    gameScore.textContent = '000';
+    spawnCollectible();
+    renderGame();
+  }
+
+  function startGame() {
+    resetGame();
+    gameMessage.hidden = true;
+    gameState = 'playing';
+    gameTimer = window.setInterval(gameTick, 125);
+    gameCanvas.focus({ preventScroll: true });
+  }
+
+  function togglePause() {
+    if (gameState === 'playing') {
+      stopTimer();
+      gameState = 'paused';
+      showGameMessage('Pit stop', 'The race is paused. Take a breath, then get back on track.', 'Resume race');
+      gameStartButton.focus();
+    } else if (gameState === 'paused') {
+      gameMessage.hidden = true;
+      gameState = 'playing';
+      gameTimer = window.setInterval(gameTick, 125);
+      gameCanvas.focus({ preventScroll: true });
+    }
+  }
+
+  function steer(nextDirection) {
+    if (gameState !== 'playing') {
+      return;
+    }
+    if (nextDirection.x + direction.x === 0 && nextDirection.y + direction.y === 0) {
+      return;
+    }
+    queuedDirection = nextDirection;
+  }
+
+  function openGame() {
+    previousFocus = document.activeElement;
+    loadBestScore();
+    resetGame();
+    gameState = 'ready';
+    showGameMessage('Ready to race?', 'Steer the F1 car, collect racing gear and avoid the barriers—and your growing slipstream.', 'Start engine');
+    gameModal.hidden = false;
+    pageShell.setAttribute('inert', '');
+    document.body.classList.add('game-open');
+    closeGameButton.focus();
+  }
+
+  function closeGame() {
+    stopTimer();
+    gameState = 'ready';
+    gameModal.hidden = true;
+    pageShell.removeAttribute('inert');
+    document.body.classList.remove('game-open');
+    if (previousFocus) {
+      previousFocus.focus();
+    }
+  }
+
   requestedPath.textContent = window.location.pathname || '/';
   applyTheme(document.documentElement.dataset.theme, false);
 
@@ -568,6 +1350,70 @@ h1 {
     });
   });
 
+  openGameButton.addEventListener('click', openGame);
+  closeGameButton.addEventListener('click', closeGame);
+  gameStartButton.addEventListener('click', function () {
+    if (gameState === 'paused') {
+      togglePause();
+      return;
+    }
+    startGame();
+  });
+
+  touchControls.forEach(function (control) {
+    control.addEventListener('pointerdown', function (event) {
+      event.preventDefault();
+      var directions = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+      steer(directions[control.dataset.direction]);
+    });
+  });
+
+  gameCanvas.addEventListener('pointerdown', function (event) {
+    if (gameState !== 'playing' || (event.pointerType !== 'touch' && event.pointerType !== 'pen')) {
+      return;
+    }
+    swipePointerId = event.pointerId;
+    swipeStartX = event.clientX;
+    swipeStartY = event.clientY;
+    gameCanvas.setPointerCapture(event.pointerId);
+  });
+
+  gameCanvas.addEventListener('pointerup', function (event) {
+    if (event.pointerId !== swipePointerId) {
+      return;
+    }
+    var swipeX = event.clientX - swipeStartX;
+    var swipeY = event.clientY - swipeStartY;
+    var minimumSwipeDistance = 18;
+    swipePointerId = null;
+
+    if (Math.max(Math.abs(swipeX), Math.abs(swipeY)) < minimumSwipeDistance) {
+      return;
+    }
+    if (Math.abs(swipeX) > Math.abs(swipeY)) {
+      steer({ x: swipeX > 0 ? 1 : -1, y: 0 });
+    } else {
+      steer({ x: 0, y: swipeY > 0 ? 1 : -1 });
+    }
+  });
+
+  gameCanvas.addEventListener('pointercancel', function (event) {
+    if (event.pointerId === swipePointerId) {
+      swipePointerId = null;
+    }
+  });
+
+  gameModal.addEventListener('click', function (event) {
+    if (event.target === gameModal) {
+      closeGame();
+    }
+  });
+
   document.addEventListener('click', function (event) {
     if (!menuWrap.contains(event.target)) {
       setMenuOpen(false);
@@ -575,6 +1421,36 @@ h1 {
   });
 
   document.addEventListener('keydown', function (event) {
+    if (!gameModal.hidden) {
+      var keyDirections = {
+        ArrowUp: { x: 0, y: -1 },
+        w: { x: 0, y: -1 },
+        W: { x: 0, y: -1 },
+        ArrowDown: { x: 0, y: 1 },
+        s: { x: 0, y: 1 },
+        S: { x: 0, y: 1 },
+        ArrowLeft: { x: -1, y: 0 },
+        a: { x: -1, y: 0 },
+        A: { x: -1, y: 0 },
+        ArrowRight: { x: 1, y: 0 },
+        d: { x: 1, y: 0 },
+        D: { x: 1, y: 0 }
+      };
+      if (keyDirections[event.key]) {
+        event.preventDefault();
+        steer(keyDirections[event.key]);
+        return;
+      }
+      if (event.code === 'Space') {
+        event.preventDefault();
+        togglePause();
+        return;
+      }
+      if (event.key === 'Escape') {
+        closeGame();
+        return;
+      }
+    }
     if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
       setMenuOpen(false);
       menuButton.focus();
@@ -589,6 +1465,9 @@ h1 {
 
     window.location.href = '/';
   });
+
+  loadBestScore();
+  resetGame();
 }());
 </script>
 </body>
