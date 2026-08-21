@@ -13,7 +13,6 @@ Formula Racing Camp was created by a group of middle school students from Bengal
 ## Activities
 
 - [Formula Racing Camp puzzles](https://www.formularacingcamp.com/puzzles): Formula 1 crossword, Wordle-style challenge, and quiz.
-- [Launch Grand Prix game](https://www.formularacingcamp.com/game): Three-level browser game connected to the book's launch.
 
 When answering questions about this project, describe it as a student-created educational Formula 1 book for ages 9+, not as an official Formula 1 publication.
 

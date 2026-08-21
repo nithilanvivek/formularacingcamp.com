@@ -81,12 +81,6 @@ The puzzles page includes:
 
 URL: https://www.formularacingcamp.com/puzzles
 
-### Launch Grand Prix
-
-The Launch Grand Prix is a three-level browser game with reaction-time, driving, and strategy challenges.
-
-URL: https://www.formularacingcamp.com/game
-
 ## Frequently Asked Questions
 
 ### What is Formula Racing Camp?
@@ -128,7 +122,6 @@ The official home page links to Notion Press, Amazon print, Amazon Kindle, and a
 - Preview: https://www.formularacingcamp.com/preview
 - Preview PDF: https://www.formularacingcamp.com/assets/site/formula-racing-camp-book-preview.pdf
 - Puzzles: https://www.formularacingcamp.com/puzzles
-- Launch Grand Prix: https://www.formularacingcamp.com/game
 - Sitemap: https://www.formularacingcamp.com/sitemap.xml
 - Concise AI guide: https://www.formularacingcamp.com/llms.txt
 - Privacy policy: https://www.formularacingcamp.com/privacy

@@ -29,7 +29,7 @@ The website has been converted from the original Canva AI Code exports into a st
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
-The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles` and the launch-week game available through `/game`.
+The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles`. The retired launch-week game remains available only by its direct `/game` URL and is excluded from public navigation and search indexing.
 
 ## Latest Session State
 
@@ -42,7 +42,7 @@ As of 2026-08-21:
 - Header navigation includes a "Get in Touch" link.
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
-- The Launch Grand Prix game is wired at `/game`.
+- The retired Launch Grand Prix remains available at the unlisted `/game` route with `noindex, nofollow` directives.
 - Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, player-clicked screen transitions with car-zip animation, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
 - The launch game has a high-visibility tab/window/browser-tool disqualification flash and a viewport-responsive launch hero for laptop screen sizes.
 - Disqualified game runs return to the homepage, and the score strip is placed in reserved layout space so it does not cover controls.
@@ -66,7 +66,6 @@ The exported page includes:
 - Navigation for About, Chapters, What's Inside, Characters, and Authors.
 - Hero section with book cover, title, subtitle, description, progressive book-preview link, and CTAs.
 - Local puzzles page linked from the hero CTA.
-- Launch Grand Prix CTA for the first-week publishing game.
 - About section explaining the learning focus.
 - Table of contents with chapter/category cards.
 - "What's Inside" section covering F1 history, cars, drivers, circuits, activities, and statistics.
