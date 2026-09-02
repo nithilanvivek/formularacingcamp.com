@@ -42,6 +42,7 @@ hamburgerBtn.focus();
 const bookAnnouncement = document.getElementById('book-announcement');
 const bookAnnouncementClose = document.getElementById('book-announcement-close');
 let bookAnnouncementTimer;
+let bookAnnouncementPreviousFocus;
 
 function getRgbChannels(color) {
 const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -84,11 +85,13 @@ return;
 }
 
 updateAnnouncementPalette();
+bookAnnouncementPreviousFocus = document.activeElement;
 document.body.classList.add('announcement-visible');
 bookAnnouncement.classList.add('active');
 bookAnnouncement.setAttribute('aria-hidden', 'false');
+bookAnnouncementClose?.focus();
 clearTimeout(bookAnnouncementTimer);
-bookAnnouncementTimer = setTimeout(hideBookAnnouncement, 6800);
+bookAnnouncementTimer = setTimeout(hideBookAnnouncement, 12000);
 }
 
 
@@ -101,6 +104,9 @@ document.body.classList.remove('announcement-visible');
 bookAnnouncement.classList.remove('active');
 bookAnnouncement.setAttribute('aria-hidden', 'true');
 clearTimeout(bookAnnouncementTimer);
+if (bookAnnouncement.contains(document.activeElement) && bookAnnouncementPreviousFocus instanceof HTMLElement) {
+bookAnnouncementPreviousFocus.focus();
+}
 }
 
 
@@ -118,6 +124,12 @@ scheduleBookAnnouncement();
 if (bookAnnouncementClose) {
 bookAnnouncementClose.addEventListener('click', hideBookAnnouncement);
 }
+
+document.addEventListener('keydown', event => {
+if (event.key === 'Escape' && bookAnnouncement?.classList.contains('active')) {
+hideBookAnnouncement();
+}
+});
 
 const buyBookFlips = Array.from(document.querySelectorAll('[data-buy-book-flip]'));
 

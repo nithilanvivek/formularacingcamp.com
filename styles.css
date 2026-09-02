@@ -639,6 +639,194 @@ transform: translateX(calc(100vw - clamp(170px, 24vw, 320px) - clamp(1rem, 5vw, 
 }
 }
 
+.book-offer-card {
+position: relative;
+z-index: 2;
+width: min(720px, 100%);
+max-height: calc(100vh - 3rem);
+overflow-y: auto;
+padding: clamp(1.6rem, 4vw, 3rem);
+border: 4px solid #06111F;
+border-radius: clamp(24px, 4vw, 40px);
+background:
+radial-gradient(circle at 90% 10%, rgba(255, 176, 0, 0.24), transparent 30%),
+linear-gradient(145deg, #ffffff 0%, #eef8ff 100%);
+box-shadow:
+0 0 0 6px rgba(255, 255, 255, 0.88),
+0 28px 80px rgba(0, 0, 0, 0.42);
+text-align: center;
+}
+
+.book-offer-kicker {
+margin: 0 3rem 0.6rem;
+color: #006FC2;
+font-size: clamp(0.78rem, 1.8vw, 0.95rem);
+font-weight: 800;
+letter-spacing: 0.13em;
+text-transform: uppercase;
+}
+
+.book-offer-title {
+margin: 0 auto;
+max-width: 620px;
+color: #06111F;
+font-family: Fredoka, sans-serif;
+font-size: clamp(2rem, 5vw, 3.7rem);
+font-weight: 700;
+line-height: 0.98;
+}
+
+.book-offer-description {
+max-width: 570px;
+margin: 0.85rem auto 1.35rem;
+color: #344052;
+font-size: clamp(0.95rem, 2vw, 1.08rem);
+line-height: 1.55;
+}
+
+.book-offer-codes {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: clamp(0.75rem, 2.5vw, 1.2rem);
+margin: 0 auto 1.4rem;
+}
+
+.book-offer-code {
+display: grid;
+justify-items: center;
+gap: 0.2rem;
+padding: clamp(1rem, 2.8vw, 1.4rem);
+border: 3px solid #06111F;
+border-radius: 22px;
+color: #ffffff;
+box-shadow: 0 8px 0 #06111F, 0 14px 28px rgba(6, 17, 31, 0.18);
+transform-origin: center;
+animation: discountCodeFlash 1.4s ease-in-out infinite alternate;
+}
+
+.book-offer-code-hardcover {
+background: linear-gradient(145deg, #007DD6, #005A9D);
+}
+
+.book-offer-code-paperback {
+background: linear-gradient(145deg, #FF7A1A, #D94A0A);
+animation-delay: -0.7s;
+}
+
+.book-offer-edition {
+font-family: Fredoka, sans-serif;
+font-size: clamp(1.25rem, 3vw, 1.65rem);
+font-weight: 700;
+}
+
+.book-offer-saving {
+font-size: clamp(0.9rem, 2vw, 1.05rem);
+letter-spacing: 0.04em;
+text-transform: uppercase;
+}
+
+.book-offer-code code {
+width: 100%;
+margin-top: 0.55rem;
+padding: 0.65rem 0.45rem;
+border: 2px dashed currentColor;
+border-radius: 12px;
+background: rgba(255, 255, 255, 0.16);
+color: #ffffff;
+font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+font-size: clamp(1.08rem, 3vw, 1.45rem);
+font-weight: 800;
+letter-spacing: 0.04em;
+}
+
+.book-offer-buy {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 0.7rem;
+min-height: 54px;
+padding: 0.85rem 1.6rem;
+border: 3px solid #06111F;
+border-radius: 999px;
+background: #00E585;
+color: #06111F;
+box-shadow: 0 7px 0 #06111F;
+font-family: Fredoka, sans-serif;
+font-size: clamp(1.05rem, 2.5vw, 1.28rem);
+font-weight: 700;
+text-decoration: none;
+transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.book-offer-buy:hover,
+.book-offer-buy:focus-visible {
+background: #63F5B7;
+box-shadow: 0 4px 0 #06111F;
+outline: 3px solid #FF9500;
+outline-offset: 4px;
+transform: translateY(3px);
+}
+
+.book-offer-note {
+margin: 1rem auto 0;
+color: #4B5563;
+font-size: 0.82rem;
+line-height: 1.45;
+}
+
+@keyframes discountCodeFlash {
+from {
+filter: brightness(0.88) saturate(0.92);
+transform: scale(0.985);
+}
+to {
+filter: brightness(1.14) saturate(1.25);
+transform: scale(1.015);
+}
+}
+
+@media (max-width: 560px) {
+.book-announcement {
+padding: 0.85rem;
+}
+
+.book-offer-card {
+max-height: calc(100vh - 1.7rem);
+padding: 1.35rem 1rem 1.5rem;
+border-radius: 24px;
+}
+
+.book-offer-kicker {
+margin-inline: 2.5rem;
+}
+
+.book-offer-codes {
+grid-template-columns: 1fr;
+}
+
+.book-offer-code {
+grid-template-columns: auto 1fr;
+align-items: center;
+justify-items: start;
+column-gap: 0.7rem;
+padding: 0.9rem 1rem;
+}
+
+.book-offer-saving {
+justify-self: end;
+}
+
+.book-offer-code code {
+grid-column: 1 / -1;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.book-offer-code {
+animation: none;
+}
+}
+
 .book-shadow {
 box-shadow: 0 20px 60px rgba(0, 150, 255, 0.2);
 }
