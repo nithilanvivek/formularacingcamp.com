@@ -15,7 +15,7 @@ const BROWSER_CANDIDATES = [
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
   '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
 ].filter(Boolean);
-const TURNSTILE_AUTOMATIC_WAIT_MS = 15000;
+const TURNSTILE_AUTOMATIC_WAIT_MS = 5000;
 const TURNSTILE_CLICK_RESULT_WAIT_MS = 20000;
 const DEMO_EMAIL = 'security-test@formularacingcamp.com';
 const DEMO_SUBJECT = 'Local security demo – automated contact attempt';
