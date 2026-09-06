@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Contact Form Security Demo</title>
+  <title>nithi.land Contact Security Demo</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body data-demo-token="__DEMO_TOKEN__">
@@ -12,8 +12,8 @@
     <header class="masthead">
       <div>
         <p class="eyebrow">LOCAL SECURITY LAB</p>
-        <h1>Contact bot simulator</h1>
-        <p class="lede">Watch one controlled browser attempt meet the production contact-form defenses.</p>
+        <h1>nithi.land contact bot</h1>
+        <p class="lede">Watch controlled browser attempts meet the live nithi.land contact-form defenses.</p>
       </div>
       <div class="status-card">
         <span class="pulse" aria-hidden="true"></span>
@@ -30,11 +30,11 @@
         <p>Each run opens a fresh, visible Chromium browser window on your computer, visits the live site, types a fixed test message, and observes Turnstile. If its checkbox appears, the bot clicks it once and records whether Cloudflare accepts or rejects that click before attempting Send.</p>
         <div class="target">
           <span>TARGET</span>
-          <strong>www.formularacingcamp.com/#contact</strong>
+          <strong>nithi.land/contact/</strong>
         </div>
         <div class="warning">
           <strong>Live action</strong>
-          <span>Starting may deliver one real email to the configured contact recipient. No reply is needed.</span>
+          <span>Starting may deliver one real nithi.land contact email. No reply is needed.</span>
         </div>
         <div class="controls">
           <button id="start" type="button">START ONE LIVE ATTEMPT <span>→</span></button>
@@ -58,10 +58,10 @@
         <h2>Defense stack under test</h2>
       </div>
       <div class="defense-grid">
-        <div><span class="tag">LAYER 1</span><strong>Same-origin request</strong><p>Rejects direct submissions from unrelated sites.</p></div>
-        <div><span class="tag">LAYER 2</span><strong>Managed Turnstile</strong><p>Evaluates browser and network signals.</p></div>
-        <div><span class="tag">LAYER 3</span><strong>Server verification</strong><p>Checks token, action, hostname, and expiry.</p></div>
-        <div><span class="tag">LAYER 4</span><strong>24-hour rate limit</strong><p>Five successful messages per protected IP or email.</p></div>
+        <div><span class="tag">LAYER 1</span><strong>Required fields</strong><p>Exercises the live Name, Email, Subject, and Message inputs.</p></div>
+        <div><span class="tag">LAYER 2</span><strong>Hidden honeypot</strong><p>Leaves the bot-trap Website field empty for this controlled test.</p></div>
+        <div><span class="tag">LAYER 3</span><strong>Managed Turnstile</strong><p>Records how Cloudflare treats the automated browser and click.</p></div>
+        <div><span class="tag">LAYER 4</span><strong>Server response</strong><p>Reports whether nithi.land accepts, blocks, or rejects the message.</p></div>
       </div>
     </section>
   </main>

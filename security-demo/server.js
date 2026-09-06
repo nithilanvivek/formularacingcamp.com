@@ -7,7 +7,7 @@ const { spawn } = require('node:child_process');
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.FRC_SECURITY_DEMO_PORT || 4173);
-const TARGET_URL = 'https://www.formularacingcamp.com/#contact';
+const TARGET_URL = 'https://nithi.land/contact/';
 const BROWSER_CANDIDATES = [
   process.env.FRC_BROWSER_PATH,
   '/Applications/Chromium.app/Contents/MacOS/Chromium',
@@ -17,9 +17,10 @@ const BROWSER_CANDIDATES = [
 ].filter(Boolean);
 const TURNSTILE_AUTOMATIC_WAIT_MS = 5000;
 const TURNSTILE_CLICK_RESULT_WAIT_MS = 20000;
-const DEMO_EMAIL = 'security-test@formularacingcamp.com';
-const DEMO_SUBJECT = 'Local security demo – automated contact attempt';
-const DEMO_MESSAGE = 'This is one controlled automated security test of the Formula Racing Camp contact form. No reply is needed.';
+const DEMO_NAME = 'Local Security Test';
+const DEMO_EMAIL = 'security-test@nithi.land';
+const DEMO_SUBJECT = 'Local security demo – automated nithi.land contact attempt';
+const DEMO_MESSAGE = 'This is one controlled automated security test of the nithi.land contact form. No reply is needed.';
 const STATIC_DIR = __dirname;
 const pageToken = crypto.randomBytes(24).toString('hex');
 
@@ -195,7 +196,7 @@ async function focusAndType(cdp, selector, text, label, attempt) {
 async function clickSubmit(cdp, attempt) {
   throwIfStopped(attempt);
   const point = await evaluate(cdp, `(() => {
-    const button = document.querySelector('#contact-submit-btn');
+    const button = document.querySelector('[data-contact-form] button[type="submit"]');
     if (!button || button.disabled) return null;
     button.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const box = button.getBoundingClientRect();
@@ -212,7 +213,7 @@ async function clickSubmit(cdp, attempt) {
 async function clickTurnstileCheckbox(cdp, attempt) {
   throwIfStopped(attempt);
   const widgetFound = await evaluate(cdp, `(() => {
-    const widget = document.querySelector('#contact-turnstile');
+    const widget = document.querySelector('[data-turnstile]');
     if (!widget) return false;
     widget.scrollIntoView({ behavior: 'instant', block: 'center' });
     return true;
@@ -221,7 +222,7 @@ async function clickTurnstileCheckbox(cdp, attempt) {
   await sleep(400);
 
   const point = await evaluate(cdp, `(() => {
-    const widget = document.querySelector('#contact-turnstile');
+    const widget = document.querySelector('[data-turnstile]');
     if (!widget) return null;
     const box = widget.getBoundingClientRect();
     if (box.width < 80 || box.height < 40 || box.bottom <= 0 || box.top >= window.innerHeight) return null;
@@ -270,7 +271,7 @@ async function runDemo(attempt) {
   addLog(`Navigating to ${TARGET_URL}`, 'action');
   await activeCdp.send('Page.navigate', { url: TARGET_URL });
   const ready = await waitFor(
-    () => evaluate(activeCdp, "document.readyState === 'complete' && Boolean(document.querySelector('#contact-form'))"),
+    () => evaluate(activeCdp, "document.readyState === 'complete' && Boolean(document.querySelector('[data-contact-form]'))"),
     20000,
     200,
     attempt
@@ -279,14 +280,16 @@ async function runDemo(attempt) {
   addLog('Production contact form loaded', 'ok');
 
   state.phase = 'typing';
-  await focusAndType(activeCdp, '#contact-email', DEMO_EMAIL, 'Test email', attempt);
-  await focusAndType(activeCdp, '#contact-subject', DEMO_SUBJECT, 'Test subject', attempt);
-  await focusAndType(activeCdp, '#contact-message', DEMO_MESSAGE, 'Test message', attempt);
+  await focusAndType(activeCdp, '[data-contact-form] [name="name"]', DEMO_NAME, 'Test name', attempt);
+  await focusAndType(activeCdp, '[data-contact-form] [name="email"]', DEMO_EMAIL, 'Test email', attempt);
+  await focusAndType(activeCdp, '[data-contact-form] [name="subject"]', DEMO_SUBJECT, 'Test subject', attempt);
+  await focusAndType(activeCdp, '[data-contact-form] [name="message"]', DEMO_MESSAGE, 'Test message', attempt);
+  addLog('Honeypot field intentionally left empty', 'ok');
 
   state.phase = 'verifying';
   addLog('Waiting for Turnstile to evaluate the browser normally', 'action');
   let verificationPassed = await waitFor(
-    () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
+    () => evaluate(activeCdp, "document.querySelector('[data-contact-form] button[type=\"submit\"]')?.disabled === false"),
     TURNSTILE_AUTOMATIC_WAIT_MS,
     300,
     attempt
@@ -297,14 +300,21 @@ async function runDemo(attempt) {
     await clickTurnstileCheckbox(activeCdp, attempt);
     addLog('Automated checkbox click dispatched; observing Turnstile’s decision', 'action');
     verificationPassed = await waitFor(
-      () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
+      () => evaluate(activeCdp, `(() => {
+        const button = document.querySelector('[data-contact-form] button[type="submit"]');
+        const status = document.querySelector('[data-contact-status]')?.textContent.trim() || '';
+        if (button?.disabled === false) return 'passed';
+        if (/could not load|timed out|expired|failed/i.test(status)) return 'failed';
+        return '';
+      })()`),
       TURNSTILE_CLICK_RESULT_WAIT_MS,
       300,
       attempt
     );
-    if (!verificationPassed) {
+    if (verificationPassed !== 'passed') {
       state.phase = 'stopped';
-      addLog('Turnstile did not accept the automated checkbox click within 20 seconds. No email was sent.', 'warn');
+      const verificationStatus = await evaluate(activeCdp, "document.querySelector('[data-contact-status]')?.textContent.trim() || ''");
+      addLog(verificationStatus || 'Turnstile did not accept the automated checkbox click within 20 seconds. No message was sent.', 'warn');
       return;
     }
     addLog('Turnstile accepted the automated checkbox click; submission is now enabled', 'ok');
@@ -318,12 +328,12 @@ async function runDemo(attempt) {
 
   const outcome = await waitFor(async () => {
     const status = await evaluate(activeCdp, `(() => {
-      const element = document.querySelector('#contact-message-status');
+      const element = document.querySelector('[data-contact-status]');
       return element ? element.textContent.trim() : '';
     })()`);
     if (/message sent/i.test(status)) return { phase: 'success', message: status };
-    if (/message limit reached/i.test(status)) return { phase: 'blocked', message: status };
-    if (/could not be sent|unavailable|failed/i.test(status)) return { phase: 'error', message: status };
+    if (/limit|too many|try again later/i.test(status)) return { phase: 'blocked', message: status };
+    if (/could not be sent|unavailable|failed|error/i.test(status)) return { phase: 'error', message: status };
     return null;
   }, 12000, 100, attempt);
 
@@ -427,7 +437,7 @@ function cleanup() {
 if (require.main === module) {
   addLog('Ready. Every Start press permits one checkbox click and one real, labeled email attempt.', 'info');
   server.listen(PORT, HOST, () => {
-    console.log(`Formula Racing Camp security demo: http://${HOST}:${PORT}`);
+    console.log(`nithi.land contact security demo: http://${HOST}:${PORT}`);
   });
   process.once('SIGINT', () => { cleanup(); process.exit(0); });
   process.once('SIGTERM', () => { cleanup(); process.exit(0); });
@@ -435,6 +445,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DEMO_NAME,
   DEMO_EMAIL,
   DEMO_MESSAGE,
   DEMO_SUBJECT,

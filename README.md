@@ -98,9 +98,9 @@ Then open:
 http://localhost:8000
 ```
 
-### Local contact security demo
+### Local nithi.land contact security demo
 
-The repository includes a localhost-only browser demonstration for the production contact form. Each confirmed run launches a fresh visible Chromium-family browser window on your computer, types a fixed test message, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test; the production five-per-24-hours limit remains the authoritative cap. Starting each demo attempt can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable.
+The repository includes a localhost-only browser demonstration for the live `https://nithi.land/contact/` form. Each confirmed run launches a fresh visible Chromium-family browser window on your computer, fills the fixed Name, Email, Subject, and Message test values while leaving the honeypot empty, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test. Starting each demo attempt can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable.
 
 ```sh
 node security-demo/server.js

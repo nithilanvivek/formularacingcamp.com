@@ -5,12 +5,13 @@ const test = require('node:test');
 
 const demo = require('../security-demo/server');
 
-test('security demo is fixed to labeled Formula Racing Camp contact attempts', () => {
+test('security demo is fixed to labeled nithi.land contact attempts', () => {
   assert.equal(demo.HOST, '127.0.0.1');
-  assert.equal(demo.TARGET_URL, 'https://www.formularacingcamp.com/#contact');
-  assert.equal(demo.DEMO_EMAIL, 'security-test@formularacingcamp.com');
+  assert.equal(demo.TARGET_URL, 'https://nithi.land/contact/');
+  assert.equal(demo.DEMO_NAME, 'Local Security Test');
+  assert.equal(demo.DEMO_EMAIL, 'security-test@nithi.land');
   assert.match(demo.DEMO_SUBJECT, /security demo/i);
-  assert.match(demo.DEMO_MESSAGE, /controlled automated security test/i);
+  assert.match(demo.DEMO_MESSAGE, /nithi\.land contact form/i);
 });
 
 test('security demo rejects non-local hosts and untrusted start requests', () => {
@@ -34,7 +35,8 @@ test('security demo is excluded from production deployment and documents its saf
   assert.match(server, /\/api\/stop/);
   assert.match(server, /AttemptStoppedError/);
   assert.match(server, /clickTurnstileCheckbox/);
-  assert.match(server, /document\.querySelector\('#contact-turnstile'\)/);
+  assert.match(server, /document\.querySelector\('\[data-turnstile\]'\)/);
+  assert.match(server, /Honeypot field intentionally left empty/);
   assert.match(server, /Turnstile requested its checkbox/);
   assert.match(server, /Turnstile accepted the automated checkbox click/);
   assert.doesNotMatch(server, /turnstileToken\s*=|cf-turnstile-response/);
