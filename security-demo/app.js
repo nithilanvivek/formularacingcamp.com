@@ -1,4 +1,5 @@
 const startButton = document.getElementById('start');
+const stopButton = document.getElementById('stop');
 const phase = document.getElementById('phase');
 const timeline = document.getElementById('timeline');
 const token = document.body.dataset.demoToken;
@@ -16,6 +17,7 @@ function render(state) {
   phase.textContent = state.phase.toUpperCase();
   phase.parentElement.dataset.phase = state.phase;
   startButton.disabled = state.attemptActive;
+  stopButton.disabled = !state.attemptActive;
   if (state.attemptActive) {
     startButton.innerHTML = `ATTEMPT ${state.attemptCount} RUNNING <span>…</span>`;
   } else if (state.attemptCount > 0) {
@@ -61,6 +63,19 @@ startButton.addEventListener('click', async () => {
     window.alert(result.error === 'attempt_in_progress'
       ? 'An attempt is already running. Wait for it to finish before starting another.'
       : 'The demo could not start.');
+  }
+  await refresh();
+});
+
+stopButton.addEventListener('click', async () => {
+  stopButton.disabled = true;
+  const response = await fetch('/api/stop', {
+    method: 'POST',
+    headers: { 'X-Demo-Token': token }
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    if (result.error !== 'no_attempt_in_progress') window.alert('The attempt could not be stopped cleanly.');
   }
   await refresh();
 });

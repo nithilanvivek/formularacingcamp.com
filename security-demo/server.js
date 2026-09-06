@@ -33,6 +33,18 @@ const state = {
 let chromeProcess;
 let chromeProfile;
 let activeCdp;
+let activeAttempt;
+
+class AttemptStoppedError extends Error {
+  constructor() {
+    super('Attempt stopped by the operator');
+    this.name = 'AttemptStoppedError';
+  }
+}
+
+function throwIfStopped(attempt) {
+  if (attempt?.cancelled) throw new AttemptStoppedError();
+}
 
 function addLog(message, tone = 'info') {
   state.logs.push({ at: new Date().toISOString(), message, tone });
@@ -77,13 +89,15 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitFor(getValue, timeoutMs, intervalMs = 200) {
+async function waitFor(getValue, timeoutMs, intervalMs = 200, attempt) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    throwIfStopped(attempt);
     const value = await getValue();
     if (value) return value;
     await sleep(intervalMs);
   }
+  throwIfStopped(attempt);
   return null;
 }
 
@@ -107,6 +121,10 @@ class CdpConnection {
       if (message.error) reject(new Error(message.error.message));
       else resolve(message.result || {});
     });
+    this.socket.addEventListener('close', () => {
+      for (const { reject } of this.pending.values()) reject(new Error('Browser connection closed'));
+      this.pending.clear();
+    });
   }
 
   send(method, params = {}) {
@@ -122,16 +140,16 @@ class CdpConnection {
   }
 }
 
-async function readDevToolsPort(profileDirectory) {
+async function readDevToolsPort(profileDirectory, attempt) {
   const portFile = path.join(profileDirectory, 'DevToolsActivePort');
   const contents = await waitFor(() => {
     try { return fs.readFileSync(portFile, 'utf8'); } catch { return null; }
-  }, 10000);
+  }, 10000, 200, attempt);
   if (!contents) throw new Error('Chrome did not expose its local debugging port');
   return Number(contents.split(/\r?\n/)[0]);
 }
 
-async function findPageTarget(port) {
+async function findPageTarget(port, attempt) {
   return waitFor(async () => {
     try {
       const response = await fetch(`http://${HOST}:${port}/json/list`);
@@ -140,7 +158,7 @@ async function findPageTarget(port) {
     } catch {
       return null;
     }
-  }, 10000);
+  }, 10000, 200, attempt);
 }
 
 async function evaluate(cdp, expression) {
@@ -153,7 +171,8 @@ async function evaluate(cdp, expression) {
   return result.result?.value;
 }
 
-async function focusAndType(cdp, selector, text, label) {
+async function focusAndType(cdp, selector, text, label, attempt) {
+  throwIfStopped(attempt);
   const found = await evaluate(cdp, `(() => {
     const field = document.querySelector(${JSON.stringify(selector)});
     if (!field) return false;
@@ -165,6 +184,7 @@ async function focusAndType(cdp, selector, text, label) {
   if (!found) throw new Error(`${label} field was not found`);
   await sleep(500);
   for (const character of text) {
+    throwIfStopped(attempt);
     await cdp.send('Input.insertText', { text: character });
     await sleep(24);
   }
@@ -172,7 +192,8 @@ async function focusAndType(cdp, selector, text, label) {
   await sleep(350);
 }
 
-async function clickSubmit(cdp) {
+async function clickSubmit(cdp, attempt) {
+  throwIfStopped(attempt);
   const point = await evaluate(cdp, `(() => {
     const button = document.querySelector('#contact-submit-btn');
     if (!button || button.disabled) return null;
@@ -182,12 +203,14 @@ async function clickSubmit(cdp) {
   })()`);
   if (!point) throw new Error('The Send Message button is not available');
   await sleep(700);
+  throwIfStopped(attempt);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
 }
 
-async function clickTurnstileCheckbox(cdp) {
+async function clickTurnstileCheckbox(cdp, attempt) {
+  throwIfStopped(attempt);
   const widgetFound = await evaluate(cdp, `(() => {
     const widget = document.querySelector('#contact-turnstile');
     if (!widget) return false;
@@ -207,13 +230,15 @@ async function clickTurnstileCheckbox(cdp) {
   if (!point) throw new Error('The Turnstile widget did not settle inside the visible viewport');
   addLog(`Checkbox target settled at screen point ${Math.round(point.x)}, ${Math.round(point.y)}`, 'info');
   await sleep(350);
+  throwIfStopped(attempt);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
 }
 
-async function runDemo() {
+async function runDemo(attempt) {
   closeBrowserSession();
+  throwIfStopped(attempt);
   state.phase = 'launching';
   const browserPath = BROWSER_CANDIDATES.find((candidate) => fs.existsSync(candidate));
   addLog('Starting a fresh visible Chromium browser session', 'action');
@@ -231,8 +256,8 @@ async function runDemo() {
     TARGET_URL
   ], { stdio: 'ignore' });
 
-  const debuggingPort = await readDevToolsPort(chromeProfile);
-  const target = await findPageTarget(debuggingPort);
+  const debuggingPort = await readDevToolsPort(chromeProfile, attempt);
+  const target = await findPageTarget(debuggingPort, attempt);
   if (!target) throw new Error('The visible Chrome tab could not be reached');
 
   activeCdp = new CdpConnection(target.webSocketDebuggerUrl);
@@ -246,32 +271,36 @@ async function runDemo() {
   await activeCdp.send('Page.navigate', { url: TARGET_URL });
   const ready = await waitFor(
     () => evaluate(activeCdp, "document.readyState === 'complete' && Boolean(document.querySelector('#contact-form'))"),
-    20000
+    20000,
+    200,
+    attempt
   );
   if (!ready) throw new Error('The production contact form did not finish loading');
   addLog('Production contact form loaded', 'ok');
 
   state.phase = 'typing';
-  await focusAndType(activeCdp, '#contact-email', DEMO_EMAIL, 'Test email');
-  await focusAndType(activeCdp, '#contact-subject', DEMO_SUBJECT, 'Test subject');
-  await focusAndType(activeCdp, '#contact-message', DEMO_MESSAGE, 'Test message');
+  await focusAndType(activeCdp, '#contact-email', DEMO_EMAIL, 'Test email', attempt);
+  await focusAndType(activeCdp, '#contact-subject', DEMO_SUBJECT, 'Test subject', attempt);
+  await focusAndType(activeCdp, '#contact-message', DEMO_MESSAGE, 'Test message', attempt);
 
   state.phase = 'verifying';
   addLog('Waiting for Turnstile to evaluate the browser normally', 'action');
   let verificationPassed = await waitFor(
     () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
     TURNSTILE_AUTOMATIC_WAIT_MS,
-    300
+    300,
+    attempt
   );
   if (!verificationPassed) {
     state.phase = 'checkbox';
     addLog('Turnstile requested its checkbox. The bot is clicking it once.', 'warn');
-    await clickTurnstileCheckbox(activeCdp);
+    await clickTurnstileCheckbox(activeCdp, attempt);
     addLog('Automated checkbox click dispatched; observing Turnstile’s decision', 'action');
     verificationPassed = await waitFor(
       () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
       TURNSTILE_CLICK_RESULT_WAIT_MS,
-      300
+      300,
+      attempt
     );
     if (!verificationPassed) {
       state.phase = 'stopped';
@@ -285,7 +314,7 @@ async function runDemo() {
 
   state.phase = 'submitting';
   addLog('Clicking Send Message once', 'action');
-  await clickSubmit(activeCdp);
+  await clickSubmit(activeCdp, attempt);
 
   const outcome = await waitFor(async () => {
     const status = await evaluate(activeCdp, `(() => {
@@ -296,21 +325,26 @@ async function runDemo() {
     if (/message limit reached/i.test(status)) return { phase: 'blocked', message: status };
     if (/could not be sent|unavailable|failed/i.test(status)) return { phase: 'error', message: status };
     return null;
-  }, 12000, 100);
+  }, 12000, 100, attempt);
 
   if (!outcome) throw new Error('The site did not report a final submission result');
   state.phase = outcome.phase;
   addLog(outcome.message, outcome.phase === 'success' ? 'ok' : outcome.phase === 'blocked' ? 'warn' : 'error');
 }
 
-async function startOnce() {
+async function startOnce(attempt) {
   try {
-    await runDemo();
+    await runDemo(attempt);
   } catch (error) {
-    state.phase = 'error';
-    addLog(`Stopped: ${error.message}`, 'error');
+    if (!attempt.cancelled) {
+      state.phase = 'error';
+      addLog(`Stopped: ${error.message}`, 'error');
+    }
   } finally {
-    state.attemptActive = false;
+    if (activeAttempt === attempt) {
+      state.attemptActive = false;
+      activeAttempt = undefined;
+    }
   }
 }
 
@@ -348,9 +382,27 @@ const server = http.createServer((req, res) => {
     }
     state.attemptActive = true;
     state.attemptCount += 1;
+    activeAttempt = { id: state.attemptCount, cancelled: false };
     addLog(`Attempt ${state.attemptCount} started by the operator`, 'info');
     json(res, 202, { ok: true, attempt: state.attemptCount });
-    void startOnce();
+    void startOnce(activeAttempt);
+    return;
+  }
+  if (req.method === 'POST' && url.pathname === '/api/stop') {
+    if (!safeStartRequest(req)) {
+      json(res, 403, { ok: false, error: 'invalid_stop_request' });
+      return;
+    }
+    if (!state.attemptActive || !activeAttempt) {
+      json(res, 409, { ok: false, error: 'no_attempt_in_progress' });
+      return;
+    }
+    activeAttempt.cancelled = true;
+    state.attemptActive = false;
+    state.phase = 'stopped';
+    addLog(`Attempt ${activeAttempt.id} stopped by the operator`, 'warn');
+    closeBrowserSession();
+    json(res, 200, { ok: true, attempt: activeAttempt.id });
     return;
   }
 

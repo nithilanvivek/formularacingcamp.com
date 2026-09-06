@@ -31,6 +31,8 @@ test('security demo is excluded from production deployment and documents its saf
   assert.match(vercelIgnore, /^security-demo\/$/m);
   assert.match(server, /attemptActive/);
   assert.match(server, /attempt_in_progress/);
+  assert.match(server, /\/api\/stop/);
+  assert.match(server, /AttemptStoppedError/);
   assert.match(server, /clickTurnstileCheckbox/);
   assert.match(server, /document\.querySelector\('#contact-turnstile'\)/);
   assert.match(server, /Turnstile requested its checkbox/);

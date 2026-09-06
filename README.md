@@ -106,7 +106,7 @@ The repository includes a localhost-only browser demonstration for the productio
 node security-demo/server.js
 ```
 
-Then open `http://127.0.0.1:4173`. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. `security-demo/` is excluded from Vercel deployments.
+Then open `http://127.0.0.1:4173`. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. The Stop Attempt control cancels the active run immediately, closes its browser window, and leaves the dashboard ready for another attempt. `security-demo/` is excluded from Vercel deployments.
 
 ## File Structure
 
