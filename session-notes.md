@@ -812,3 +812,39 @@ Current state:
 Next step:
 
 - Monitor production 404-game behavior on real touch devices after deployment.
+
+## Contact Protection and Security Testing Wrap-Up
+
+Date: 2026-09-06
+
+Completed:
+
+- Replaced the homepage contact form's basic protection with Cloudflare Turnstile Managed, including explicit client rendering and mandatory server-side token, action, and hostname verification.
+- Added a fail-closed rolling rate limit of five successful contact messages per 24 hours. Limits apply independently to HMAC-protected public-IP and normalized-email identifiers stored in the existing Upstash Redis/Vercel KV database; failed Resend deliveries are rolled back.
+- Added clear client feedback for expired or failed verification, unavailable anti-abuse storage, and rate-limited submissions.
+- Updated the privacy policy and README with the anti-abuse data handling, 24-hour retention, configuration, and failure behavior.
+- Deployed the contact protection to Vercel production deployment `dpl_75W8VGTrW3sRSWCzz8bGiP3yH5ka`, aliased to `https://www.formularacingcamp.com`.
+- Added a localhost-only visible-browser security demo under `security-demo/`, excluded it from Vercel deployments, and added repeated sequential runs plus an immediate Stop Attempt control.
+- Retargeted the local demo to `https://nithi.land/contact/`. The fixed test leaves its honeypot empty, performs one automated Turnstile checkbox click, records the decision, and never reads verification tokens.
+- Confirmed in a live controlled test that nithi.land Turnstile rejected the automated checkbox click, kept Send disabled, and sent no email.
+
+Validation performed:
+
+- `npm test`: 32 tests passed.
+- JavaScript syntax checks passed for the homepage, contact API, Redis rate limiter, and localhost security-demo scripts.
+- `git diff --check` passed during implementation.
+- Verified the production Formula Racing Camp JavaScript and privacy notice contained the deployed rate-limit behavior.
+- Verified the required production `TURNSTILE_*`, `KV_REST_API_*`, and `RESEND_API_KEY` variable names are present without exposing their values.
+
+Current state:
+
+- Branch: `main`, tracking `origin/main`.
+- Latest feature commit before this wrap-up: `8e5000a Retarget contact security demo to nithi.land`.
+- Production domain: `https://www.formularacingcamp.com`.
+- The security demo is local tooling only and is not part of the production deployment.
+
+Next steps:
+
+- Monitor real contact traffic and Redis usage; adjust the five-per-24-hours limit only if legitimate shared-network users are affected.
+- Treat Turnstile as one anti-abuse layer rather than proof of humanity; retain server verification and rate limiting.
+- If nithi.land later receives unwanted contact spam, add an independent server-side rate limit in that site's own repository.
