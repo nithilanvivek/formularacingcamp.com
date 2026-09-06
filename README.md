@@ -72,7 +72,7 @@ The exported page includes:
 - "Did You Know?" fact section.
 - Character profile section.
 - Authors section for the student author group.
-- Contact form that submits through `/api/contact-submit` and sends mail with Reply-To set to the visitor's submitted email.
+- Turnstile-protected contact form that submits through `/api/contact-submit` and sends mail with Reply-To set to the visitor's submitted email.
 
 ## Dependencies
 
@@ -133,7 +133,7 @@ The site exposes a concise `/llms.txt` guide and an expanded `/llms-full.txt` re
 
 ## Deployment Notes
 
-For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. The contact form uses Formspree, so visitors can submit messages from the page without a custom backend.
+For GitHub Pages or most static hosts, the main entry file should be named `index.html` at the repository root. The contact form requires its Vercel Functions and will not submit on a static-only host without an equivalent backend.
 
 ## Vercel Deployment
 
@@ -183,6 +183,13 @@ Player receipt emails are sent through Resend after valid, non-dry-run submissio
 Player receipt emails always use `authors@formularacingcamp.com` as Reply-To.
 
 The homepage contact form also uses Resend through `/api/contact-submit`. It sends messages to `CONTACT_TO`, falling back to `LAUNCH_GAME_REPLY_TO` and then `authors@formularacingcamp.com`, with `reply_to` set to the visitor's email.
+
+The contact form is protected by a Cloudflare Turnstile Managed widget. Create a Turnstile widget restricted to `www.formularacingcamp.com`, then configure both values in every Vercel environment that should accept contact submissions:
+
+- `TURNSTILE_SITE_KEY` - public widget site key returned by `/api/contact-config`
+- `TURNSTILE_SECRET_KEY` - server-only secret used by `/api/contact-submit`
+
+The API fails closed when Turnstile is unavailable or misconfigured, validates every token with Cloudflare before sending email, and checks the verified hostname and `contact` action. Turnstile tokens are single-use, so the browser resets the widget after every submission attempt.
 
 ## Near-Term Tasks
 

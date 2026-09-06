@@ -182,78 +182,141 @@ closeBuyBookFlips();
 }
 
 // Contact Form Functionality
+const contactForm = document.getElementById('contact-form');
+const contactStatus = document.getElementById('contact-message-status');
+const contactSubmit = document.getElementById('contact-submit-btn');
+const contactVerificationLoading = document.getElementById('contact-verification-loading');
+let contactTurnstileToken = '';
+let contactTurnstileWidgetId;
+
+function showContactStatus(message, color) {
+if (!contactStatus) return;
+contactStatus.textContent = message;
+contactStatus.style.color = color;
+contactStatus.style.display = 'block';
+}
+
+function setContactVerification(token) {
+contactTurnstileToken = token || '';
+if (contactSubmit) contactSubmit.disabled = !contactTurnstileToken;
+}
+
+function resetContactVerification() {
+setContactVerification('');
+if (window.turnstile && contactTurnstileWidgetId !== undefined) {
+window.turnstile.reset(contactTurnstileWidgetId);
+}
+}
+
+async function initializeContactVerification() {
+if (!contactForm || !contactSubmit) return;
+
+try {
+const response = await fetch('/api/contact-config', { headers: { Accept: 'application/json' } });
+const config = await response.json().catch(() => ({}));
+if (!response.ok || !config.siteKey || !window.turnstile) {
+throw new Error('Contact verification is not configured');
+}
+
+if (contactVerificationLoading) contactVerificationLoading.remove();
+contactTurnstileWidgetId = window.turnstile.render('#contact-turnstile', {
+sitekey: config.siteKey,
+action: 'contact',
+theme: 'light',
+size: 'flexible',
+callback: (token) => {
+setContactVerification(token);
+if (contactStatus?.textContent.toLowerCase().includes('verification')) contactStatus.style.display = 'none';
+},
+'expired-callback': () => {
+setContactVerification('');
+showContactStatus('Verification expired. Please verify again.', '#b45309');
+},
+'error-callback': () => {
+setContactVerification('');
+showContactStatus('Verification could not load. Please refresh the page and try again.', '#dc2626');
+}
+});
+} catch (error) {
+setContactVerification('');
+if (contactVerificationLoading) {
+contactVerificationLoading.textContent = 'Verification is temporarily unavailable. Please try again later.';
+}
+showContactStatus('The contact form is temporarily unavailable. Please try again later.', '#dc2626');
+}
+}
+
 async function handleContactSubmit(event) {
 event.preventDefault();
-
 
 const form = event.target;
 const email = document.getElementById('contact-email').value.trim();
 const subject = document.getElementById('contact-subject').value.trim();
 const message = document.getElementById('contact-message').value.trim();
-const statusDiv = document.getElementById('contact-message-status');
 const submitBtn = document.getElementById('contact-submit-btn');
 
-
-// Validate inputs
 if (!email || !subject || !message) {
-statusDiv.textContent = '❌ Please fill in all fields';
-statusDiv.style.color = '#ff6b6b';
-statusDiv.style.display = 'block';
+showContactStatus('❌ Please fill in all fields', '#dc2626');
 return;
 }
-
 
 if (!email.includes('@')) {
-statusDiv.textContent = '❌ Please enter a valid email address';
-statusDiv.style.color = '#ff6b6b';
-statusDiv.style.display = 'block';
+showContactStatus('❌ Please enter a valid email address', '#dc2626');
 return;
 }
 
+if (!contactTurnstileToken) {
+showContactStatus('Please complete the human verification before sending.', '#b45309');
+return;
+}
 
-// Show loading state
 submitBtn.disabled = true;
 submitBtn.textContent = 'Sending...';
-statusDiv.style.display = 'block';
-statusDiv.textContent = 'Sending your message...';
-statusDiv.style.color = '#0096FF';
+showContactStatus('Sending your message...', '#0096FF');
 
 try {
 const response = await fetch(form.action, {
 method: 'POST',
 headers: {
- 'Content-Type': 'application/json',
+'Content-Type': 'application/json',
 Accept: 'application/json'
 },
 body: JSON.stringify({
 email,
 subject,
-message
+message,
+turnstileToken: contactTurnstileToken
 })
 });
+const result = await response.json().catch(() => ({}));
 
 if (!response.ok) {
-throw new Error('Contact submission failed');
+const error = new Error('Contact submission failed');
+error.code = result.error;
+throw error;
 }
 
-statusDiv.textContent = '✓ Message sent! Thanks for getting in touch.';
-statusDiv.style.color = '#22c55e';
-
-// Reset form
+showContactStatus('✓ Message sent! Thanks for getting in touch.', '#15803d');
 form.reset();
 
-// Clear message after 3 seconds
 setTimeout(() => {
-statusDiv.style.display = 'none';
+if (contactStatus) contactStatus.style.display = 'none';
 }, 3000);
 } catch (error) {
-statusDiv.textContent = 'Message could not be sent. Please try again in a moment.';
-statusDiv.style.color = '#ff6b6b';
+if (error.code === 'captcha_required' || error.code === 'captcha_failed') {
+showContactStatus('Human verification failed or expired. Please verify again.', '#dc2626');
+} else if (error.code === 'captcha_unavailable') {
+showContactStatus('Verification is temporarily unavailable. Please try again in a moment.', '#dc2626');
+} else {
+showContactStatus('Message could not be sent. Please try again in a moment.', '#dc2626');
+}
 } finally {
-submitBtn.disabled = false;
+resetContactVerification();
 submitBtn.textContent = 'Send Message';
 }
 }
+
+initializeContactVerification();
 
 if (window.lucide) {
   lucide.createIcons();

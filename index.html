@@ -210,9 +210,10 @@
 </script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260902-discount-offer1">
+<link rel="stylesheet" href="styles.css?v=20260906-turnstile1">
 
 <script defer src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+<script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
 <script src="/assets/interaction-counter.js?v=20260801-redis1"></script>
 <script src="/interaction-routes.js?v=20260731-hobby1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -882,9 +883,13 @@ He makes them follow him. 🐆💨</p>
 <div class="mb-6"><label for="contact-subject" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Subject</label> <input type="text" id="contact-subject" name="subject" placeholder="What is this about?" style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit;" required>
 </div>
 <div class="mb-6"><label for="contact-message" style="display: block; font-weight: 600; margin-bottom: 8px; color: #333333;">Your Message</label> <textarea id="contact-message" name="message" placeholder="Tell us what you're thinking..." style="width: 100%; padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; font-size: 1rem; font-family: inherit; min-height: 120px; resize: vertical;" required></textarea>
-</div><button type="submit" id="contact-submit-btn" class="w-full font-bold py-3 rounded-lg transition-all duration-300" style="background-color: #0096FF; color: #ffffff; cursor: pointer; font-size: 1rem;">Send Message</button>
+</div>
+<div class="contact-verification" aria-label="Human verification">
+<div id="contact-turnstile"><span id="contact-verification-loading">Preparing verification…</span></div>
+</div>
+<button type="submit" id="contact-submit-btn" class="w-full font-bold py-3 rounded-lg transition-all duration-300" style="background-color: #0096FF; color: #ffffff; cursor: pointer; font-size: 1rem;" disabled>Send Message</button>
 </form>
-<div id="contact-message-status" style="margin-top: 16px; text-align: center; display: none; font-weight: 600; font-size: 0.95rem;"></div>
+<div id="contact-message-status" role="status" aria-live="polite" style="margin-top: 16px; text-align: center; display: none; font-weight: 600; font-size: 0.95rem;"></div>
 </div>
 </div>
 </section>
@@ -930,6 +935,6 @@ FORMULA RACING CAMP
 <p class="book-offer-note">Choose Hardcover or Paperback on Notion Press, then enter its code at checkout.</p>
 </div>
 </div>
-<script defer src="app.js?v=20260902-discount-offer1"></script>
+<script defer src="app.js?v=20260906-turnstile1"></script>
 </body>
 </html>
