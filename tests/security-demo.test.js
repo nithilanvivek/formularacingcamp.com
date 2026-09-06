@@ -31,7 +31,8 @@ test('security demo is excluded from production deployment and documents its saf
   assert.match(vercelIgnore, /^security-demo\/$/m);
   assert.match(server, /attemptActive/);
   assert.match(server, /attempt_in_progress/);
-  assert.match(server, /Turnstile requested human verification/);
-  assert.match(server, /Human verification completed; automation is resuming/);
+  assert.match(server, /clickTurnstileCheckbox/);
+  assert.match(server, /Turnstile requested its checkbox/);
+  assert.match(server, /Turnstile accepted the automated checkbox click/);
   assert.doesNotMatch(server, /turnstileToken\s*=|cf-turnstile-response/);
 });

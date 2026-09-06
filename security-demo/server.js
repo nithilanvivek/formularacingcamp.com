@@ -16,7 +16,7 @@ const BROWSER_CANDIDATES = [
   '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
 ].filter(Boolean);
 const TURNSTILE_AUTOMATIC_WAIT_MS = 15000;
-const TURNSTILE_MANUAL_WAIT_MS = 5 * 60 * 1000;
+const TURNSTILE_CLICK_RESULT_WAIT_MS = 20000;
 const DEMO_EMAIL = 'security-test@formularacingcamp.com';
 const DEMO_SUBJECT = 'Local security demo – automated contact attempt';
 const DEMO_MESSAGE = 'This is one controlled automated security test of the Formula Racing Camp contact form. No reply is needed.';
@@ -187,6 +187,21 @@ async function clickSubmit(cdp) {
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
 }
 
+async function clickTurnstileCheckbox(cdp) {
+  const point = await evaluate(cdp, `(() => {
+    const frame = document.querySelector('#contact-turnstile iframe');
+    if (!frame) return null;
+    frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const box = frame.getBoundingClientRect();
+    return { x: box.left + Math.min(30, box.width / 8), y: box.top + box.height / 2 };
+  })()`);
+  if (!point) throw new Error('The Turnstile checkbox frame was not found');
+  await sleep(700);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+}
+
 async function runDemo() {
   closeBrowserSession();
   state.phase = 'launching';
@@ -239,19 +254,21 @@ async function runDemo() {
     300
   );
   if (!verificationPassed) {
-    state.phase = 'manual';
-    addLog('Turnstile requested human verification. Click its checkbox in the visible browser; automation is paused.', 'warn');
+    state.phase = 'checkbox';
+    addLog('Turnstile requested its checkbox. The bot is clicking it once.', 'warn');
+    await clickTurnstileCheckbox(activeCdp);
+    addLog('Automated checkbox click dispatched; observing Turnstile’s decision', 'action');
     verificationPassed = await waitFor(
       () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
-      TURNSTILE_MANUAL_WAIT_MS,
+      TURNSTILE_CLICK_RESULT_WAIT_MS,
       300
     );
     if (!verificationPassed) {
       state.phase = 'stopped';
-      addLog('Stopped after five minutes without manual verification. No challenge was bypassed and no email was sent.', 'warn');
+      addLog('Turnstile did not accept the automated checkbox click within 20 seconds. No email was sent.', 'warn');
       return;
     }
-    addLog('Human verification completed; automation is resuming', 'ok');
+    addLog('Turnstile accepted the automated checkbox click; submission is now enabled', 'ok');
   } else {
     addLog('Turnstile enabled the form without an interactive challenge', 'ok');
   }
@@ -346,7 +363,7 @@ function cleanup() {
 }
 
 if (require.main === module) {
-  addLog('Ready. Every Start press permits one real, labeled production test email.', 'info');
+  addLog('Ready. Every Start press permits one checkbox click and one real, labeled email attempt.', 'info');
   server.listen(PORT, HOST, () => {
     console.log(`Formula Racing Camp security demo: http://${HOST}:${PORT}`);
   });

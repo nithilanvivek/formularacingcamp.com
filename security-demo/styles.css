@@ -34,7 +34,7 @@ h1 { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: clamp(
 .status-card { border: 1px solid var(--line); background: rgba(85, 245, 154, .06); color: var(--green); padding: 13px 16px; display: flex; align-items: center; gap: 10px; min-width: 128px; }
 .pulse { width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 18px currentColor; animation: blink 1.4s infinite; }
 .status-card[data-phase="error"] { color: var(--red); }
-.status-card[data-phase="blocked"], .status-card[data-phase="manual"], .status-card[data-phase="stopped"] { color: var(--amber); }
+.status-card[data-phase="blocked"], .status-card[data-phase="checkbox"], .status-card[data-phase="stopped"] { color: var(--amber); }
 .status-card[data-phase="success"] { color: var(--green); }
 
 .grid { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 20px; }
