@@ -189,7 +189,9 @@ The contact form is protected by a Cloudflare Turnstile Managed widget. Create a
 - `TURNSTILE_SITE_KEY` - public widget site key returned by `/api/contact-config`
 - `TURNSTILE_SECRET_KEY` - server-only secret used by `/api/contact-submit`
 
-The API fails closed when Turnstile is unavailable or misconfigured, validates every token with Cloudflare before sending email, and checks the verified hostname and `contact` action. Turnstile tokens are single-use, so the browser resets the widget after every submission attempt.
+The API fails closed when Turnstile or rate-limit storage is unavailable, validates every token with Cloudflare before sending email, and checks the verified hostname and `contact` action. Turnstile tokens are single-use, so the browser resets the widget after every submission attempt.
+
+Successful contact messages are limited to five per rolling 24 hours by both public IP address and normalized email address. The limiter stores only HMAC-protected identifiers in the existing Upstash Redis/Vercel KV database, so deleting browser history or cookies does not reset it. Configure the existing `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` variables (or the legacy `KV_REST_API_URL` and `KV_REST_API_TOKEN` aliases). `CONTACT_RATE_LIMIT_SECRET` is optional; when omitted, the server-only Turnstile secret is used to protect the identifiers. Failed Resend deliveries are removed from the count.
 
 ## Near-Term Tasks
 

@@ -293,6 +293,7 @@ const result = await response.json().catch(() => ({}));
 if (!response.ok) {
 const error = new Error('Contact submission failed');
 error.code = result.error;
+error.retryAfterSeconds = result.retryAfterSeconds;
 throw error;
 }
 
@@ -307,6 +308,11 @@ if (error.code === 'captcha_required' || error.code === 'captcha_failed') {
 showContactStatus('Human verification failed or expired. Please verify again.', '#dc2626');
 } else if (error.code === 'captcha_unavailable') {
 showContactStatus('Verification is temporarily unavailable. Please try again in a moment.', '#dc2626');
+} else if (error.code === 'rate_limited') {
+const retryHours = Math.max(1, Math.ceil(Number(error.retryAfterSeconds || 0) / 3600));
+showContactStatus(`Message limit reached. Please try again in about ${retryHours} hour${retryHours === 1 ? '' : 's'}.`, '#b45309');
+} else if (error.code === 'rate_limit_unavailable') {
+showContactStatus('Spam protection is temporarily unavailable. Please try again in a moment.', '#dc2626');
 } else {
 showContactStatus('Message could not be sent. Please try again in a moment.', '#dc2626');
 }

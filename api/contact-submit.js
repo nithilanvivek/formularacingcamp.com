@@ -1,5 +1,6 @@
 const RESEND_EMAIL_ENDPOINT = 'https://api.resend.com/emails';
 const TURNSTILE_VERIFY_ENDPOINT = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+const rateLimit = require('../lib/contact-rate-limit');
 const TURNSTILE_ACTION = 'contact';
 const DEFAULT_CONTACT_FROM = 'Formula Racing Camp <contact@mail.formularacingcamp.com>';
 const DEFAULT_CONTACT_TO = 'authors@formularacingcamp.com';
@@ -26,7 +27,13 @@ try { return new URL(origin).hostname.toLowerCase() === hostname; } catch { retu
 }
 
 function clientIp(req) {
-return String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+return String(req.headers?.['x-vercel-forwarded-for'] || req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+}
+
+function applyRateLimitHeaders(res, result) {
+res.setHeader('X-RateLimit-Limit', String(result.limit));
+res.setHeader('X-RateLimit-Remaining', String(result.remaining));
+res.setHeader('X-RateLimit-Reset', String(Math.ceil(result.resetAt / 1000)));
 }
 
 function isValidEmail(email) {
@@ -165,6 +172,27 @@ res.status(400).json({ ok: false, error: 'captcha_failed' });
 return;
 }
 
+let rateLimitResult;
+try {
+rateLimitResult = await rateLimit.reserveContactSubmission({
+ip: clientIp(req),
+email: payload.email,
+secret: process.env.CONTACT_RATE_LIMIT_SECRET || turnstileSecret
+});
+applyRateLimitHeaders(res, rateLimitResult);
+} catch (error) {
+console.error('Contact rate limit failed', error.message);
+res.status(503).json({ ok: false, error: 'rate_limit_unavailable' });
+return;
+}
+
+if (!rateLimitResult.allowed) {
+const retryAfterSeconds = Math.max(1, Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000));
+res.setHeader('Retry-After', String(retryAfterSeconds));
+res.status(429).json({ ok: false, error: 'rate_limited', retryAfterSeconds });
+return;
+}
+
 let response;
 try {
 response = await fetch(RESEND_EMAIL_ENDPOINT, {
@@ -184,12 +212,18 @@ text: contactText(payload)
 });
 } catch (error) {
 console.error('Contact email failed', 'request_error');
+try { await rateLimit.releaseContactSubmission(rateLimitResult.reservation); } catch (releaseError) {
+console.error('Contact rate-limit rollback failed', releaseError.message);
+}
 res.status(502).json({ ok: false, error: 'contact_email_failed' });
 return;
 }
 
 if (!response.ok) {
 console.error('Contact email failed', response.status, await response.text());
+try { await rateLimit.releaseContactSubmission(rateLimitResult.reservation); } catch (releaseError) {
+console.error('Contact rate-limit rollback failed', releaseError.message);
+}
 res.status(502).json({ ok: false, error: 'contact_email_failed' });
 return;
 }
@@ -201,3 +235,4 @@ module.exports.contactPayload = contactPayload;
 module.exports.requestBody = requestBody;
 module.exports.requestHostname = requestHostname;
 module.exports.sameOrigin = sameOrigin;
+module.exports.clientIp = clientIp;
