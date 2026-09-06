@@ -32,6 +32,7 @@ test('security demo is excluded from production deployment and documents its saf
   assert.match(server, /attemptActive/);
   assert.match(server, /attempt_in_progress/);
   assert.match(server, /clickTurnstileCheckbox/);
+  assert.match(server, /document\.querySelector\('#contact-turnstile'\)/);
   assert.match(server, /Turnstile requested its checkbox/);
   assert.match(server, /Turnstile accepted the automated checkbox click/);
   assert.doesNotMatch(server, /turnstileToken\s*=|cf-turnstile-response/);

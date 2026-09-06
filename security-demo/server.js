@@ -189,13 +189,13 @@ async function clickSubmit(cdp) {
 
 async function clickTurnstileCheckbox(cdp) {
   const point = await evaluate(cdp, `(() => {
-    const frame = document.querySelector('#contact-turnstile iframe');
-    if (!frame) return null;
-    frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const box = frame.getBoundingClientRect();
+    const widget = document.querySelector('#contact-turnstile');
+    if (!widget) return null;
+    widget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const box = widget.getBoundingClientRect();
     return { x: box.left + Math.min(30, box.width / 8), y: box.top + box.height / 2 };
   })()`);
-  if (!point) throw new Error('The Turnstile checkbox frame was not found');
+  if (!point) throw new Error('The visible Turnstile widget container was not found');
   await sleep(700);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
