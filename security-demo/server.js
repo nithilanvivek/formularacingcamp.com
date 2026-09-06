@@ -188,15 +188,25 @@ async function clickSubmit(cdp) {
 }
 
 async function clickTurnstileCheckbox(cdp) {
+  const widgetFound = await evaluate(cdp, `(() => {
+    const widget = document.querySelector('#contact-turnstile');
+    if (!widget) return false;
+    widget.scrollIntoView({ behavior: 'instant', block: 'center' });
+    return true;
+  })()`);
+  if (!widgetFound) throw new Error('The visible Turnstile widget container was not found');
+  await sleep(400);
+
   const point = await evaluate(cdp, `(() => {
     const widget = document.querySelector('#contact-turnstile');
     if (!widget) return null;
-    widget.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const box = widget.getBoundingClientRect();
+    if (box.width < 80 || box.height < 40 || box.bottom <= 0 || box.top >= window.innerHeight) return null;
     return { x: box.left + Math.min(30, box.width / 8), y: box.top + box.height / 2 };
   })()`);
-  if (!point) throw new Error('The visible Turnstile widget container was not found');
-  await sleep(700);
+  if (!point) throw new Error('The Turnstile widget did not settle inside the visible viewport');
+  addLog(`Checkbox target settled at screen point ${Math.round(point.x)}, ${Math.round(point.y)}`, 'info');
+  await sleep(350);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
