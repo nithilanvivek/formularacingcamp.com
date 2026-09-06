@@ -15,8 +15,12 @@ function formatTime(isoTime) {
 function render(state) {
   phase.textContent = state.phase.toUpperCase();
   phase.parentElement.dataset.phase = state.phase;
-  startButton.disabled = state.attemptUsed;
-  if (state.attemptUsed) startButton.innerHTML = 'ATTEMPT LOCKED <span>×</span>';
+  startButton.disabled = state.attemptActive;
+  if (state.attemptActive) {
+    startButton.innerHTML = `ATTEMPT ${state.attemptCount} RUNNING <span>…</span>`;
+  } else if (state.attemptCount > 0) {
+    startButton.innerHTML = 'START NEXT ATTEMPT <span>→</span>';
+  }
 
   state.logs.slice(renderedLogs).forEach((entry) => {
     const item = document.createElement('li');
@@ -54,8 +58,8 @@ startButton.addEventListener('click', async () => {
   });
   if (!response.ok) {
     const result = await response.json().catch(() => ({}));
-    window.alert(result.error === 'attempt_already_used'
-      ? 'The one-attempt safety lock is already active. Restart the local server for a new session.'
+    window.alert(result.error === 'attempt_in_progress'
+      ? 'An attempt is already running. Wait for it to finish before starting another.'
       : 'The demo could not start.');
   }
   await refresh();

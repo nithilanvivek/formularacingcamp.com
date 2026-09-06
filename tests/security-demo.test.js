@@ -5,7 +5,7 @@ const test = require('node:test');
 
 const demo = require('../security-demo/server');
 
-test('security demo is fixed to one labeled Formula Racing Camp contact attempt', () => {
+test('security demo is fixed to labeled Formula Racing Camp contact attempts', () => {
   assert.equal(demo.HOST, '127.0.0.1');
   assert.equal(demo.TARGET_URL, 'https://www.formularacingcamp.com/#contact');
   assert.equal(demo.DEMO_EMAIL, 'security-test@formularacingcamp.com');
@@ -29,7 +29,9 @@ test('security demo is excluded from production deployment and documents its saf
   const server = fs.readFileSync(path.join(root, 'security-demo/server.js'), 'utf8');
 
   assert.match(vercelIgnore, /^security-demo\/$/m);
-  assert.match(server, /attemptUsed/);
-  assert.match(server, /Turnstile did not enable submission/);
+  assert.match(server, /attemptActive/);
+  assert.match(server, /attempt_in_progress/);
+  assert.match(server, /Turnstile requested human verification/);
+  assert.match(server, /Human verification completed; automation is resuming/);
   assert.doesNotMatch(server, /turnstileToken\s*=|cf-turnstile-response/);
 });

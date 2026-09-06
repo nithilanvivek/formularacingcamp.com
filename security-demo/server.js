@@ -15,7 +15,8 @@ const BROWSER_CANDIDATES = [
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
   '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
 ].filter(Boolean);
-const TURNSTILE_WAIT_MS = 30000;
+const TURNSTILE_AUTOMATIC_WAIT_MS = 15000;
+const TURNSTILE_MANUAL_WAIT_MS = 5 * 60 * 1000;
 const DEMO_EMAIL = 'security-test@formularacingcamp.com';
 const DEMO_SUBJECT = 'Local security demo – automated contact attempt';
 const DEMO_MESSAGE = 'This is one controlled automated security test of the Formula Racing Camp contact form. No reply is needed.';
@@ -24,7 +25,8 @@ const pageToken = crypto.randomBytes(24).toString('hex');
 
 const state = {
   phase: 'ready',
-  attemptUsed: false,
+  attemptActive: false,
+  attemptCount: 0,
   logs: []
 };
 
@@ -186,6 +188,7 @@ async function clickSubmit(cdp) {
 }
 
 async function runDemo() {
+  closeBrowserSession();
   state.phase = 'launching';
   const browserPath = BROWSER_CANDIDATES.find((candidate) => fs.existsSync(candidate));
   addLog('Starting a fresh visible Chromium browser session', 'action');
@@ -230,17 +233,28 @@ async function runDemo() {
 
   state.phase = 'verifying';
   addLog('Waiting for Turnstile to evaluate the browser normally', 'action');
-  const verificationPassed = await waitFor(
+  let verificationPassed = await waitFor(
     () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
-    TURNSTILE_WAIT_MS,
+    TURNSTILE_AUTOMATIC_WAIT_MS,
     300
   );
   if (!verificationPassed) {
-    state.phase = 'stopped';
-    addLog('Stopped: Turnstile did not enable submission. No challenge was bypassed and no email was sent.', 'warn');
-    return;
+    state.phase = 'manual';
+    addLog('Turnstile requested human verification. Click its checkbox in the visible browser; automation is paused.', 'warn');
+    verificationPassed = await waitFor(
+      () => evaluate(activeCdp, "document.querySelector('#contact-submit-btn')?.disabled === false"),
+      TURNSTILE_MANUAL_WAIT_MS,
+      300
+    );
+    if (!verificationPassed) {
+      state.phase = 'stopped';
+      addLog('Stopped after five minutes without manual verification. No challenge was bypassed and no email was sent.', 'warn');
+      return;
+    }
+    addLog('Human verification completed; automation is resuming', 'ok');
+  } else {
+    addLog('Turnstile enabled the form without an interactive challenge', 'ok');
   }
-  addLog('Turnstile enabled the form without an interactive challenge', 'ok');
 
   state.phase = 'submitting';
   addLog('Clicking Send Message once', 'action');
@@ -268,6 +282,8 @@ async function startOnce() {
   } catch (error) {
     state.phase = 'error';
     addLog(`Stopped: ${error.message}`, 'error');
+  } finally {
+    state.attemptActive = false;
   }
 }
 
@@ -299,13 +315,14 @@ const server = http.createServer((req, res) => {
       json(res, 403, { ok: false, error: 'invalid_start_request' });
       return;
     }
-    if (state.attemptUsed) {
-      json(res, 409, { ok: false, error: 'attempt_already_used' });
+    if (state.attemptActive) {
+      json(res, 409, { ok: false, error: 'attempt_in_progress' });
       return;
     }
-    state.attemptUsed = true;
-    addLog('One-attempt safety lock engaged', 'info');
-    json(res, 202, { ok: true });
+    state.attemptActive = true;
+    state.attemptCount += 1;
+    addLog(`Attempt ${state.attemptCount} started by the operator`, 'info');
+    json(res, 202, { ok: true, attempt: state.attemptCount });
     void startOnce();
     return;
   }
@@ -313,16 +330,23 @@ const server = http.createServer((req, res) => {
   json(res, 404, { ok: false, error: 'not_found' });
 });
 
-function cleanup() {
+function closeBrowserSession() {
   try { activeCdp?.close(); } catch {}
   try { chromeProcess?.kill(); } catch {}
   if (chromeProfile?.startsWith(os.tmpdir() + path.sep + 'frc-security-demo-')) {
     try { fs.rmSync(chromeProfile, { recursive: true, force: true }); } catch {}
   }
+  activeCdp = undefined;
+  chromeProcess = undefined;
+  chromeProfile = undefined;
+}
+
+function cleanup() {
+  closeBrowserSession();
 }
 
 if (require.main === module) {
-  addLog('Ready. Start permits one real, labeled production test email.', 'info');
+  addLog('Ready. Every Start press permits one real, labeled production test email.', 'info');
   server.listen(PORT, HOST, () => {
     console.log(`Formula Racing Camp security demo: http://${HOST}:${PORT}`);
   });

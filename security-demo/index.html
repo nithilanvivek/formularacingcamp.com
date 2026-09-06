@@ -27,7 +27,7 @@
           <span>01</span>
           <h2>Mission controls</h2>
         </div>
-        <p>The demo opens a fresh, visible Chromium browser window on your computer, visits the live site, types a fixed test message, waits for Turnstile, and makes at most one Send attempt.</p>
+        <p>Each run opens a fresh, visible Chromium browser window on your computer, visits the live site, types a fixed test message, waits for Turnstile, and makes one Send attempt. If Turnstile asks for its checkbox, automation pauses until you complete it manually.</p>
         <div class="target">
           <span>TARGET</span>
           <strong>www.formularacingcamp.com/#contact</strong>
@@ -37,7 +37,7 @@
           <span>Starting may deliver one real email to the configured contact recipient. No reply is needed.</span>
         </div>
         <button id="start" type="button">START ONE LIVE ATTEMPT <span>→</span></button>
-        <p class="safety">One attempt per server run · No custom payloads · No CAPTCHA bypass</p>
+        <p class="safety">Sequential attempts · Confirmation every time · Manual challenge handoff · No CAPTCHA bypass</p>
       </article>
 
       <article class="panel telemetry">
