@@ -98,6 +98,16 @@ Then open:
 http://localhost:8000
 ```
 
+### Local contact security demo
+
+The repository includes a localhost-only, one-attempt browser demonstration for the production contact form. It launches a fresh visible Chromium-family browser window on your computer, types a fixed test message, waits for Turnstile without bypassing an interactive challenge, and tries Send once. Starting the demo can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable.
+
+```sh
+node security-demo/server.js
+```
+
+Then open `http://127.0.0.1:4173`. The server binds only to loopback, accepts no custom target or message, and locks after one attempt until restarted. `security-demo/` is excluded from Vercel deployments.
+
 ## File Structure
 
 The project now uses:

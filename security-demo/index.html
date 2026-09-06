@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Contact Form Security Demo</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-demo-token="__DEMO_TOKEN__">
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">LOCAL SECURITY LAB</p>
+        <h1>Contact bot simulator</h1>
+        <p class="lede">Watch one controlled browser attempt meet the production contact-form defenses.</p>
+      </div>
+      <div class="status-card">
+        <span class="pulse" aria-hidden="true"></span>
+        <span id="phase">READY</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="panel mission">
+        <div class="panel-heading">
+          <span>01</span>
+          <h2>Mission controls</h2>
+        </div>
+        <p>The demo opens a fresh, visible Chromium browser window on your computer, visits the live site, types a fixed test message, waits for Turnstile, and makes at most one Send attempt.</p>
+        <div class="target">
+          <span>TARGET</span>
+          <strong>www.formularacingcamp.com/#contact</strong>
+        </div>
+        <div class="warning">
+          <strong>Live action</strong>
+          <span>Starting may deliver one real email to the configured contact recipient. No reply is needed.</span>
+        </div>
+        <button id="start" type="button">START ONE LIVE ATTEMPT <span>→</span></button>
+        <p class="safety">One attempt per server run · No custom payloads · No CAPTCHA bypass</p>
+      </article>
+
+      <article class="panel telemetry">
+        <div class="panel-heading">
+          <span>02</span>
+          <h2>Live telemetry</h2>
+        </div>
+        <ol id="timeline" aria-live="polite"></ol>
+      </article>
+    </section>
+
+    <section class="panel defenses">
+      <div class="panel-heading">
+        <span>03</span>
+        <h2>Defense stack under test</h2>
+      </div>
+      <div class="defense-grid">
+        <div><span class="tag">LAYER 1</span><strong>Same-origin request</strong><p>Rejects direct submissions from unrelated sites.</p></div>
+        <div><span class="tag">LAYER 2</span><strong>Managed Turnstile</strong><p>Evaluates browser and network signals.</p></div>
+        <div><span class="tag">LAYER 3</span><strong>Server verification</strong><p>Checks token, action, hostname, and expiry.</p></div>
+        <div><span class="tag">LAYER 4</span><strong>24-hour rate limit</strong><p>Five successful messages per protected IP or email.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
