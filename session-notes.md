@@ -848,3 +848,14 @@ Next steps:
 - Monitor real contact traffic and Redis usage; adjust the five-per-24-hours limit only if legitimate shared-network users are affected.
 - Treat Turnstile as one anti-abuse layer rather than proof of humanity; retain server verification and rate limiting.
 - If nithi.land later receives unwanted contact spam, add an independent server-side rate limit in that site's own repository.
+
+## Background Tab Title Wrap-Up
+
+Date: 2026-09-07
+
+- Added `assets/tab-title.js` to all 11 public HTML entry points, including transition pages and the custom 404 page. Hidden tabs show “🏎️ Race Back!”; visible tabs restore their original page title. Background loading is handled immediately.
+- Validation: all 32 existing tests passed; JavaScript syntax and whitespace checks passed. A runtime simulation verified initial foreground/background loading, repeated switches, and title restoration.
+- Feature commit `61bd99f` is pushed to `origin/main`. Vercel production deployment `dpl_Vp3tog7LbJzzUsqrjonRN6CXnqFr` reached `READY` and is aliased to `https://www.formularacingcamp.com`.
+- Live checks confirmed the script reference on the homepage and nine other routes; the deployed script exactly matches the validated local file.
+- No local preview servers were started or found during wrap-up. README and session notes are excluded from deployment, so the documentation wrap-up needs no redeployment.
+- No outstanding follow-up for this change.

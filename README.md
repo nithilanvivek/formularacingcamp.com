@@ -9,6 +9,7 @@ The website has been converted from the original Canva AI Code exports into a st
 - `index.html` - page markup and content.
 - `styles.css` - extracted site styles.
 - `app.js` - mobile menu, contact form, and icon initialization.
+- `assets/tab-title.js` - shared visibility handler that shows “🏎️ Race Back!” in background tabs and restores each page's original title on return.
 - `puzzles.html` - Formula Racing Camp puzzles page, available at `/puzzles`.
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
@@ -33,11 +34,11 @@ The current deployable entry point is `index.html`, with the puzzles page availa
 
 ## Latest Session State
 
-As of 2026-08-21:
+As of 2026-09-07:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
-- Home page title and hero copy now use "Formula Racing Camp: Learning In The Fast Lane".
+- The homepage title is "Formula Racing Camp Book for Kids | F1 STEM Learning". Public pages show “🏎️ Race Back!” while their tab is hidden, then restore their original titles when visible.
 - The subscribe bar has been removed.
 - Header navigation includes a "Get in Touch" link.
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
