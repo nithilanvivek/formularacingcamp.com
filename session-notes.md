@@ -866,4 +866,7 @@ Date: 2026-09-11
 
 - Removed `game.html` and its browser script `launch-game.js`; `/game` and `/game.html` now resolve to the site's 404 response. Removed the old game redirect/header and leaderboard links to the removed page.
 - Retained the historical leaderboard, shared stylesheet, existing APIs, and stored results. The separate 404-page mini-game is unaffected.
-- Updated the retirement checks and README for the removed route. Deployment requested to the existing Vercel production site at `https://www.formularacingcamp.com`.
+- Updated the retirement checks and README for the removed route. All 32 tests and `git diff --check` passed.
+- Feature commit `a589dce` is pushed to `origin/main`. Vercel production deployment `dpl_BoFW7CVpqCzifRCy5tt6mP2VSEzC` reached `READY`, aliased to `https://www.formularacingcamp.com`.
+- Verified live: `/game`, `/game.html`, `/game/`, and `/launch-game.js` return 404; `/`, `/puzzles`, and `/game-leaderboard` return 200. The leaderboard no longer links to `/game`.
+- No local preview servers were started or found during wrap-up. No outstanding follow-up for this removal; the documentation-only wrap-up needs no redeployment.
