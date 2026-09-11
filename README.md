@@ -14,10 +14,8 @@ The website has been converted from the original Canva AI Code exports into a st
 - `puzzles.css` - extracted puzzles page styles.
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
 - `preview.html` - progressive WebP book preview with an optimized PDF fallback, available at `/preview`.
-- `game.html` - Launch Grand Prix game page, available at `/game`.
 - `404.html` - custom error page with a built-in F1-themed collection game.
-- `launch-game.css` - Launch Grand Prix styles.
-- `launch-game.js` - Launch Grand Prix browser game logic and test-mode handling.
+- `launch-game.css` - styles retained for the historical leaderboard.
 - `api/launch-game-submit.js` - Vercel Function endpoint for launch game submissions and review flags.
 - `assets/` - local optimized images, including the book cover and character bio WebP files.
 - `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
@@ -30,11 +28,11 @@ The website has been converted from the original Canva AI Code exports into a st
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
-The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles`. The retired launch-week game remains available only by its direct `/game` URL and is excluded from public navigation and search indexing.
+The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles`. The retired launch-week game has been removed; `/game` and `/game.html` return 404. The historical leaderboard remains available.
 
 ## Latest Session State
 
-As of 2026-09-07:
+As of 2026-09-11:
 
 - Production domain is `https://www.formularacingcamp.com`.
 - `https://formularacingcamp.com` redirects to the `www` domain.
@@ -43,7 +41,7 @@ As of 2026-09-07:
 - Header navigation includes a "Get in Touch" link.
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
-- The retired Launch Grand Prix remains available at the unlisted `/game` route with `noindex, nofollow` directives.
+- The retired Launch Grand Prix page has been removed; its historical leaderboard remains unindexed.
 - Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, player-clicked screen transitions with car-zip animation, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
 - The launch game has a high-visibility tab/window/browser-tool disqualification flash and a viewport-responsive launch hero for laptop screen sizes.
 - Disqualified game runs return to the homepage, and the score strip is placed in reserved layout space so it does not cover controls.
@@ -121,9 +119,7 @@ preview.html
 puzzles.html
 puzzles.css
 puzzles.js
-game.html
 launch-game.css
-launch-game.js
 api/
 assets/
 vercel.json
@@ -167,11 +163,7 @@ With clean URLs enabled, `puzzles.html` is served at:
 https://www.formularacingcamp.com/puzzles
 ```
 
-With clean URLs enabled, `game.html` is served at:
-
-```text
-https://www.formularacingcamp.com/game
-```
+The retired `/game` and `/game.html` routes return 404.
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 

@@ -859,3 +859,11 @@ Date: 2026-09-07
 - Live checks confirmed the script reference on the homepage and nine other routes; the deployed script exactly matches the validated local file.
 - No local preview servers were started or found during wrap-up. README and session notes are excluded from deployment, so the documentation wrap-up needs no redeployment.
 - No outstanding follow-up for this change.
+
+## Launch Game Page Removal
+
+Date: 2026-09-11
+
+- Removed `game.html` and its browser script `launch-game.js`; `/game` and `/game.html` now resolve to the site's 404 response. Removed the old game redirect/header and leaderboard links to the removed page.
+- Retained the historical leaderboard, shared stylesheet, existing APIs, and stored results. The separate 404-page mini-game is unaffected.
+- Updated the retirement checks and README for the removed route. Deployment requested to the existing Vercel production site at `https://www.formularacingcamp.com`.

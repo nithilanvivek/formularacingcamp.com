@@ -29,11 +29,6 @@
       "permanent": true
     },
     {
-      "source": "/game.html",
-      "destination": "/game",
-      "permanent": true
-    },
-    {
       "source": "/game-leaderboard.html",
       "destination": "/game-leaderboard",
       "permanent": true
@@ -50,15 +45,6 @@
     }
   ],
   "headers": [
-    {
-      "source": "/game",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    },
     {
       "source": "/game-leaderboard",
       "headers": [

@@ -202,7 +202,7 @@ test('90-day filter clearly falls back to Hobby reporting availability', { concu
 });
 
 test('client code has no Hobby-incompatible custom-event calls', () => {
-  const files = ['app.js', 'launch-game.js', 'puzzles.js', 'interaction-routes.js'];
+  const files = ['app.js', 'puzzles.js', 'interaction-routes.js'];
   const source = files.map((file) => fs.readFileSync(path.join(projectRoot, file), 'utf8')).join('\n');
   assert.doesNotMatch(source, /trackFrcEvent|\btrack\s*\(|window\.va\s*\(\s*['"]event/);
 });

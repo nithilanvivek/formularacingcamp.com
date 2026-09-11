@@ -10,14 +10,15 @@ function read(file) {
 }
 
 test('retired launch game is absent from public discovery surfaces', () => {
-  for (const file of ['index.html', 'puzzles.html', 'llms.txt', 'llms-full.txt', 'sitemap.xml']) {
+  for (const file of ['index.html', 'puzzles.html', 'game-leaderboard.html', 'llms.txt', 'llms-full.txt', 'sitemap.xml']) {
     const content = read(file);
-    assert.doesNotMatch(content, /(?:href=["']\/game(?:[?"'])|formularacingcamp\.com\/game\b)/i, `${file} still advertises /game`);
+    assert.doesNotMatch(content, /(?:href=["']\/game(?:[?"'])|formularacingcamp\.com\/game(?=[/?#"\s<]|$))/i, `${file} still advertises /game`);
   }
 });
 
-test('retired launch game remains available but explicitly unindexed', () => {
-  const game = read('game.html');
+test('removed game has no page or redirect and historical leaderboard remains unindexed', () => {
+  assert.equal(fs.existsSync(path.join(root, 'game.html')), false);
+  assert.equal(fs.existsSync(path.join(root, 'launch-game.js')), false);
   const leaderboard = read('game-leaderboard.html');
   const vercel = JSON.parse(read('vercel.json'));
   const robotHeaders = new Map(
@@ -27,8 +28,7 @@ test('retired launch game remains available but explicitly unindexed', () => {
     ])
   );
 
-  assert.match(game, /<meta name="robots" content="noindex, nofollow">/i);
+  assert.ok(!vercel.redirects.some(rule => rule.source === '/game.html' || rule.destination === '/game'));
   assert.match(leaderboard, /<meta name="robots" content="noindex, nofollow">/i);
-  assert.equal(robotHeaders.get('/game'), 'noindex, nofollow');
   assert.equal(robotHeaders.get('/game-leaderboard'), 'noindex, nofollow');
 });
