@@ -99,13 +99,13 @@ http://localhost:8000
 
 ### Local nithi.land contact security demo
 
-The repository includes a localhost-only browser demonstration for the live `https://nithi.land/contact/` form. Each confirmed run launches a fresh visible Chromium-family browser window on your computer, fills the fixed Name, Email, Subject, and Message test values while leaving the honeypot empty, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test. Starting each demo attempt can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable.
+The repository includes a localhost-only browser demonstration for the live `https://nithi.land/contact/` form. Each confirmed run launches a fresh headless Chromium-family browser session using `--headless=new`, without opening a browser window or showing a browser icon in the macOS Dock. It fills the fixed Name, Email, Subject, and Message test values while leaving the honeypot empty, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test. Starting each demo attempt can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable with headless support.
 
 ```sh
 node security-demo/server.js
 ```
 
-Then open `http://127.0.0.1:4173`. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. The Stop Attempt control cancels the active run immediately, closes its browser window, and leaves the dashboard ready for another attempt. `security-demo/` is excluded from Vercel deployments.
+Then open `http://127.0.0.1:4173` to follow the live telemetry. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. The Stop Attempt control cancels the active run immediately, ends its headless browser session, and leaves the dashboard ready for another attempt. `security-demo/` is excluded from Vercel deployments.
 
 ## File Structure
 

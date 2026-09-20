@@ -242,24 +242,24 @@ async function runDemo(attempt) {
   throwIfStopped(attempt);
   state.phase = 'launching';
   const browserPath = BROWSER_CANDIDATES.find((candidate) => fs.existsSync(candidate));
-  addLog('Starting a fresh visible Chromium browser session', 'action');
+  addLog('Starting a fresh headless Chromium browser session', 'action');
 
   if (!browserPath) throw new Error('No supported Chromium browser was found. Set FRC_BROWSER_PATH to its executable.');
   if (typeof WebSocket !== 'function') throw new Error('This demo requires Node.js 22 or newer');
 
   chromeProfile = fs.mkdtempSync(path.join(os.tmpdir(), 'frc-security-demo-'));
   chromeProcess = spawn(browserPath, [
+    '--headless=new',
     '--remote-debugging-port=0',
     `--user-data-dir=${chromeProfile}`,
     '--no-first-run',
     '--no-default-browser-check',
-    '--new-window',
     TARGET_URL
   ], { stdio: 'ignore' });
 
   const debuggingPort = await readDevToolsPort(chromeProfile, attempt);
   const target = await findPageTarget(debuggingPort, attempt);
-  if (!target) throw new Error('The visible Chrome tab could not be reached');
+  if (!target) throw new Error('The headless browser page could not be reached');
 
   activeCdp = new CdpConnection(target.webSocketDebuggerUrl);
   await activeCdp.connect();

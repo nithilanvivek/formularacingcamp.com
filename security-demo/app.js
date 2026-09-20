@@ -50,7 +50,7 @@ async function refresh() {
 }
 
 startButton.addEventListener('click', async () => {
-  const approved = window.confirm('This will open Chrome, click the Turnstile checkbox once if shown, and may send one real security-test email. Start the controlled attempt?');
+  const approved = window.confirm('This will run a browser in the background without opening a window, click the Turnstile checkbox once if shown, and may send one real security-test email. Start the controlled attempt?');
   if (!approved) return;
 
   startButton.disabled = true;

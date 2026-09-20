@@ -870,3 +870,15 @@ Date: 2026-09-11
 - Feature commit `a589dce` is pushed to `origin/main`. Vercel production deployment `dpl_BoFW7CVpqCzifRCy5tt6mP2VSEzC` reached `READY`, aliased to `https://www.formularacingcamp.com`.
 - Verified live: `/game`, `/game.html`, `/game/`, and `/launch-game.js` return 404; `/`, `/puzzles`, and `/game-leaderboard` return 200. The leaderboard no longer links to `/game`.
 - No local preview servers were started or found during wrap-up. No outstanding follow-up for this removal; the documentation-only wrap-up needs no redeployment.
+
+## Headless Browser Testing
+
+Date: 2026-09-20
+
+- Inspected the test entry points: `npm test` uses Node's built-in runner without launching a browser; `security-demo/server.js` is the only browser launcher in the repository.
+- Set the security demo to `--headless=new`, removed `--new-window`, and updated its UI, logs, and README. Existing confirmation, fixed inputs, sequential attempts, and cleanup remain in place.
+- Added `AGENTS.md` requiring headless browser tests and automated checks in future sessions. Installed browser bundles and macOS settings were not changed.
+- Validation: all 32 tests passed; `node --check` passed for both changed JavaScript files; `git diff --check` passed. The live demo was not run because it can send a real email.
+- Branch: `main`, tracking `origin/main` at `https://github.com/nithilanvivek/formularacingcamp.com.git`; these changes are being committed and pushed as the session wrap-up.
+- No local preview servers were started for this session or found on common preview ports. The security demo is excluded from Vercel deployment; no production deployment was performed or verified this session.
+- Next step: retain headless mode for future browser checks and use screenshots, traces, or logs for debugging.
