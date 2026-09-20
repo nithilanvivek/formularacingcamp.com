@@ -882,3 +882,15 @@ Date: 2026-09-20
 - Branch: `main`, tracking `origin/main` at `https://github.com/nithilanvivek/formularacingcamp.com.git`; these changes are being committed and pushed as the session wrap-up.
 - No local preview servers were started for this session or found on common preview ports. The security demo is excluded from Vercel deployment; no production deployment was performed or verified this session.
 - Next step: retain headless mode for future browser checks and use screenshots, traces, or logs for debugging.
+
+### Follow-up: dedicated headless shell
+
+- The full macOS Chrome app could still leave Dock icons when launched headlessly. Replaced the desktop-browser search and `--headless=new` launch with Playwright's dedicated Chromium headless shell, with no desktop-browser fallback or executable override.
+- Added a pinned Playwright development dependency, tracked npm manifests, `npm run browsers:install`, and an offline `npm run test:browser` check. Updated README and AGENTS.md to require the dedicated shell.
+- Browser sessions now close after success, failure, or Stop. A stopped launch is cleaned up before another attempt is accepted; the fixed contact flow and confirmation remain intact.
+- Validation: 35 Node tests passed, including cancellation/failure/completion cleanup checks; the offline browser smoke test passed for navigation, typing, clicking, screenshots, and close. Syntax and whitespace checks passed. No live contact submission was performed.
+- Verified standalone shell processes for both this project and `nithi.land` with macOS NSWorkspace: activation policy 1 (accessory), with no new regular Chrome Dock application. The other project's ongoing task updated its Playwright configuration and AGENTS.md concurrently; those edits were preserved and inspected.
+- Ran `nithi.land`'s existing homepage tests: 12 passed, two failed because Microsoft Store badges expose buttons while the tests expect links. Confirmed the external badge script loaded successfully and its shadow DOM contains `role="button"`; those unrelated assertions were left unchanged.
+- Installed both projects' matching shells. The older `nithi.land` Playwright installer stalled under Node 24; retrying the official installer with temporary Node 22 completed successfully. Installed browser application bundles and macOS settings were not changed.
+- Session wrap-up: committing and pushing these changes on `main` to `origin/main`. The browser checks closed their sessions and temporary servers; no project preview listeners remained. No production deployment was performed or verified.
+- Follow-up: update the unrelated Microsoft Store badge selectors in `nithi.land` when maintaining that suite; keep using the dedicated shell for all browser checks.

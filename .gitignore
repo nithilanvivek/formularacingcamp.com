@@ -3,7 +3,5 @@
 *.log
 .env*
 
-# Unused package files; this static site loads Vercel Analytics directly.
+# Local development dependencies; keep manifests tracked for reproducible tests.
 node_modules/
-package.json
-package-lock.json

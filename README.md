@@ -99,13 +99,17 @@ http://localhost:8000
 
 ### Local nithi.land contact security demo
 
-The repository includes a localhost-only browser demonstration for the live `https://nithi.land/contact/` form. Each confirmed run launches a fresh headless Chromium-family browser session using `--headless=new`, without opening a browser window or showing a browser icon in the macOS Dock. It fills the fixed Name, Email, Subject, and Message test values while leaving the honeypot empty, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test. Starting each demo attempt can deliver one real email. Chromium is preferred when installed; Google Chrome, Microsoft Edge, and Brave are supported fallbacks. Set `FRC_BROWSER_PATH` to use another Chromium executable with headless support.
+The repository includes a localhost-only browser demonstration for the live `https://nithi.land/contact/` form. Each confirmed run launches Playwright's dedicated Chromium headless shell, rather than the installed macOS Chrome application. A headless flag on the full desktop browser did not prevent Dock icons in this environment; the standalone shell avoids launching that application. It fills the fixed Name, Email, Subject, and Message test values while leaving the honeypot empty, waits for Turnstile, and tries Send once. If Turnstile requests its checkbox, the bot clicks that checkbox once and records whether Cloudflare accepts the click; it does not read verification tokens or attempt further challenge-solving. After the attempt finishes, the control panel allows another sequential test. Starting each demo attempt can deliver one real email. Install the pinned development dependencies and matching headless shell before starting the demo. The former `FRC_BROWSER_PATH` override and desktop-browser fallbacks are no longer used. A missing shell produces an installation error instead of launching a desktop browser.
 
 ```sh
+npm ci
+npm run browsers:install
 node security-demo/server.js
 ```
 
-Then open `http://127.0.0.1:4173` to follow the live telemetry. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. The Stop Attempt control cancels the active run immediately, ends its headless browser session, and leaves the dashboard ready for another attempt. `security-demo/` is excluded from Vercel deployments.
+Then open `http://127.0.0.1:4173` to follow the live telemetry. The server binds only to loopback, accepts no custom target or message, requires a confirmation for every run, and prevents concurrent attempts. The Stop Attempt control cancels the active run immediately, ends its headless browser session, and leaves the dashboard ready for another attempt. `security-demo/` is excluded from Vercel deployments. Every completed, failed, or stopped attempt closes its browser session.
+
+Run `npm run test:browser` for an offline shell smoke check that exercises navigation, input, clicks, screenshots, and cleanup without opening the live form or sending email. On macOS it also checks that the shell is not registered as a regular Dock application. `npm test` remains the browser-free Node test suite. Re-run `npm run browsers:install` after updating Playwright.
 
 ## File Structure
 

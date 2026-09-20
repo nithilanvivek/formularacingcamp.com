@@ -1,20 +1,12 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const http = require('node:http');
-const os = require('node:os');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { launchHeadlessSession } = require('./browser-session');
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.FRC_SECURITY_DEMO_PORT || 4173);
 const TARGET_URL = 'https://nithi.land/contact/';
-const BROWSER_CANDIDATES = [
-  process.env.FRC_BROWSER_PATH,
-  '/Applications/Chromium.app/Contents/MacOS/Chromium',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-  '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
-].filter(Boolean);
 const TURNSTILE_AUTOMATIC_WAIT_MS = 5000;
 const TURNSTILE_CLICK_RESULT_WAIT_MS = 20000;
 const DEMO_NAME = 'Local Security Test';
@@ -31,9 +23,6 @@ const state = {
   logs: []
 };
 
-let chromeProcess;
-let chromeProfile;
-let activeCdp;
 let activeAttempt;
 
 class AttemptStoppedError extends Error {
@@ -100,66 +89,6 @@ async function waitFor(getValue, timeoutMs, intervalMs = 200, attempt) {
   }
   throwIfStopped(attempt);
   return null;
-}
-
-class CdpConnection {
-  constructor(url) {
-    this.nextId = 1;
-    this.pending = new Map();
-    this.socket = new WebSocket(url);
-  }
-
-  async connect() {
-    await new Promise((resolve, reject) => {
-      this.socket.addEventListener('open', resolve, { once: true });
-      this.socket.addEventListener('error', reject, { once: true });
-    });
-    this.socket.addEventListener('message', (event) => {
-      const message = JSON.parse(String(event.data));
-      if (!message.id || !this.pending.has(message.id)) return;
-      const { resolve, reject } = this.pending.get(message.id);
-      this.pending.delete(message.id);
-      if (message.error) reject(new Error(message.error.message));
-      else resolve(message.result || {});
-    });
-    this.socket.addEventListener('close', () => {
-      for (const { reject } of this.pending.values()) reject(new Error('Browser connection closed'));
-      this.pending.clear();
-    });
-  }
-
-  send(method, params = {}) {
-    return new Promise((resolve, reject) => {
-      const id = this.nextId++;
-      this.pending.set(id, { resolve, reject });
-      this.socket.send(JSON.stringify({ id, method, params }));
-    });
-  }
-
-  close() {
-    this.socket.close();
-  }
-}
-
-async function readDevToolsPort(profileDirectory, attempt) {
-  const portFile = path.join(profileDirectory, 'DevToolsActivePort');
-  const contents = await waitFor(() => {
-    try { return fs.readFileSync(portFile, 'utf8'); } catch { return null; }
-  }, 10000, 200, attempt);
-  if (!contents) throw new Error('Chrome did not expose its local debugging port');
-  return Number(contents.split(/\r?\n/)[0]);
-}
-
-async function findPageTarget(port, attempt) {
-  return waitFor(async () => {
-    try {
-      const response = await fetch(`http://${HOST}:${port}/json/list`);
-      const targets = await response.json();
-      return targets.find((target) => target.type === 'page' && target.webSocketDebuggerUrl) || null;
-    } catch {
-      return null;
-    }
-  }, 10000, 200, attempt);
 }
 
 async function evaluate(cdp, expression) {
@@ -238,40 +167,24 @@ async function clickTurnstileCheckbox(cdp, attempt) {
 }
 
 async function runDemo(attempt) {
-  closeBrowserSession();
+  await closeBrowserSession();
   throwIfStopped(attempt);
   state.phase = 'launching';
-  const browserPath = BROWSER_CANDIDATES.find((candidate) => fs.existsSync(candidate));
-  addLog('Starting a fresh headless Chromium browser session', 'action');
+  addLog('Starting a fresh Chromium headless shell session', 'action');
 
-  if (!browserPath) throw new Error('No supported Chromium browser was found. Set FRC_BROWSER_PATH to its executable.');
-  if (typeof WebSocket !== 'function') throw new Error('This demo requires Node.js 22 or newer');
-
-  chromeProfile = fs.mkdtempSync(path.join(os.tmpdir(), 'frc-security-demo-'));
-  chromeProcess = spawn(browserPath, [
-    '--headless=new',
-    '--remote-debugging-port=0',
-    `--user-data-dir=${chromeProfile}`,
-    '--no-first-run',
-    '--no-default-browser-check',
-    TARGET_URL
-  ], { stdio: 'ignore' });
-
-  const debuggingPort = await readDevToolsPort(chromeProfile, attempt);
-  const target = await findPageTarget(debuggingPort, attempt);
-  if (!target) throw new Error('The headless browser page could not be reached');
-
-  activeCdp = new CdpConnection(target.webSocketDebuggerUrl);
-  await activeCdp.connect();
-  await activeCdp.send('Page.enable');
-  await activeCdp.send('Runtime.enable');
-  await activeCdp.send('Page.bringToFront');
+  const session = await launchHeadlessSession();
+  if (attempt.cancelled) {
+    await session.close();
+    throwIfStopped(attempt);
+  }
+  attempt.session = session;
+  const cdp = session.cdp;
 
   state.phase = 'navigating';
   addLog(`Navigating to ${TARGET_URL}`, 'action');
-  await activeCdp.send('Page.navigate', { url: TARGET_URL });
+  await cdp.send('Page.navigate', { url: TARGET_URL });
   const ready = await waitFor(
-    () => evaluate(activeCdp, "document.readyState === 'complete' && Boolean(document.querySelector('[data-contact-form]'))"),
+    () => evaluate(cdp, "document.readyState === 'complete' && Boolean(document.querySelector('[data-contact-form]'))"),
     20000,
     200,
     attempt
@@ -280,16 +193,16 @@ async function runDemo(attempt) {
   addLog('Production contact form loaded', 'ok');
 
   state.phase = 'typing';
-  await focusAndType(activeCdp, '[data-contact-form] [name="name"]', DEMO_NAME, 'Test name', attempt);
-  await focusAndType(activeCdp, '[data-contact-form] [name="email"]', DEMO_EMAIL, 'Test email', attempt);
-  await focusAndType(activeCdp, '[data-contact-form] [name="subject"]', DEMO_SUBJECT, 'Test subject', attempt);
-  await focusAndType(activeCdp, '[data-contact-form] [name="message"]', DEMO_MESSAGE, 'Test message', attempt);
+  await focusAndType(cdp, '[data-contact-form] [name="name"]', DEMO_NAME, 'Test name', attempt);
+  await focusAndType(cdp, '[data-contact-form] [name="email"]', DEMO_EMAIL, 'Test email', attempt);
+  await focusAndType(cdp, '[data-contact-form] [name="subject"]', DEMO_SUBJECT, 'Test subject', attempt);
+  await focusAndType(cdp, '[data-contact-form] [name="message"]', DEMO_MESSAGE, 'Test message', attempt);
   addLog('Honeypot field intentionally left empty', 'ok');
 
   state.phase = 'verifying';
   addLog('Waiting for Turnstile to evaluate the browser normally', 'action');
   let verificationPassed = await waitFor(
-    () => evaluate(activeCdp, "document.querySelector('[data-contact-form] button[type=\"submit\"]')?.disabled === false"),
+    () => evaluate(cdp, "document.querySelector('[data-contact-form] button[type=\"submit\"]')?.disabled === false"),
     TURNSTILE_AUTOMATIC_WAIT_MS,
     300,
     attempt
@@ -297,10 +210,10 @@ async function runDemo(attempt) {
   if (!verificationPassed) {
     state.phase = 'checkbox';
     addLog('Turnstile requested its checkbox. The bot is clicking it once.', 'warn');
-    await clickTurnstileCheckbox(activeCdp, attempt);
+    await clickTurnstileCheckbox(cdp, attempt);
     addLog('Automated checkbox click dispatched; observing Turnstile’s decision', 'action');
     verificationPassed = await waitFor(
-      () => evaluate(activeCdp, `(() => {
+      () => evaluate(cdp, `(() => {
         const button = document.querySelector('[data-contact-form] button[type="submit"]');
         const status = document.querySelector('[data-contact-status]')?.textContent.trim() || '';
         if (button?.disabled === false) return 'passed';
@@ -313,7 +226,7 @@ async function runDemo(attempt) {
     );
     if (verificationPassed !== 'passed') {
       state.phase = 'stopped';
-      const verificationStatus = await evaluate(activeCdp, "document.querySelector('[data-contact-status]')?.textContent.trim() || ''");
+      const verificationStatus = await evaluate(cdp, "document.querySelector('[data-contact-status]')?.textContent.trim() || ''");
       addLog(verificationStatus || 'Turnstile did not accept the automated checkbox click within 20 seconds. No message was sent.', 'warn');
       return;
     }
@@ -324,10 +237,10 @@ async function runDemo(attempt) {
 
   state.phase = 'submitting';
   addLog('Clicking Send Message once', 'action');
-  await clickSubmit(activeCdp, attempt);
+  await clickSubmit(cdp, attempt);
 
   const outcome = await waitFor(async () => {
-    const status = await evaluate(activeCdp, `(() => {
+    const status = await evaluate(cdp, `(() => {
       const element = document.querySelector('[data-contact-status]');
       return element ? element.textContent.trim() : '';
     })()`);
@@ -351,6 +264,7 @@ async function startOnce(attempt) {
       addLog(`Stopped: ${error.message}`, 'error');
     }
   } finally {
+    await closeBrowserSession(attempt);
     if (activeAttempt === attempt) {
       state.attemptActive = false;
       activeAttempt = undefined;
@@ -408,10 +322,9 @@ const server = http.createServer((req, res) => {
       return;
     }
     activeAttempt.cancelled = true;
-    state.attemptActive = false;
     state.phase = 'stopped';
     addLog(`Attempt ${activeAttempt.id} stopped by the operator`, 'warn');
-    closeBrowserSession();
+    void closeBrowserSession();
     json(res, 200, { ok: true, attempt: activeAttempt.id });
     return;
   }
@@ -419,19 +332,15 @@ const server = http.createServer((req, res) => {
   json(res, 404, { ok: false, error: 'not_found' });
 });
 
-function closeBrowserSession() {
-  try { activeCdp?.close(); } catch {}
-  try { chromeProcess?.kill(); } catch {}
-  if (chromeProfile?.startsWith(os.tmpdir() + path.sep + 'frc-security-demo-')) {
-    try { fs.rmSync(chromeProfile, { recursive: true, force: true }); } catch {}
-  }
-  activeCdp = undefined;
-  chromeProcess = undefined;
-  chromeProfile = undefined;
+async function closeBrowserSession(attempt = activeAttempt) {
+  const session = attempt?.session;
+  if (session) await session.close().catch(() => {});
+  if (attempt && attempt.session === session) attempt.session = undefined;
 }
 
-function cleanup() {
-  closeBrowserSession();
+async function cleanup() {
+  if (activeAttempt) activeAttempt.cancelled = true;
+  await closeBrowserSession();
 }
 
 if (require.main === module) {
@@ -439,9 +348,8 @@ if (require.main === module) {
   server.listen(PORT, HOST, () => {
     console.log(`nithi.land contact security demo: http://${HOST}:${PORT}`);
   });
-  process.once('SIGINT', () => { cleanup(); process.exit(0); });
-  process.once('SIGTERM', () => { cleanup(); process.exit(0); });
-  process.once('exit', cleanup);
+  process.once('SIGINT', async () => { await cleanup(); process.exit(0); });
+  process.once('SIGTERM', async () => { await cleanup(); process.exit(0); });
 }
 
 module.exports = {

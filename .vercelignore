@@ -2,7 +2,7 @@
 .vercel
 *.log
 
-# Unused package files; this static site loads Vercel Analytics directly.
+# Local development dependencies; this static site loads Vercel Analytics directly.
 node_modules/
 package.json
 package-lock.json

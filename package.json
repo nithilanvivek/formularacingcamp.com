@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "browsers:install": "playwright install chromium --only-shell",
+    "test:browser": "node --test tests/browser-smoke.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
