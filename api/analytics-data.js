@@ -1,33 +1,13 @@
-const crypto = require('node:crypto');
+const safe = require('../lib/public-analytics');
 const counters = require('../lib/analytics-counters');
 
 const VERCEL_ANALYTICS_URL = 'https://api.vercel.com/v1/query/web-analytics';
-const COOKIE_NAME = 'frc_analytics_access';
 const ALLOWED_RANGES = new Set([7, 30, 90]);
 const MAX_AGGREGATE_LIMIT = 100;
 const MAX_DAILY_QUERY_DAYS = 62;
 const HOBBY_REPORTING_DAYS = 31;
 const PREVIEW_PATH = '/preview';
 const TRACKED_ACTIONS = counters.ACTION_DEFINITIONS;
-
-function secureEqual(left, right) {
-  const leftBuffer = Buffer.from(String(left || ''), 'utf8');
-  const rightBuffer = Buffer.from(String(right || ''), 'utf8');
-  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
-}
-
-function sessionToken(password) {
-  return crypto.createHmac('sha256', password).update('formula-racing-camp-analytics-session-v1').digest('base64url');
-}
-
-function cookieValue(req, name) {
-  for (const cookie of String(req.headers.cookie || '').split(';')) {
-    const separator = cookie.indexOf('=');
-    if (separator === -1) continue;
-    if (cookie.slice(0, separator).trim() === name) return decodeURIComponent(cookie.slice(separator + 1).trim());
-  }
-  return '';
-}
 
 function isoDate(date) {
   return date.toISOString().slice(0, 10);
@@ -76,6 +56,13 @@ function odataString(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+function publicActions(rows) {
+  return TRACKED_ACTIONS.map(({ key, name, metricLabel, detail }) => ({
+    key, name, metricLabel, detail,
+    count: safe.count(rows.find(row => row.key === key)?.count)
+  }));
+}
+
 function samplePayload(days, range) {
   const trend = Array.from({ length: days }, (_, index) => {
     const date = new Date(`${range.since}T00:00:00.000Z`);
@@ -84,7 +71,7 @@ function samplePayload(days, range) {
     return { timestamp: date.toISOString(), pageviews: wave * 3, visitors: wave * 2 };
   });
   const sampleCounts = [8, 26, 7, 5, 3, 11, 18, 12];
-  const actions = TRACKED_ACTIONS.map((action, index) => ({ ...action, count: sampleCounts[index] || 0 }));
+  const actions = publicActions(TRACKED_ACTIONS.map((action, index) => ({ ...action, count: sampleCounts[index] || 0 })));
   return {
     sample: true,
     generatedAt: new Date().toISOString(),
@@ -114,11 +101,6 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const password = process.env.ANALYTICS_DASHBOARD_PASSWORD;
-  if (!password || !secureEqual(cookieValue(req, COOKIE_NAME), sessionToken(password))) {
-    return res.status(401).json({ error: 'Analytics authentication required.' });
   }
 
   const requestedRange = Number(req.query?.days);
@@ -190,7 +172,12 @@ module.exports = async function handler(req, res) {
       queryRange = dateRange(HOBBY_REPORTING_DAYS);
       rangeData = await loadRange(queryRange);
     }
-    const { trend, topPages, referrers, devices, browsers, previewRows } = rangeData;
+    const trend = safe.trend(rangeData.trend);
+    const topPages = safe.visits(rangeData.topPages, 'requestPath');
+    const referrers = safe.visits(rangeData.referrers, 'referrerHostname');
+    const devices = safe.visits(rangeData.devices, 'deviceType');
+    const browsers = safe.visits(rangeData.browsers, 'browserName');
+    const previewRows = safe.visits(rangeData.previewRows, 'requestPath').filter(row => row.requestPath === PREVIEW_PATH);
     let actionData;
     try {
       actionData = await counters.readActions(range);
@@ -198,7 +185,7 @@ module.exports = async function handler(req, res) {
       console.error('Analytics counters could not be loaded:', error.message);
       actionData = { configured: false, actions: TRACKED_ACTIONS.map((action) => ({ ...action, count: 0 })) };
     }
-    const actions = actionData.actions;
+    const actions = publicActions(actionData.actions);
     const pageviews = sum(trend, 'pageviews');
     const detailsAvailable = [topPages, referrers, devices, browsers].some((rows) => rows.length > 0);
 
@@ -238,8 +225,6 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.dateRange = dateRange;
-module.exports.secureEqual = secureEqual;
-module.exports.sessionToken = sessionToken;
 module.exports.TRACKED_ACTIONS = TRACKED_ACTIONS;
 module.exports.MAX_AGGREGATE_LIMIT = MAX_AGGREGATE_LIMIT;
 module.exports.MAX_DAILY_QUERY_DAYS = MAX_DAILY_QUERY_DAYS;

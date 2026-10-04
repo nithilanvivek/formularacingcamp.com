@@ -19,10 +19,6 @@
     try {
       const response = await fetch(`/api/analytics-data?days=${state.days}`, { cache: 'no-store', credentials: 'same-origin' });
       const payload = await response.json();
-      if (response.status === 401) {
-        window.location.assign('/analytics');
-        return;
-      }
       if (!response.ok) throw new Error(payload.error || 'Analytics could not be loaded.');
       render(payload);
       sampleBadge.hidden = !payload.sample;

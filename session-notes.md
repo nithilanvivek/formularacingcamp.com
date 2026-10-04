@@ -894,3 +894,21 @@ Date: 2026-09-20
 - Installed both projects' matching shells. The older `nithi.land` Playwright installer stalled under Node 24; retrying the official installer with temporary Node 22 completed successfully. Installed browser application bundles and macOS settings were not changed.
 - Session wrap-up: committing and pushing these changes on `main` to `origin/main`. The browser checks closed their sessions and temporary servers; no project preview listeners remained. No production deployment was performed or verified.
 - Follow-up: update the unrelated Microsoft Store badge selectors in `nithi.land` when maintaining that suite; keep using the dedicated shell for all browser checks.
+
+## 2026-10-04 — Anonymous, unlisted analytics
+
+- User approved removing the dashboard/API locks and deploying after being told
+  that anyone with the URL can read the statistics. Password/session controls and
+  Lock UI removed only from analytics; server credentials remain private.
+- Public responses allowlist fixed published paths and aggregate fields. Unknown
+  and identifier-bearing routes are omitted; referrers are hostname-only; unknown
+  event names are grouped without publishing their values. Formula interaction
+  responses omit internal Redis field names.
+- Retained noindex/no-store on page and API variants and sitemap exclusion;
+  removed analytics robots blocks so crawlers can read noindex directives.
+- Validation: 39 Node tests passed; the dedicated headless dashboard test passed after
+  installing the matching official headless shell. It covers anonymous loading,
+  7/30/90-day ranges, refresh, error recovery and a 375px viewport.
+- Publishing follows the user’s latest instruction: commit and push to GitHub;
+  let Vercel’s configured integration deploy automatically. No manual deployment
+  is initiated. Automatic production verification is reported in the task.

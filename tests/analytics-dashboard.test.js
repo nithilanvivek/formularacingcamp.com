@@ -21,10 +21,6 @@ function responseRecorder() {
   };
 }
 
-function authenticatedCookie(password) {
-  return `frc_analytics_access=${analyticsData.sessionToken(password)}`;
-}
-
 function saveEnvironment() {
   const names = ['ANALYTICS_DASHBOARD_PASSWORD', 'VERCEL_ANALYTICS_TOKEN', 'VERCEL_ANALYTICS_PROJECT_ID', 'VERCEL_ANALYTICS_TEAM_ID', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'KV_REST_API_URL', 'KV_REST_API_TOKEN', 'VERCEL'];
   const saved = Object.fromEntries(names.map((name) => [name, process.env[name]]));
@@ -34,23 +30,21 @@ function saveEnvironment() {
   });
 }
 
-test('dashboard rejects an incorrect password with 401', { concurrency: false }, () => {
+test('dashboard rejects obsolete login writes with 405', { concurrency: false }, () => {
   const restore = saveEnvironment();
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   const req = { method: 'POST', headers: {}, body: { password: 'wrong-password' } };
   const res = responseRecorder();
   analyticsAccess(req, res);
   restore();
-  assert.equal(res.statusCode, 401);
+  assert.equal(res.statusCode, 405);
   assert.match(res.headers['x-robots-tag'], /noindex/);
 });
 
 test('dashboard includes the preview reader metric', { concurrency: false }, () => {
   const restore = saveEnvironment();
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   const req = {
     method: 'GET',
-    headers: { cookie: authenticatedCookie('test-password') }
+    headers: {}
   };
   const res = responseRecorder();
   analyticsAccess(req, res);
@@ -60,24 +54,22 @@ test('dashboard includes the preview reader metric', { concurrency: false }, () 
   assert.match(res.body, /Visitors who opened \/preview/);
 });
 
-test('analytics API rejects requests without an authenticated cookie', { concurrency: false }, async () => {
+test('analytics API returns local samples without an authenticated cookie', { concurrency: false }, async () => {
   const restore = saveEnvironment();
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   const req = { method: 'GET', headers: { host: 'localhost:4174' }, query: { days: '30' } };
   const res = responseRecorder();
   await analyticsData(req, res);
   restore();
-  assert.equal(res.statusCode, 401);
+  assert.equal(res.statusCode, 200);
   assert.match(res.headers['x-robots-tag'], /noindex/);
 });
 
 test('localhost gets clearly labeled transition-route sample data only', { concurrency: false }, async () => {
   const restore = saveEnvironment();
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   delete process.env.VERCEL;
   delete process.env.VERCEL_ANALYTICS_TOKEN;
   delete process.env.VERCEL_ANALYTICS_PROJECT_ID;
-  const req = { method: 'GET', headers: { host: 'localhost:4174', cookie: authenticatedCookie('test-password') }, query: { days: '7' } };
+  const req = { method: 'GET', headers: { host: 'localhost:4174' }, query: { days: '7' } };
   const res = responseRecorder();
   await analyticsData(req, res);
   restore();
@@ -91,10 +83,9 @@ test('localhost gets clearly labeled transition-route sample data only', { concu
 test('production never falls back to sample analytics', { concurrency: false }, async () => {
   const restore = saveEnvironment();
   process.env.VERCEL = '1';
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   delete process.env.VERCEL_ANALYTICS_TOKEN;
   delete process.env.VERCEL_ANALYTICS_PROJECT_ID;
-  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com', cookie: authenticatedCookie('test-password') }, query: { days: '30' } };
+  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com' }, query: { days: '30' } };
   const res = responseRecorder();
   await analyticsData(req, res);
   restore();
@@ -107,7 +98,6 @@ test('production queries only visit aggregates, official dimensions, and limits 
   const originalFetch = global.fetch;
   const requestedUrls = [];
   process.env.VERCEL = '1';
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   process.env.VERCEL_ANALYTICS_TOKEN = 'server-only-test-token';
   process.env.VERCEL_ANALYTICS_PROJECT_ID = 'project-id';
   process.env.VERCEL_ANALYTICS_TEAM_ID = 'team-id';
@@ -127,7 +117,7 @@ test('production queries only visit aggregates, official dimensions, and limits 
     return { ok: true, status: 200, json: async () => ({ data }) };
   };
 
-  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com', cookie: authenticatedCookie('test-password') }, query: { days: '90' } };
+  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com' }, query: { days: '90' } };
   const res = responseRecorder();
   await analyticsData(req, res);
   global.fetch = originalFetch;
@@ -165,7 +155,6 @@ test('90-day filter clearly falls back to Hobby reporting availability', { concu
   const originalFetch = global.fetch;
   const requestedUrls = [];
   process.env.VERCEL = '1';
-  process.env.ANALYTICS_DASHBOARD_PASSWORD = 'test-password';
   process.env.VERCEL_ANALYTICS_TOKEN = 'server-only-test-token';
   process.env.VERCEL_ANALYTICS_PROJECT_ID = 'project-id';
   process.env.VERCEL_ANALYTICS_TEAM_ID = 'team-id';
@@ -187,7 +176,7 @@ test('90-day filter clearly falls back to Hobby reporting availability', { concu
     return { ok: true, status: 200, json: async () => ({ data }) };
   };
 
-  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com', cookie: authenticatedCookie('test-password') }, query: { days: '90' } };
+  const req = { method: 'GET', headers: { host: 'www.formularacingcamp.com' }, query: { days: '90' } };
   const res = responseRecorder();
   await analyticsData(req, res);
   global.fetch = originalFetch;
@@ -229,6 +218,6 @@ test('homepage header includes the tracked YouTube route', () => {
 
 test('analytics routes are excluded from search engines', () => {
   const robots = fs.readFileSync(path.join(projectRoot, 'robots.txt'), 'utf8');
-  assert.match(robots, /Disallow: \/analytics\//);
-  assert.match(robots, /Disallow: \/api\/analytics-data/);
+  assert.doesNotMatch(robots, /Disallow: .*analytics/);
+  assert.doesNotMatch(fs.readFileSync(path.join(projectRoot, 'sitemap.xml'), 'utf8'), /\/analytics/);
 });

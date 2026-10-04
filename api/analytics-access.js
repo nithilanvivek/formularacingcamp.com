@@ -1,49 +1,3 @@
-const crypto = require('node:crypto');
-
-const COOKIE_NAME = 'frc_analytics_access';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-
-function secureEqual(left, right) {
-  const leftBuffer = Buffer.from(String(left || ''), 'utf8');
-  const rightBuffer = Buffer.from(String(right || ''), 'utf8');
-  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
-}
-
-function sessionToken(password) {
-  return crypto
-    .createHmac('sha256', password)
-    .update('formula-racing-camp-analytics-session-v1')
-    .digest('base64url');
-}
-
-function cookieValue(req, name) {
-  for (const cookie of String(req.headers.cookie || '').split(';')) {
-    const separator = cookie.indexOf('=');
-    if (separator === -1) continue;
-    if (cookie.slice(0, separator).trim() === name) {
-      return decodeURIComponent(cookie.slice(separator + 1).trim());
-    }
-  }
-  return '';
-}
-
-function submittedValue(req, name) {
-  if (req.body && typeof req.body === 'object') return String(req.body[name] || '');
-  return String(new URLSearchParams(String(req.body || '')).get(name) || '');
-}
-
-function isSecureRequest(req) {
-  return Boolean(process.env.VERCEL) || String(req.headers['x-forwarded-proto'] || '').includes('https');
-}
-
-function setSessionCookie(req, res, value, maxAge) {
-  const secure = isSecureRequest(req) ? '; Secure' : '';
-  res.setHeader(
-    'Set-Cookie',
-    `${COOKIE_NAME}=${encodeURIComponent(value)}; Path=/; HttpOnly${secure}; SameSite=Strict; Max-Age=${maxAge}`
-  );
-}
-
 function documentShell(content, title, scripts = '') {
   return `<!doctype html>
 <html lang="en">
@@ -52,7 +6,7 @@ function documentShell(content, title, scripts = '') {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
-  <meta name="description" content="Private analytics dashboard for Formula Racing Camp.">
+  <meta name="description" content="Site analytics dashboard for Formula Racing Camp.">
   <meta name="theme-color" content="#07111b">
   <title>${title} | Formula Racing Camp</title>
   <link rel="icon" type="image/webp" href="/assets/site/f1-camp-logo-transparent.webp?v=20260731-webp1">
@@ -60,7 +14,7 @@ function documentShell(content, title, scripts = '') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/analytics/dashboard.css?v=20260804-preview1">
+  <link rel="stylesheet" href="/assets/analytics/dashboard.css?v=20261004">
 </head>
 <body>
   <div class="site-shell">
@@ -69,37 +23,13 @@ function documentShell(content, title, scripts = '') {
         <img src="/assets/site/f1-camp-logo-transparent.webp?v=20260731-webp1" alt="">
         <span>Formula Racing Camp</span>
       </a>
-      <span class="private-label"><i aria-hidden="true"></i> Private analytics</span>
+      <span class="private-label"><i aria-hidden="true"></i> Site analytics</span>
     </header>
     ${content}
   </div>
   ${scripts}
 </body>
 </html>`;
-}
-
-function loginPage({ invalid = false, unavailable = false } = {}) {
-  const message = unavailable
-    ? 'Analytics access is not configured yet.'
-    : invalid
-      ? 'That password did not make the grid. Try again.'
-      : '';
-  return documentShell(`
-    <main class="lock-screen">
-      <div class="lock-mark" aria-hidden="true"><span></span></div>
-      <p class="eyebrow">Private dashboard</p>
-      <h1>Team telemetry,<br>behind the pit wall.</h1>
-      <p class="lock-copy">Enter the dashboard password to see traffic, popular pages, devices, and on-site interactions.</p>
-      <form class="lock-form" action="/analytics" method="post">
-        <label for="password">Dashboard password</label>
-        <div class="password-row">
-          <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
-          <button type="submit">Unlock <span aria-hidden="true">→</span></button>
-        </div>
-        <p class="form-status" role="alert">${message}</p>
-      </form>
-      <p class="privacy-note">The password and analytics credentials are checked only on the server.</p>
-    </main>`, 'Analytics Access');
 }
 
 function dashboardPage() {
@@ -109,7 +39,7 @@ function dashboardPage() {
         <div>
           <p class="eyebrow">Audience race data</p>
           <h1>Site analytics</h1>
-          <p class="dashboard-intro">A private view of what readers are exploring and where they choose to continue.</p>
+          <p class="dashboard-intro">A view of what readers are exploring and where they choose to continue.</p>
         </div>
         <div class="dashboard-tools">
           <div class="range-switch" aria-label="Analytics date range">
@@ -118,7 +48,6 @@ function dashboardPage() {
             <button type="button" data-range="90" aria-pressed="false">90 days</button>
           </div>
           <button class="quiet-button" id="refresh-button" type="button">Refresh</button>
-          <form action="/analytics" method="post"><input type="hidden" name="action" value="logout"><button class="quiet-button" type="submit">Lock</button></form>
         </div>
       </header>
 
@@ -152,47 +81,19 @@ function dashboardPage() {
         <section class="panel panel--wide panel--events" aria-labelledby="actions-title"><header class="panel-heading"><div><p class="panel-kicker">Interactions</p><h2 id="actions-title">Tracked actions</h2></div><span class="event-pill">Redis counters</span></header><div class="event-grid" id="action-list"></div></section>
       </div>
 
-      <footer class="dashboard-footer"><span id="updated-at">Not refreshed yet</span><span>Private · noindex · Vercel Web Analytics + Upstash Redis</span></footer>
-    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20260804-preview1"></script>');
+      <footer class="dashboard-footer"><span id="updated-at">Not refreshed yet</span><span>Unlisted · noindex · Vercel Web Analytics + Upstash Redis</span></footer>
+    </main>`, 'Analytics', '<script src="/assets/analytics/dashboard.js?v=20261004"></script>');
 }
 
 module.exports = function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
 
-  const password = process.env.ANALYTICS_DASHBOARD_PASSWORD;
-  if (!password) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(503).send(loginPage({ unavailable: true }));
-  }
-
-  if (req.method === 'POST') {
-    if (submittedValue(req, 'action') === 'logout') {
-      setSessionCookie(req, res, '', 0);
-      res.setHeader('Location', '/analytics');
-      return res.status(303).end();
-    }
-
-    if (!secureEqual(submittedValue(req, 'password'), password)) {
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return res.status(401).send(loginPage({ invalid: true }));
-    }
-
-    setSessionCookie(req, res, sessionToken(password), COOKIE_MAX_AGE);
-    res.setHeader('Location', '/analytics');
-    return res.status(303).end();
-  }
-
   if (req.method !== 'GET' && req.method !== 'HEAD') {
-    res.setHeader('Allow', 'GET, HEAD, POST');
+    res.setHeader('Allow', 'GET, HEAD');
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  const authenticated = secureEqual(cookieValue(req, COOKIE_NAME), sessionToken(password));
-  const html = authenticated ? dashboardPage() : loginPage();
+  const html = dashboardPage();
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(req.method === 'HEAD' ? '' : html);
 };
-
-module.exports.secureEqual = secureEqual;
-module.exports.sessionToken = sessionToken;

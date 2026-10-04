@@ -209,3 +209,11 @@ Successful contact messages are limited to five per rolling 24 hours by both pub
 5. After August 15, ask the first-place winner for a delivery address and send the unique second- and third-place codes in the email body without attaching the source CSV files.
 6. Verify the launch-week game on production Chrome/Safari after deployment.
 7. Consider replacing the Tailwind CDN with a build step if the project grows.
+
+## Unlisted public analytics
+
+`/analytics` and `/api/analytics-data` are accessible without a password. Vercel
+and Redis credentials remain server-side. Responses publish only fixed public
+page paths and selected aggregate metrics, with unknown paths and upstream
+metadata excluded. The page, direct HTML handler, and JSON API retain `noindex`
+and `no-store`; none are in the sitemap. Crawlers may fetch them to read noindex.
