@@ -46,7 +46,7 @@ test('anonymous dashboard renders, changes range, refreshes and recovers from AP
     assert.equal(await evaluate(`document.querySelector('input[type=password]')===null`),true);
     assert.equal(await evaluate(`document.querySelector('meta[name=robots]').content.includes('noindex')`),true);
     assert.equal(await evaluate(`!!document.querySelector('#traffic-chart svg')`),true);
-    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#action-list .event-meta')).map(element=>element.textContent).filter(text=>['/amazon','/kindle','/flipkart','/np'].includes(text))`),['/amazon','/kindle','/flipkart','/np']);
+    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#action-list .event-meta')).map(element=>element.textContent).filter(text=>['/amazon','/kindle','/flipkart','/np','/youtube'].includes(text))`),['/amazon','/kindle','/flipkart','/np','/youtube']);
     assert.equal(await evaluate(`document.querySelector('#action-list').textContent.includes('Book store selected')`),false);
     for(const days of [7,90,30]) {
       await evaluate(`document.querySelector('[data-range="${days}"]').click()`);

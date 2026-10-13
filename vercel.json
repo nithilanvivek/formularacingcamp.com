@@ -37,19 +37,23 @@
   "rewrites": [
     {
       "source": "/amazon",
-      "destination": "/api/redirect-amazon"
+      "destination": "/api/short-link-redirect?shortLink=amazon"
     },
     {
       "source": "/kindle",
-      "destination": "/api/redirect-kindle"
+      "destination": "/api/short-link-redirect?shortLink=kindle"
     },
     {
       "source": "/flipkart",
-      "destination": "/api/redirect-flipkart"
+      "destination": "/api/short-link-redirect?shortLink=flipkart"
     },
     {
       "source": "/np",
-      "destination": "/api/redirect-np"
+      "destination": "/api/short-link-redirect?shortLink=np"
+    },
+    {
+      "source": "/youtube",
+      "destination": "/api/short-link-redirect?shortLink=youtube"
     },
     {
       "source": "/analytics",

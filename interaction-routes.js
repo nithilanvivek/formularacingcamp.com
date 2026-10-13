@@ -15,11 +15,6 @@
       windowObject.location.assign('/go/puzzles');
       return;
     }
-
-    if (url.hostname.includes('youtube.com') || url.hostname === 'youtu.be' || url.hostname === 'tinyurl.com') {
-      event.preventDefault();
-      windowObject.location.assign('/go/youtube');
-    }
   });
 
   document.addEventListener('DOMContentLoaded', () => {

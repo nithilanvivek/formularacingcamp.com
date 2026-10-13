@@ -2,8 +2,7 @@ const counters = require('../lib/analytics-counters');
 
 const EXPECTED_PATHS = {
   purchase_opened: new Set(['/']),
-  puzzles_opened: new Set(['/go/puzzles', '/go/puzzles/']),
-  youtube_opened: new Set(['/go/youtube', '/go/youtube/'])
+  puzzles_opened: new Set(['/go/puzzles', '/go/puzzles/'])
 };
 
 function requestBody(req) {

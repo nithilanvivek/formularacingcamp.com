@@ -196,14 +196,14 @@ test('client code has no Hobby-incompatible custom-event calls', () => {
   assert.doesNotMatch(source, /trackFrcEvent|\btrack\s*\(|window\.va\s*\(\s*['"]event/);
 });
 
-test('legacy book page forwards through short links while puzzle and YouTube pages track their actions', () => {
+test('legacy book and YouTube pages forward through short links while puzzles track their actions', () => {
   for (const route of ['book', 'puzzles', 'youtube']) {
     const html = fs.readFileSync(path.join(projectRoot, 'go', route, 'index.html'), 'utf8');
-    if (route === 'book') assert.doesNotMatch(html, /\/_vercel\/insights\/script\.js|interaction-counter\.js/);
+    if (route !== 'puzzles') assert.doesNotMatch(html, /\/_vercel\/insights\/script\.js|interaction-counter\.js/);
     else assert.match(html, /\/_vercel\/insights\/script\.js/);
     assert.match(html, new RegExp(`history\\.replaceState\\(null,'','/go/${route}/'\\)`));
     assert.match(html, /id="continue-link"/);
-    if (route !== 'book') assert.match(html, /interaction-counter\.js/);
+    if (route === 'puzzles') assert.match(html, /interaction-counter\.js/);
     assert.match(html, /go-transition\.js/);
   }
   const transitionScript = fs.readFileSync(path.join(projectRoot, 'assets', 'go-transition.js'), 'utf8');
@@ -214,7 +214,7 @@ test('legacy book page forwards through short links while puzzle and YouTube pag
 
 test('homepage header includes the tracked YouTube route', () => {
   const homepage = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
-  assert.match(homepage, /class="header-action header-action-youtube" href="\/go\/youtube"/);
+  assert.match(homepage, /class="header-action header-action-youtube" href="\/youtube"/);
 });
 
 test('analytics routes are excluded from search engines', () => {

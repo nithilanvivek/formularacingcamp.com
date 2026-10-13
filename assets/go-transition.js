@@ -8,7 +8,7 @@
   const transition = document.body.dataset.transition;
   const destinations = {
     puzzles: { name: 'F1 puzzles', url: '/puzzles' },
-    youtube: { name: 'YouTube channel', url: 'https://youtube.com/@WhereF1RulesTheWorld' }
+    youtube: { name: 'YouTube channel', url: '/youtube' }
   };
   const selectedStore = document.documentElement.dataset.store;
   const destination = transition === 'book'
@@ -24,8 +24,6 @@
 
   if (transition === 'puzzles') {
     windowObject.frcTrackAction?.('puzzles_opened');
-  } else if (transition === 'youtube') {
-    windowObject.frcTrackAction?.('youtube_opened');
   }
 
   const localPreview = document.documentElement.dataset.preview === 'true';

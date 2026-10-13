@@ -169,20 +169,22 @@ https://www.formularacingcamp.com/puzzles
 
 The retired `/game` and `/game.html` routes return 404.
 
-### Retailer short links
+### Tracked short links
 
 The header and hero buy buttons use `/amazon` (print), `/kindle`, `/flipkart`,
-and `/np` (Notion Press). Vercel rewrites each short link to a fixed retailer
-function, which records a daily Redis counter before returning a non-cached
-302 redirect. Shared links and website clicks use the same counters.
+and `/np` (Notion Press). YouTube channel buttons use `/youtube`, which targets
+`https://www.youtube.com/@WhereF1RulesTheWorld`. Vercel rewrites these links to
+one shared function with an allowlist of fixed destinations. It records a daily
+Redis counter before returning a non-cached 302 redirect. Shared links and
+website clicks use the same counters.
 
-`/analytics` shows the four short-link totals for the selected date range.
+`/analytics` shows the five short-link totals for the selected date range.
 They count GET requests, including repeat requests and bots, rather than unique
 people or purchases; HEAD checks do not count. Counting starts with this
-deployment. The old retailer-selection counters and `/go/book` page statistics
-are excluded from the dashboard. Older `/go/book?store=...` links still continue
-through the corresponding short link. A counter outage or a 1.5-second timeout
-does not block the retailer redirect.
+deployment of each link. The old retailer-selection and YouTube-open counters
+and `/go/book` and `/go/youtube` page statistics are excluded from the dashboard.
+Older transition links still continue through the corresponding short link.
+A counter outage or a 1.5-second timeout does not block the redirect.
 
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 
