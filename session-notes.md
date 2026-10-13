@@ -912,3 +912,28 @@ Date: 2026-09-20
 - Publishing follows the user’s latest instruction: commit and push to GitHub;
   let Vercel’s configured integration deploy automatically. No manual deployment
   is initiated. Automatic production verification is reported in the task.
+
+## 2026-10-13 — Retailer short links and analytics
+
+- Added `/amazon`, `/kindle`, `/flipkart`, and `/np` and updated the header,
+  hero, and Notion Press offer links to use them. Kindle targets
+  `https://www.amazon.in/dp/B0H7TH9QW6`; the other destinations match the
+  requested retailer URLs documented in the redirect handlers.
+- Replaced the initial permanent redirects with fixed retailer functions that
+  increment daily Redis counters and return non-cached 302 responses. HEAD
+  requests do not count; a counter outage or 1.5-second timeout still redirects.
+- `/analytics` shows the four short-link counters and excludes the old retailer
+  selection entries and `/go/book` page statistics. Legacy book transition links
+  forward through the new short links without recording their old page view.
+  Puzzle and YouTube tracking remains in place. README documents the behavior.
+- Validation: all 44 Node tests, JavaScript syntax checks, whitespace checks,
+  and the dedicated headless dashboard check passed. Browser sessions and
+  temporary test servers closed; no project preview listeners remain.
+- Feature commit `c5695a2` is pushed to `origin/main` at
+  `https://github.com/nithilanvivek/formularacingcamp.com.git`. Vercel reported
+  successful deployment to `https://www.formularacingcamp.com`.
+- Live verification confirmed all eight header/hero retailer buttons, all four
+  destinations, and one increment per short link. Each counter includes one
+  verification visit. Old retailer analytics entries are absent.
+- Wrap-up commits only these notes. The pre-existing untracked macOS `Icon\r`
+  file is left untouched. No outstanding follow-up for these changes.
