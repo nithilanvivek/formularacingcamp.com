@@ -3,21 +3,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/np",
-      "destination": "https://notionpress.com/in/read/formula-racing-camp",
-      "permanent": true
-    },
-    {
-      "source": "/amazon",
-      "destination": "https://www.amazon.in/dp/B0H8ZYFV7Q",
-      "permanent": true
-    },
-    {
-      "source": "/flipkart",
-      "destination": "https://www.flipkart.com/search?q=Formula%20Racing%20Camp%20book",
-      "permanent": true
-    },
-    {
       "source": "/(.*)",
       "has": [
         {
@@ -50,6 +35,22 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/amazon",
+      "destination": "/api/redirect-amazon"
+    },
+    {
+      "source": "/kindle",
+      "destination": "/api/redirect-kindle"
+    },
+    {
+      "source": "/flipkart",
+      "destination": "/api/redirect-flipkart"
+    },
+    {
+      "source": "/np",
+      "destination": "/api/redirect-np"
+    },
     {
       "source": "/analytics",
       "destination": "/api/analytics-access"

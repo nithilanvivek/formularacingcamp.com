@@ -2,7 +2,6 @@ const counters = require('../lib/analytics-counters');
 
 const EXPECTED_PATHS = {
   purchase_opened: new Set(['/']),
-  book_store_selected: new Set(['/go/book', '/go/book/']),
   puzzles_opened: new Set(['/go/puzzles', '/go/puzzles/']),
   youtube_opened: new Set(['/go/youtube', '/go/youtube/'])
 };

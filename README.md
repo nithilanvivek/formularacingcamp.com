@@ -169,6 +169,21 @@ https://www.formularacingcamp.com/puzzles
 
 The retired `/game` and `/game.html` routes return 404.
 
+### Retailer short links
+
+The header and hero buy buttons use `/amazon` (print), `/kindle`, `/flipkart`,
+and `/np` (Notion Press). Vercel rewrites each short link to a fixed retailer
+function, which records a daily Redis counter before returning a non-cached
+302 redirect. Shared links and website clicks use the same counters.
+
+`/analytics` shows the four short-link totals for the selected date range.
+They count GET requests, including repeat requests and bots, rather than unique
+people or purchases; HEAD checks do not count. Counting starts with this
+deployment. The old retailer-selection counters and `/go/book` page statistics
+are excluded from the dashboard. Older `/go/book?store=...` links still continue
+through the corresponding short link. A counter outage or a 1.5-second timeout
+does not block the retailer redirect.
+
 Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
 
 The launch-game API can also save a leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, score, level scores, review status, bucket, and timestamps, but not email addresses. Because the repository is public, these stored leaderboard fields are public even though the raw JSON file is excluded from Vercel deployments by `.vercelignore`; the `vercel.json` not-found rewrite is retained as defense in depth. Submitted email addresses are used for receipts and may be sent to the configured private administrative webhook, but are not written into new GitHub leaderboard entries. Configure these Vercel environment variables to enable it:

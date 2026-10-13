@@ -64,7 +64,7 @@ test('counter reader applies the requested date range to every action', { concur
   assert.equal(result.actions[1].count, 2);
 });
 
-test('same-origin interaction endpoint increments the selected store only', { concurrency: false }, async () => {
+test('same-origin interaction endpoint increments the puzzle counter', { concurrency: false }, async () => {
   const restore = saveEnvironment();
   const originalFetch = global.fetch;
   configureRedis();
@@ -78,9 +78,9 @@ test('same-origin interaction endpoint increments the selected store only', { co
     headers: {
       host: 'www.formularacingcamp.com',
       origin: 'https://www.formularacingcamp.com',
-      referer: 'https://www.formularacingcamp.com/go/book/'
+      referer: 'https://www.formularacingcamp.com/go/puzzles/'
     },
-    body: { action: 'book_store_selected', store: 'amazon_kindle' }
+    body: { action: 'puzzles_opened' }
   };
   const res = responseRecorder();
   await trackAction(req, res);
@@ -89,7 +89,7 @@ test('same-origin interaction endpoint increments the selected store only', { co
 
   assert.equal(res.statusCode, 202);
   assert.equal(command[0], 'HINCRBY');
-  assert.match(command[2], /:book:amazon_kindle$/);
+  assert.match(command[2], /:puzzles:opened$/);
 });
 
 test('interaction endpoint rejects cross-origin counter requests', { concurrency: false }, async () => {

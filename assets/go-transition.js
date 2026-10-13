@@ -1,9 +1,9 @@
 (function initializeTransition(windowObject) {
   const bookDestinations = {
-    amazon_print: { name: 'Amazon paperback', url: 'https://www.amazon.in/dp/B0H8ZYFV7Q' },
-    amazon_kindle: { name: 'Amazon Kindle', url: 'https://www.amazon.in/dp/B0H7TH9QW6' },
-    flipkart: { name: 'Flipkart', url: 'https://www.flipkart.com/search?q=Formula%20Racing%20Camp%20book' },
-    notion_press: { name: 'Notion Press', url: 'https://notionpress.com/in/read/formula-racing-camp' }
+    amazon_print: { name: 'Amazon paperback', url: '/amazon' },
+    amazon_kindle: { name: 'Amazon Kindle', url: '/kindle' },
+    flipkart: { name: 'Flipkart', url: '/flipkart' },
+    notion_press: { name: 'Notion Press', url: '/np' }
   };
   const transition = document.body.dataset.transition;
   const destinations = {
@@ -22,10 +22,7 @@
   link.href = destination.url;
   link.setAttribute('aria-label', `Continue to ${destination.name}`);
 
-  if (transition === 'book') {
-    const store = bookDestinations[selectedStore] ? selectedStore : 'notion_press';
-    windowObject.frcTrackAction?.('book_store_selected', { store });
-  } else if (transition === 'puzzles') {
+  if (transition === 'puzzles') {
     windowObject.frcTrackAction?.('puzzles_opened');
   } else if (transition === 'youtube') {
     windowObject.frcTrackAction?.('youtube_opened');
