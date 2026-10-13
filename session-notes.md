@@ -937,3 +937,22 @@ Date: 2026-09-20
   verification visit. Old retailer analytics entries are absent.
 - Wrap-up commits only these notes. The pre-existing untracked macOS `Icon\r`
   file is left untouched. No outstanding follow-up for these changes.
+
+### YouTube follow-up — 2026-10-13
+
+- Added `/youtube` targeting `https://www.youtube.com/@WhereF1RulesTheWorld`.
+  All three homepage YouTube buttons use it. `/analytics` now shows its daily
+  redirect counter and excludes the old YouTube-open entry and `/go/youtube`
+  page statistics. Legacy transition links continue through `/youtube`.
+- Consolidated the five short links into one shared function with fixed,
+  allowlisted destinations; the retailer URLs and counter fields are retained.
+  README documents the current five-link tracking behavior.
+- Feature commit `5d40745` is pushed to `origin/main`; Vercel confirmed successful
+  deployment to `https://www.formularacingcamp.com`. Verified all five live
+  destinations and all three channel buttons. The YouTube counter includes one
+  verification visit, confirmed as a single increment.
+- Validation: all 45 Node tests and the dedicated headless dashboard check
+  passed; JavaScript syntax and whitespace checks passed. Browser sessions and
+  temporary servers closed. No local project preview listeners remain.
+- This wrap-up commits only the notes. The existing untracked `Icon\r` file
+  remains untouched. No outstanding follow-up for this update.
