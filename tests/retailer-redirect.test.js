@@ -15,7 +15,7 @@ const destinations = {
   kindle: 'https://www.amazon.in/dp/B0H7TH9QW6',
   flipkart: 'https://www.flipkart.com/search?q=Formula%20Racing%20Camp%20book',
   np: 'https://notionpress.com/in/read/formula-racing-camp',
-  youtube: 'https://www.youtube.com/@WhereF1RulesTheWorld'
+  youtube: 'https://youtube.com/@FormulaRacingCamp'
 };
 
 function response() {

@@ -173,7 +173,7 @@ The retired `/game` and `/game.html` routes return 404.
 
 The header and hero buy buttons use `/amazon` (print), `/kindle`, `/flipkart`,
 and `/np` (Notion Press). YouTube channel buttons use `/youtube`, which targets
-`https://www.youtube.com/@WhereF1RulesTheWorld`. Vercel rewrites these links to
+`https://youtube.com/@FormulaRacingCamp`. Vercel rewrites these links to
 one shared function with an allowlist of fixed destinations. It records a daily
 Redis counter before returning a non-cached 302 redirect. Shared links and
 website clicks use the same counters.
