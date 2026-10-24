@@ -992,6 +992,12 @@ Date: 2026-09-20
 - OpenCV independently decoded all four exported PNG variants to the exact
   expected UPI URI. Screenshots and test downloads are in `/tmp/camp-upi-qa`,
   outside the repository. No real payment or email was sent.
-- Publishing via `main` to `origin/main` and the existing Vercel integration;
-  next step is live deployment verification. The test closed its headless
-  browser and temporary server. The existing untracked `Icon\r` is preserved.
+- Feature commit `ed9219a` is pushed to `origin/main`; Vercel reported successful
+  production deployment. Live `/upi` returns HTTP 200 with the studio HTML.
+- Repeated the full headless browser check on
+  `https://www.formularacingcamp.com/upi`; all interactions and mobile layout
+  passed without CSP errors. OpenCV decoded all four live exported PNGs to the
+  exact expected URI. Live QA files are in `/tmp/camp-upi-live-qa`.
+- Headless sessions and the temporary local server closed; no project preview
+  servers remain. This wrap-up commits only the verified deployment notes.
+  The existing untracked `Icon\r` is preserved. No outstanding follow-up.
