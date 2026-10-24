@@ -956,3 +956,16 @@ Date: 2026-09-20
   temporary servers closed. No local project preview listeners remain.
 - This wrap-up commits only the notes. The existing untracked `Icon\r` file
   remains untouched. No outstanding follow-up for this update.
+
+## 2026-10-24 — UPI QR Studio redirect
+
+- Added a temporary `/upi` redirect to
+  `https://camp-upi-qr-studio.vivekr22.chatgpt.site/`, before the canonical-host
+  rule so both root and `www` domains can redirect directly. README documents it.
+- This changes routing only; public page content and its review dates are unchanged.
+- Validation: all 45 Node tests and `git diff --check` passed. No local preview
+  servers were started or found; unrelated system listeners were left running.
+- Publishing on `main` to `origin/main` at
+  `https://github.com/nithilanvivek/formularacingcamp.com.git` through the existing
+  Vercel integration. Next step: confirm deployment and the live `/upi` redirect.
+- The pre-existing untracked macOS `Icon\r` file remains untouched.
