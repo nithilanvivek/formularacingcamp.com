@@ -961,11 +961,15 @@ Date: 2026-09-20
 
 - Added a temporary `/upi` redirect to
   `https://camp-upi-qr-studio.vivekr22.chatgpt.site/`, before the canonical-host
-  rule so both root and `www` domains can redirect directly. README documents it.
+  rule. README documents it.
 - This changes routing only; public page content and its review dates are unchanged.
 - Validation: all 45 Node tests and `git diff --check` passed. No local preview
   servers were started or found; unrelated system listeners were left running.
-- Publishing on `main` to `origin/main` at
-  `https://github.com/nithilanvivek/formularacingcamp.com.git` through the existing
-  Vercel integration. Next step: confirm deployment and the live `/upi` redirect.
+- Feature commit `651ee3a` is pushed on `main` to `origin/main` at
+  `https://github.com/nithilanvivek/formularacingcamp.com.git`. Vercel reported a
+  successful deployment through the existing GitHub integration.
+- Live HEAD checks confirmed `https://www.formularacingcamp.com/upi` returns 307
+  with the requested QR Studio destination. The root domain first returns its
+  existing 308 to `www`, then reaches the same redirect.
+- This final wrap-up updates only session notes. No outstanding follow-up.
 - The pre-existing untracked macOS `Icon\r` file remains untouched.
