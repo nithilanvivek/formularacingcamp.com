@@ -159,7 +159,9 @@ Recommended Vercel settings:
 
 The `vercel.json` file enables clean URLs, canonical redirects, caching, and site-wide security headers. The `.vercelignore` file keeps reference-only files out of the deployed public output.
 
-`/upi` redirects to the UPI QR Studio at `https://camp-upi-qr-studio.vivekr22.chatgpt.site/` with a temporary redirect, allowing the destination to be updated later.
+`/upi` serves the Camp Pay UPI QR Studio from `upi.html`. It generates payment QR codes locally in the browser, with optional INR amounts, notes, camp branding, PNG/SVG downloads, and a copyable UPI link. Its scripts and styles live in `assets/upi/`; the QR library retains its MIT license notice. Payment details are not sent to a server. Test the generated code with your UPI app and confirm the recipient before sharing.
+
+Run `node --test tests/upi-browser.js` after installing the matching headless shell to check the studio under the production security headers, including input validation, clipboard copying, downloads, and mobile layout. The test starts and closes its own local server. Set `UPI_LIVE_BASE_URL=https://www.formularacingcamp.com` to run the same check against production; it generates only test QR codes and makes no payments. `UPI_QA_DIR` optionally selects the output folder for screenshots and downloaded QR images.
 
 Vercel Web Analytics is loaded directly from `/_vercel/insights/script.js` on every public HTML page. This static site does not require the `@vercel/analytics` npm package or a JavaScript build step. The unused local package files are excluded by both `.gitignore` and `.vercelignore`; if the project later adopts the package API, remove those exclusions and add an intentional bundling workflow.
 

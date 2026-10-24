@@ -3,11 +3,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/upi",
-      "destination": "https://camp-upi-qr-studio.vivekr22.chatgpt.site/",
-      "permanent": false
-    },
-    {
       "source": "/(.*)",
       "has": [
         {

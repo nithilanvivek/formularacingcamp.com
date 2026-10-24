@@ -973,3 +973,25 @@ Date: 2026-09-20
   existing 308 to `www`, then reaches the same redirect.
 - This final wrap-up updates only session notes. No outstanding follow-up.
 - The pre-existing untracked macOS `Icon\r` file remains untouched.
+
+### 2026-10-24 — Host Camp Pay directly at `/upi`
+
+- Replaced the external redirect with `upi.html`, based on the supplied
+  `Camp-Pay-UPI-QR.html`. Vercel clean URLs serve it at `/upi`.
+- Preserved the supplied form, QR colour/logo controls, amount/note options,
+  PNG/SVG downloads, and UPI-link copy. Extracted local CSS/JavaScript, retained
+  the QR library license, and reused the identical existing camp logo.
+- Repaired a broken exported CSS fragment and made PNG rendering compatible
+  with the existing CSP. Generation/export guards prevent changed details from
+  producing stale downloads. Added a visible last-updated date of October 24,
+  2026. Payment data stays in the browser; no payment is initiated by the tool.
+- Validation: all 45 Node tests, JavaScript syntax checks, and whitespace checks
+  passed. The dedicated headless browser checked validation, both themes,
+  logo toggling, clipboard content, PNG/SVG downloads, optional fields, and
+  desktop/mobile layout under production security headers, without CSP errors.
+- OpenCV independently decoded all four exported PNG variants to the exact
+  expected UPI URI. Screenshots and test downloads are in `/tmp/camp-upi-qa`,
+  outside the repository. No real payment or email was sent.
+- Publishing via `main` to `origin/main` and the existing Vercel integration;
+  next step is live deployment verification. The test closed its headless
+  browser and temporary server. The existing untracked `Icon\r` is preserved.
