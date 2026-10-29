@@ -36,6 +36,10 @@
   ],
   "rewrites": [
     {
+      "source": "/assets/latestpdf",
+      "destination": "/assets/latestpdf.pdf"
+    },
+    {
       "source": "/amazon",
       "destination": "/api/short-link-redirect?shortLink=amazon"
     },
@@ -65,6 +69,23 @@
     }
   ],
   "headers": [
+    {
+      "source": "/assets/latestpdf",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/pdf"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"Formula-Racing-Camp-5.5x8.5.pdf\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/analytics",
       "headers": [

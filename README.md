@@ -136,6 +136,8 @@ Homepage images are served from local optimized WebP files in `assets/site/` and
 
 The preview reader serves its pages from `assets/site/preview-pages/`. Only the first page is requested eagerly; later pages lazy-load as the reader scrolls. `assets/site/formula-racing-camp-book-preview.pdf` remains available as a compact PDF alternative.
 
+The full book download is available at `https://formularacingcamp.com/assets/latestpdf` (redirecting to the canonical `www` host). Vercel rewrites this stable URL to `assets/latestpdf.pdf` and sends an attachment header so it downloads as `Formula-Racing-Camp-5.5x8.5.pdf`. Replace that asset to update the download; the URL revalidates cached copies.
+
 ## AI and Answer Engine Discovery
 
 The site exposes a concise `/llms.txt` guide and an expanded `/llms-full.txt` reference. The home page also contains visible answer-focused FAQs with matching Schema.org `FAQPage` data, while the preview, puzzles, and game pages include page-specific JSON-LD.
