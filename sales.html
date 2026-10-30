@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/assets/upi/studio.css">
   <link rel="stylesheet" href="/assets/sales/recorder.css">
   <script defer src="/assets/sales/model.js"></script>
+  <script defer src="/assets/sales/workbook.js"></script>
   <script defer src="/assets/sales/recorder.js"></script>
 </head>
 <body>
@@ -23,6 +24,14 @@
       <h1>Every book.<br><span>Every sale.</span></h1>
       <p>Your camp’s sales, all in one place.<br>Choose what you’d like to record.</p>
     </div>
+    <section id="verification-gate" class="overview verification-gate" aria-labelledby="verification-title">
+      <div class="section-title"><span class="step">✓</span><h2 id="verification-title">Open your sales recorder</h2></div>
+      <p class="field-note">One Cloudflare check opens the whole page. Then record batches, sales, and cancellations without verifying each action.</p>
+      <div id="sales-challenge"></div>
+      <p id="challenge-status" class="hint" role="status">Checking your session…</p>
+      <button id="retry-verification" class="secondary" type="button" hidden>Try again</button>
+    </section>
+    <div id="recorder-content" hidden>
     <section class="overview" aria-labelledby="overview-title">
       <div class="section-title"><h2 id="overview-title">Sales overview</h2><span class="local">Cancelled sales excluded</span></div>
       <div class="totals"><div><span>Total sales</span><strong id="total-sales">—</strong><small id="total-books">Loading…</small></div><div><span>Total profit</span><strong id="total-profit">—</strong><small>Sales minus all batch costs</small></div><div><span>Profit per author</span><strong id="author-profit">—</strong><small>Equal share · 6 authors</small></div></div>
@@ -45,8 +54,6 @@
         <form id="entry-form" novalidate>
           <div id="entry-fields"></div>
           <p id="entry-error" class="error" role="alert"></p>
-          <div id="sales-challenge"></div>
-          <p id="challenge-status" class="hint" role="status"></p>
           <button id="save-entry" class="primary" type="submit">Save batch <span>↗</span></button>
         </form>
       </div>
@@ -58,9 +65,12 @@
     <p id="feedback" role="status" aria-live="polite"></p>
     <section class="ledger" aria-labelledby="ledger-title">
       <div class="section-title"><span class="step">03</span><h2 id="ledger-title">Your records</h2><span id="storage-label" class="local"></span></div>
+      <div id="record-filters" class="filter-controls" aria-label="Filter records"></div>
+      <p id="records-filter-status" class="hint" role="status"></p>
       <div id="records" aria-live="polite"><p class="empty-records">Loading your records…</p></div>
-      <div class="record-tools"><button id="refresh" class="secondary" type="button">Refresh records</button><button id="export" class="secondary" type="button" disabled>Export records</button></div>
+      <div class="record-tools"><button id="refresh" class="secondary" type="button">Refresh records</button><button id="export" class="secondary" type="button" disabled>Export Excel (.xlsx)</button></div>
     </section>
+    </div>
     <footer><span>EVERY BOOK. YOUR CAMP.</span><span>Made for the Formula Racing Camp team.</span></footer>
   </main>
 </body>

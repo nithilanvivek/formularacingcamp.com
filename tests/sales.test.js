@@ -6,6 +6,7 @@ const model = require('../assets/sales/model');
 const { salesFixture } = require('./helpers/sales-fixture');
 const store = require('../lib/sales-store');
 const handler = require('../api/sales-data');
+const verification = require('../lib/sales-verification');
 
 test('sales amounts accept decimal INR and retain exact paise', () => {
   assert.equal(model.parseMoney('349.50'), 34950);
@@ -41,6 +42,23 @@ test('profits subtract full batch costs, exclude cancellations and include onlin
   assert.equal(totals.booksSold, 2);
   assert.deepEqual(totals.batchProfits.map(batch => batch.profitPaise), [5000, -20000]);
   assert.equal(totals.profitPaise / 6, -8000 / 6);
+});
+
+test('record filters combine type, sale channel, format, batch and recorded day in India time', () => {
+  const entries = [
+    { kind: 'batch', id: 'b1', createdAt: '2026-10-29T19:00:00Z' },
+    { kind: 'sale', batchId: 'b1', channel: 'batch', format: 'Paperback', createdAt: '2026-10-29T19:00:00Z' },
+    { kind: 'sale', channel: 'online', format: 'Hardcover', createdAt: '2026-10-30T19:00:00Z' }
+  ];
+  const all = { type: 'all', channel: 'all', format: 'all', batchId: 'all', dateEnabled: false, date: '2026-10-30' };
+  const count = changes => entries.filter(entry => model.matchesFilters(entry, { ...all, ...changes })).length;
+  assert.equal(count({}), 3);
+  assert.equal(count({ type: 'batch' }), 1);
+  assert.equal(count({ type: 'sale', channel: 'batch', format: 'Paperback', batchId: 'b1', dateEnabled: true }), 1);
+  assert.equal(count({ type: 'sale', channel: 'batch', format: 'Hardcover' }), 0);
+  assert.equal(count({ channel: 'online', dateEnabled: true }), 0);
+  assert.equal(count({ channel: 'online', dateEnabled: true, date: '2026-10-31' }), 1);
+  assert.equal(count({ batchId: 'unknown' }), 0);
 });
 
 test('server persists dated batches and sales, retries safely, and retains cancelled orders', async t => {
@@ -94,30 +112,63 @@ async function callAPI(method, body, headers = {}) {
   return response;
 }
 
-test('sales API verifies Turnstile action and hostname before saving, rejects cross-origin writes and fails closed', async t => {
+test('one page verification unlocks reads and repeated writes; unverified requests cannot access records', async t => {
   const fixture = salesFixture(t);
-  const body = fixture.request('batch', { cost: '100.50', turnstileToken: 'test-token' });
+  const body = fixture.request('batch', { cost: '100.50' });
   assert.equal((await callAPI('POST', body, { origin: 'https://elsewhere.test' })).statusCode, 403);
-  assert.equal((await callAPI('POST', { ...body, turnstileToken: '' })).statusCode, 400);
+  const locked = await callAPI('GET');
+  assert.equal(locked.statusCode, 401);
+  assert.equal(locked.body.verificationRequired, true);
+  assert.equal(locked.body.turnstileSiteKey, 'test-site-key');
+  assert.equal('batches' in locked.body, false);
+  assert.equal(fixture.commands.length, 0);
+  assert.equal((await callAPI('POST', body)).statusCode, 401);
+  const challenge = { action: 'verify-page', turnstileToken: 'test-token' };
+  assert.equal((await callAPI('POST', { ...challenge, turnstileToken: '' })).statusCode, 400);
   fixture.challenge.action = 'contact';
-  assert.equal((await callAPI('POST', body)).statusCode, 400);
+  assert.equal((await callAPI('POST', challenge)).statusCode, 400);
   fixture.challenge.action = 'sales'; fixture.challenge.hostname = 'elsewhere.test';
-  assert.equal((await callAPI('POST', body)).statusCode, 400);
+  assert.equal((await callAPI('POST', challenge)).statusCode, 400);
   assert.equal(fixture.raw, null);
   fixture.challenge.hostname = 'localhost';
-  const saved = await callAPI('POST', body);
+  const unlocked = await callAPI('POST', challenge);
+  assert.equal(unlocked.statusCode, 200);
+  const cookie = unlocked.headers['Set-Cookie'].split(';')[0];
+  assert.match(unlocked.headers['Set-Cookie'], /HttpOnly; Secure; SameSite=Strict/);
+  assert.equal(fixture.verifications, 3);
+  const saved = await callAPI('POST', body, { cookie });
   assert.equal(saved.statusCode, 200);
   assert.equal(saved.body.batches[0].costPaise, 10050);
   assert.equal(saved.headers['Cache-Control'], 'private, no-store, max-age=0');
   assert.ok(saved.headers['X-Robots-Tag'].includes('noindex'));
-  const read = await callAPI('GET');
-  assert.equal(read.body.turnstileSiteKey, 'test-site-key');
+  const read = await callAPI('GET', undefined, { cookie });
+  assert.equal(read.statusCode, 200);
+  assert.equal(read.body.batches.length, 1);
+  assert.equal((await callAPI('POST', fixture.request('online-sale', { format: 'Paperback', price: '500' }), { cookie })).statusCode, 200);
+  assert.equal(fixture.verifications, 3, 'Saving and refreshing must not recheck Turnstile');
   assert.equal(JSON.stringify(read.body).includes('test-secret-key'), false);
   delete process.env.TURNSTILE_SECRET_KEY;
-  assert.equal((await callAPI('POST', body)).statusCode, 503);
+  assert.equal((await callAPI('POST', challenge)).statusCode, 503);
   assert.equal((await callAPI('DELETE')).statusCode, 405);
   fixture.offline = true;
-  assert.equal((await callAPI('GET')).statusCode, 503);
+  process.env.TURNSTILE_SECRET_KEY = 'test-secret-key';
+  assert.equal((await callAPI('GET', undefined, { cookie })).statusCode, 503);
+});
+
+test('page verification sessions reject expiry, tampering and another hostname', t => {
+  salesFixture(t);
+  const now = Date.now();
+  const cookie = verification.sessionCookie('localhost', now).split(';')[0];
+  assert.equal(verification.hasSession({ headers: { cookie } }, 'localhost', now), true);
+  assert.equal(verification.hasSession({ headers: { cookie } }, 'localhost', now + verification.SESSION_SECONDS * 1000), false);
+  assert.equal(verification.hasSession({ headers: { cookie } }, 'elsewhere.test', now), false);
+  assert.equal(verification.hasSession({ headers: { cookie: cookie.slice(0, -1) + '!' } }, 'localhost', now), false);
+  const [name, signed] = cookie.split('=');
+  const [payload, signature] = signed.split('.');
+  const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
+  data.expires += 86400000;
+  const tampered = `${name}=${Buffer.from(JSON.stringify(data)).toString('base64url')}.${signature}`;
+  assert.equal(verification.hasSession({ headers: { cookie: tampered } }, 'localhost', now), false);
 });
 
 test('sales and UPI have noindex in page metadata and HTTP headers, and are absent from the sitemap', () => {

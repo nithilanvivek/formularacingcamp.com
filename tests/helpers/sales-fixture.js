@@ -10,9 +10,9 @@ function salesFixture(t) {
   process.env.UPSTASH_REDIS_REST_TOKEN = 'test-redis-token';
   process.env.TURNSTILE_SITE_KEY = 'test-site-key';
   process.env.TURNSTILE_SECRET_KEY = 'test-secret-key';
-  const fixture = { raw: null, commands: [], offline: false, challenge: { success: true, action: 'sales', hostname: 'localhost' } };
+  const fixture = { raw: null, commands: [], offline: false, verifications: 0, challenge: { success: true, action: 'sales', hostname: 'localhost' } };
   t.mock.method(global, 'fetch', async (url, options) => {
-    if (url === 'https://challenges.cloudflare.com/turnstile/v0/siteverify') return { ok: true, json: async () => fixture.challenge };
+    if (url === 'https://challenges.cloudflare.com/turnstile/v0/siteverify') { fixture.verifications++; return { ok: true, json: async () => fixture.challenge }; }
     if (url !== 'https://sales-redis.example.test') throw new Error('Unexpected external request');
     if (fixture.offline) throw new Error('Storage offline');
     const args = JSON.parse(options.body);

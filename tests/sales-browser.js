@@ -56,9 +56,11 @@ test('sales recorder persists all four workflows and updates profits under the p
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: `
       window.cspViolations=[];
       addEventListener('securitypolicyviolation',e=>cspViolations.push(e.violatedDirective+':'+e.blockedURI));
-      window.turnstile={render(selector,options){window.challengeOptions=options;const box=document.createElement('div');box.style.width=options.size==='compact'?'150px':'300px';box.style.height=options.size==='compact'?'140px':'65px';document.querySelector(selector).append(box);setTimeout(()=>options.callback('test-token'),0);return 'test-widget';},reset(){setTimeout(()=>window.challengeOptions.callback('test-token'),0);}};
+      window.turnstile={render(selector,options){window.challengeOptions=options;const box=document.createElement('div');box.style.width=options.size==='compact'?'150px':'300px';box.style.height=options.size==='compact'?'140px':'65px';document.querySelector(selector).append(box);return 'test-widget';},remove(){document.querySelector('#sales-challenge').replaceChildren();}};
     ` });
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+    const { targetInfo } = await cdp.send('Target.getTargetInfo');
+    await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output, browserContextId: targetInfo.browserContextId });
     const navigate = async () => {
       await cdp.send('Page.navigate', { url: base + '/sales' });
       await until(`document.querySelector('#feedback')?.textContent==='Records are up to date.'`);
@@ -72,7 +74,14 @@ test('sales recorder persists all four workflows and updates profits under the p
     const submit = async () => evaluate(`document.querySelector('#entry-form').requestSubmit()`);
     const saved = async revision => until(`document.querySelector('#feedback').textContent.includes('saved') || document.querySelector('#feedback').textContent.startsWith('Order cancelled')`).then(() => assert.equal(JSON.parse(fixture.raw).revision, revision));
 
-    await navigate();
+    await cdp.send('Page.navigate', { url: base + '/sales' });
+    await until('!!window.challengeOptions');
+    assert.equal(await evaluate(`document.querySelector('#recorder-content').hidden`), true);
+    assert.equal(fixture.commands.length, 0, 'Records must not be read before page verification');
+    await evaluate(`window.challengeOptions.callback('test-token')`);
+    await until(`document.querySelector('#feedback').textContent==='Records are up to date.'`);
+    assert.equal(fixture.verifications, 1);
+    assert.equal(await evaluate(`document.querySelector('#verification-gate').hidden`), true);
     assert.equal(await evaluate(`document.querySelector('#entry-panel').hidden`), true);
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '₹0.00');
     assert.equal(await evaluate(`document.querySelector('meta[name=robots]').content.includes('noindex')`), true);
@@ -108,6 +117,8 @@ test('sales recorder persists all four workflows and updates profits under the p
     await navigate();
     assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹1,600.00');
     assert.equal(await evaluate(`localStorage.length`), 0);
+    assert.equal(await evaluate(`typeof window.challengeOptions`), 'undefined', 'Reload should reuse the verified session');
+    assert.equal(fixture.verifications, 1);
     await choose('cancel');
     await until(`!document.querySelector('#save-entry').disabled`);
     await fill({ 'order-id': JSON.parse(fixture.raw).sales[0].id });
@@ -131,6 +142,61 @@ test('sales recorder persists all four workflows and updates profits under the p
     await until(`!document.querySelector('#save-entry').disabled`);
     await submit(); await saved(5);
     assert.equal(JSON.parse(fixture.raw).sales.length, 3);
+    assert.equal(fixture.verifications, 1, 'All saves and cancellations share one page check');
+
+    const change = async (id, value, checked = false) => evaluate(`(() => {const field=document.getElementById(${JSON.stringify(id)});field[${checked ? '"checked"' : '"value"'}]=${JSON.stringify(value)};field.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+    await change('record-type', 'batch');
+    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 1);
+    assert.equal(await evaluate(`!!document.querySelector('#record-batch')`), true);
+    assert.equal(await evaluate(`!!document.querySelector('#record-format')`), false);
+    await change('record-type', 'sale');
+    await change('record-channel', 'online');
+    await change('record-format', 'Hardcover');
+    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 1);
+    await change('record-date-enabled', true, true);
+    await change('record-date', '2000-01-01');
+    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 0);
+    await change('record-date-enabled', false, true);
+    assert.equal(await evaluate(`document.querySelector('#record-date').disabled`), true);
+    await change('record-format', 'all');
+    await change('record-channel', 'batch');
+    await change('record-batch', batchId);
+    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 1);
+    await change('record-type', 'all');
+    await change('record-channel', 'all');
+
+    await choose('cancel');
+    assert.equal(await evaluate(`!!document.querySelector('#cancel-type')`), false);
+    await change('cancel-channel', 'batch');
+    await change('cancel-batch', batchId);
+    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 1, 'Cancelled orders must not reappear');
+    await change('cancel-channel', 'online');
+    await change('cancel-format', 'Hardcover');
+    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 2);
+    await change('cancel-date-enabled', true, true);
+    await change('cancel-date', '2000-01-01');
+    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 1);
+    await change('cancel-date-enabled', false, true);
+
+    await evaluate(`document.querySelector('#export').click()`);
+    const filename = 'formula-racing-camp-sales-' + new Date().toISOString().slice(0, 10) + '.xlsx';
+    const downloaded = path.join(output, filename);
+    for (let i = 0; i < 100 && !fs.existsSync(downloaded); i++) await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(fs.readFileSync(downloaded).subarray(0, 4).toString('hex'), '504b0304');
+    assert.ok(fs.readFileSync(downloaded).includes(Buffer.from('Batch profits')));
+    assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹449.50', 'Filters do not alter overview totals');
+
+    // An expired session returns to the single gate without losing an unfinished sale.
+    await choose('online-sale');
+    await fill({ format: 'Paperback', price: '20.00', 'payment-name': 'Preserved after expiry' });
+    await cdp.send('Network.clearBrowserCookies');
+    await submit();
+    await until('!!window.challengeOptions && !document.querySelector("#verification-gate").hidden');
+    assert.equal(await evaluate(`document.querySelector('#price').value`), '20.00');
+    await evaluate(`window.challengeOptions.callback('test-token')`);
+    await until(`document.querySelector('#verification-gate').hidden`);
+    assert.equal(fixture.verifications, 2);
+    await submit(); await saved(6);
     await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
     await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }).then(result => fs.writeFileSync(path.join(output, 'desktop.png'), Buffer.from(result.data, 'base64')));
     for (const action of ['batch', 'batch-sale', 'online-sale', 'cancel']) {
@@ -142,7 +208,7 @@ test('sales recorder persists all four workflows and updates profits under the p
     await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }).then(result => fs.writeFileSync(path.join(output, 'mobile.png'), Buffer.from(result.data, 'base64')));
     assert.deepEqual(errors, []);
     assert.deepEqual(await evaluate('cspViolations'), []);
-    console.log('Sales screenshots: ' + output);
+    console.log('Sales screenshots and Excel export: ' + output);
   } finally {
     if (session) await session.close();
     await new Promise(resolve => server.close(resolve));

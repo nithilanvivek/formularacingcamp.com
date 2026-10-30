@@ -58,5 +58,18 @@
     return { salesPaise, costsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.length, batchProfits };
   }
 
-  return { parseMoney, money, createBatch, createBatchSale, createOnlineSale, summary };
+  function localDay(value = Date.now()) {
+    return new Date(new Date(value).getTime() + 19800000).toISOString().slice(0, 10);
+  }
+
+  function matchesFilters(entry, filters) {
+    if (filters.type !== 'all' && entry.kind !== filters.type) return false;
+    if (filters.channel !== 'all' && (entry.kind !== 'sale' || entry.channel !== filters.channel)) return false;
+    if (filters.format !== 'all' && (entry.kind !== 'sale' || entry.format !== filters.format)) return false;
+    if (filters.batchId !== 'all' && (entry.kind === 'batch' ? entry.id : entry.batchId) !== filters.batchId) return false;
+    if (filters.dateEnabled && localDay(entry.createdAt) !== filters.date) return false;
+    return true;
+  }
+
+  return { parseMoney, money, createBatch, createBatchSale, createOnlineSale, summary, localDay, matchesFilters };
 });

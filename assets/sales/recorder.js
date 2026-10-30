@@ -3,7 +3,9 @@
   const $ = id => document.getElementById(id);
   const model = window.CampSales;
   let ledger = null, action = null, busy = false, pending = null;
-  let siteKey = '', challengeToken = '', widgetId = null, scriptLoading = false;
+  let siteKey = '', widgetId = null, scriptLoading = false, pageVerified = false, verifying = false;
+  const newFilters = type => ({ type, channel: 'all', format: 'all', batchId: 'all', dateEnabled: false, date: model.localDay() });
+  const recordFilters = newFilters('all'), cancelFilters = newFilters('sale');
   const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', cancel: 'Cancel order' };
   const descriptions = {
     batch: ['A fresh starting line.', 'Record the total cost of the books you ordered. A batch number is assigned when you save.'],
@@ -32,11 +34,11 @@
   }
   function updateSaveButton() {
     const noChoices = action === 'batch-sale' && !ledger?.batches.length || action === 'cancel' && !ledger?.sales.some(sale => sale.status === 'active');
-    $('save-entry').disabled = busy || !ledger || !challengeToken || Boolean(noChoices);
+    $('save-entry').disabled = busy || !ledger || !pageVerified || Boolean(noChoices);
   }
   function ensureChallenge() {
-    if (!action || widgetId !== null) return;
-    if (!siteKey) { $('challenge-status').textContent = 'Bot verification is not configured. Saving is unavailable.'; return; }
+    if (pageVerified || widgetId !== null) return;
+    if (!siteKey) { $('challenge-status').textContent = 'Bot verification is not configured. Please try again later.'; return; }
     if (!window.turnstile) {
       if (scriptLoading) return;
       scriptLoading = true;
@@ -45,17 +47,88 @@
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=campSalesChallengeReady';
       script.async = true;
-      script.onerror = () => { scriptLoading = false; $('challenge-status').textContent = 'Bot verification could not load. Check your connection and refresh.'; };
+      script.onerror = () => { scriptLoading = false; $('challenge-status').textContent = 'Bot verification could not load. Check your connection and try again.'; $('retry-verification').hidden = false; };
       document.head.append(script);
       return;
     }
-    $('challenge-status').textContent = 'Complete the bot check below before saving.';
+    $('challenge-status').textContent = 'Complete this check to open the sales recorder.';
     widgetId = window.turnstile.render('#sales-challenge', {
       sitekey: siteKey, action: 'sales', size: 'compact',
-      callback: token => { challengeToken = token; $('challenge-status').textContent = 'Bot verification complete.'; updateSaveButton(); },
-      'expired-callback': () => { challengeToken = ''; $('challenge-status').textContent = 'Verification expired. Please verify again.'; updateSaveButton(); },
-      'error-callback': () => { challengeToken = ''; $('challenge-status').textContent = 'Bot verification failed. Please try again.'; updateSaveButton(); }
+      callback: verifyPage,
+      'expired-callback': () => { if (!pageVerified) $('challenge-status').textContent = 'Verification expired. Please complete the check.'; },
+      'error-callback': () => { if (!pageVerified) { $('challenge-status').textContent = 'Bot verification failed. Please try again.'; $('retry-verification').hidden = false; } }
     });
+  }
+  function showGate(data) {
+    pageVerified = false;
+    if (typeof data.turnstileSiteKey === 'string') siteKey = data.turnstileSiteKey;
+    $('verification-gate').hidden = false;
+    $('recorder-content').hidden = true;
+    ensureChallenge();
+  }
+  function openRecorder() {
+    pageVerified = true;
+    $('verification-gate').hidden = true;
+    $('recorder-content').hidden = false;
+    if (widgetId !== null) { window.turnstile.remove(widgetId); widgetId = null; }
+    renderRecords();
+    // Keep an unfinished form when a session expires during a save.
+    if (!$('entry-fields').childElementCount) renderForm();
+    updateSaveButton();
+  }
+  async function verifyPage(token) {
+    if (pageVerified || verifying) return;
+    verifying = true;
+    $('retry-verification').hidden = true;
+    $('challenge-status').textContent = 'Opening your sales recorder…';
+    try {
+      ledger = await api({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify-page', turnstileToken: token }) });
+      openRecorder();
+      $('feedback').textContent = 'Records are up to date.';
+    } catch (error) {
+      $('challenge-status').textContent = error.message;
+      $('retry-verification').hidden = false;
+    } finally { verifying = false; }
+  }
+  function renderFilters(container, prefix, filters, allowType, onChange) {
+    container.innerHTML = (allowType ? `<div><label for="${prefix}-type">Record type</label><select id="${prefix}-type"><option value="all">All records</option><option value="sale">Sales</option><option value="batch">Batches</option></select></div>` : '') +
+      (filters.type !== 'batch' ? `<div><label for="${prefix}-channel">Sale channel</label><select id="${prefix}-channel"><option value="all">All channels</option><option value="online">Online stall</option><option value="batch">Batch sales</option></select></div><div><label for="${prefix}-format">Book format</label><select id="${prefix}-format"><option value="all">All formats</option><option>Paperback</option><option>Hardcover</option></select></div>` : '') +
+      (filters.type === 'batch' || filters.channel === 'batch' ? `<div><label for="${prefix}-batch">Batch number</label><select id="${prefix}-batch"></select></div>` : '') +
+      `<div class="date-filter"><label class="filter-toggle" for="${prefix}-date-enabled"><input type="checkbox" id="${prefix}-date-enabled">Filter by date</label><input type="date" id="${prefix}-date" aria-label="Recorded on, India time"><small class="hint">Recorded date · India time</small></div>`;
+    if (allowType) $(prefix + '-type').value = filters.type;
+    if ($(prefix + '-channel')) $(prefix + '-channel').value = filters.channel;
+    if ($(prefix + '-format')) $(prefix + '-format').value = filters.format;
+    if ($(prefix + '-batch')) {
+      option($(prefix + '-batch'), 'all', 'All batches');
+      for (const batch of ledger.batches) option($(prefix + '-batch'), batch.id, batchName(batch));
+      $(prefix + '-batch').value = filters.batchId;
+    }
+    $(prefix + '-date-enabled').checked = filters.dateEnabled;
+    $(prefix + '-date').value = filters.date;
+    $(prefix + '-date').disabled = !filters.dateEnabled;
+    container.onchange = event => {
+      if (allowType) filters.type = $(prefix + '-type').value;
+      filters.channel = $(prefix + '-channel')?.value || 'all';
+      filters.format = $(prefix + '-format')?.value || 'all';
+      filters.batchId = $(prefix + '-batch')?.value || 'all';
+      filters.dateEnabled = $(prefix + '-date-enabled').checked;
+      filters.date = $(prefix + '-date').value;
+      if (allowType && event.target.id === prefix + '-type' && filters.type === 'batch') { filters.channel = 'all'; filters.format = 'all'; }
+      if (allowType && (event.target.id === prefix + '-channel' && filters.channel !== 'all' || event.target.id === prefix + '-format' && filters.format !== 'all')) filters.type = 'sale';
+      if (filters.type !== 'batch' && filters.channel !== 'batch') filters.batchId = 'all';
+      renderFilters(container, prefix, filters, allowType, onChange);
+      onChange();
+    };
+  }
+  function renderCancelOptions() {
+    const select = $('order-id'), previous = select.value;
+    select.replaceChildren();
+    option(select, '', 'Choose an active order');
+    const candidates = ledger.sales.filter(sale => sale.status === 'active' && model.matchesFilters({ ...sale, kind: 'sale' }, cancelFilters));
+    for (const sale of candidates) option(select, sale.id, `${orderName(sale)} · ${channelName(sale)} · ${sale.format} · ${model.money(sale.pricePaise)}${sale.paymentName ? ' · ' + sale.paymentName : ''} · ${dateLabel(sale.createdAt)}`);
+    if (candidates.some(sale => sale.id === previous)) select.value = previous;
+    $('confirm-cancel').checked = false;
+    $('cancel-hint').textContent = candidates.length ? `${candidates.length} active order${candidates.length === 1 ? '' : 's'} match your filters.` : 'No active orders match these filters.';
   }
   function renderForm() {
     if (!action) return;
@@ -81,16 +154,12 @@
       }
       button.textContent = 'Save sale ↗';
     } else {
-      fields.innerHTML = '<label for="order-id">Order to cancel</label><select id="order-id" required></select><p id="cancel-hint" class="hint"></p><label class="confirm-row" for="confirm-cancel"><input id="confirm-cancel" type="checkbox" required><span>I confirm this order should be cancelled.</span></label>';
-      option($('order-id'), '', 'Choose an active order');
-      for (const sale of ledger?.sales.filter(item => item.status === 'active') || []) {
-        option($('order-id'), sale.id, `${orderName(sale)} · ${channelName(sale)} · ${sale.format} · ${model.money(sale.pricePaise)}${sale.paymentName ? ' · ' + sale.paymentName : ''} · ${dateLabel(sale.createdAt)}`);
-      }
-      $('cancel-hint').textContent = ledger?.sales.some(sale => sale.status === 'active') ? 'The cancellation is saved when you confirm below.' : 'There are no active orders to cancel.';
+      fields.innerHTML = '<div id="cancel-filters" class="filter-controls" aria-label="Filter orders"></div><label for="order-id">Order to cancel</label><select id="order-id" required></select><p id="cancel-hint" class="hint"></p><label class="confirm-row" for="confirm-cancel"><input id="confirm-cancel" type="checkbox" required><span>I confirm this order should be cancelled.</span></label>';
+      renderFilters($('cancel-filters'), 'cancel', cancelFilters, false, renderCancelOptions);
+      renderCancelOptions();
       button.textContent = 'Cancel selected order ↶';
     }
     updateSaveButton();
-    ensureChallenge();
   }
   function renderStats() {
     const summary = model.summary(ledger);
@@ -125,8 +194,11 @@
     renderStats();
     const container = $('records');
     container.replaceChildren();
-    const entries = [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' }))].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    if (!entries.length) container.append(element('p', 'Your first record starts here. Choose an action above.', 'empty-records'));
+    renderFilters($('record-filters'), 'record', recordFilters, true, renderRecords);
+    const all = [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' }))];
+    const entries = all.filter(entry => model.matchesFilters(entry, recordFilters)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    $('records-filter-status').textContent = `Showing ${entries.length} of ${all.length} records. Overview and Excel export include all records.`;
+    if (!entries.length) container.append(element('p', all.length ? 'No records match these filters.' : 'Your first record starts here. Choose an action above.', 'empty-records'));
     else {
       const list = element('ul', undefined, 'record-list');
       for (const entry of entries) {
@@ -146,15 +218,19 @@
   async function api(options) {
     const response = await fetch('/api/sales-data', { cache: 'no-store', ...options });
     const data = await response.json();
+    if (response.status === 401 && data.verificationRequired) {
+      showGate(data);
+      throw Object.assign(new Error(data.error), { verificationRequired: true });
+    }
     if (!response.ok) throw new Error(data.error || 'Could not save your record. Please try again.');
     if (data.version !== 1 || !Array.isArray(data.batches) || !Array.isArray(data.sales)) throw new Error('The server returned an invalid record. Try refreshing.');
-    if (typeof data.turnstileSiteKey === 'string') siteKey = data.turnstileSiteKey;
     return { version: data.version, revision: data.revision, batches: data.batches, sales: data.sales };
   }
   function setBusy(value) {
     busy = value;
     for (const button of document.querySelectorAll('[data-action], #refresh, #export')) button.disabled = value;
     for (const field of $('entry-fields').querySelectorAll('input, select')) field.disabled = value;
+    if ($('cancel-date')) $('cancel-date').disabled = value || !cancelFilters.dateEnabled;
     $('entry-form').setAttribute('aria-busy', String(value));
     updateSaveButton();
     if (!ledger) $('export').disabled = true;
@@ -164,10 +240,13 @@
     $('feedback').textContent = 'Loading records…';
     try {
       ledger = await api();
-      renderRecords(); renderForm();
+      openRecorder();
+      renderForm();
       $('feedback').textContent = 'Records are up to date.';
     } catch (error) {
+      if (error.verificationRequired) return;
       $('feedback').textContent = error.message;
+      if (!pageVerified) { $('challenge-status').textContent = error.message; $('retry-verification').hidden = false; }
       if (!ledger) {
         $('storage-label').textContent = 'Unable to connect';
         $('records').textContent = 'Records could not be loaded. Use Refresh records to try again.';
@@ -187,6 +266,7 @@
   $('entry-form').addEventListener('input', event => {
     event.target.removeAttribute('aria-invalid'); $('entry-error').textContent = '';
   });
+  $('entry-form').addEventListener('change', event => { if (event.target.id === 'order-id') $('confirm-cancel').checked = false; });
   $('entry-form').addEventListener('submit', async event => {
     event.preventDefault();
     if (busy || !ledger || $('save-entry').disabled) return;
@@ -214,7 +294,6 @@
     const signature = JSON.stringify(data);
     if (!pending || pending.signature !== signature) pending = { signature, requestId: crypto.randomUUID() };
     data.requestId = pending.requestId;
-    data.turnstileToken = challengeToken;
     setBusy(true); $('feedback').textContent = 'Saving…';
     try {
       ledger = await api({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -224,18 +303,23 @@
     } catch (error) {
       $('feedback').textContent = ''; $('entry-error').textContent = error.message + ' Your form is still here; try again.';
     } finally {
-      challengeToken = '';
-      if (widgetId !== null) window.turnstile.reset(widgetId);
       setBusy(false);
     }
   });
   $('refresh').addEventListener('click', load);
+  $('retry-verification').addEventListener('click', async () => {
+    if (verifying) return;
+    if (widgetId !== null) { window.turnstile.remove(widgetId); widgetId = null; }
+    await load();
+  });
   $('export').addEventListener('click', () => {
     if (!ledger) return;
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), ...ledger }, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob), anchor = document.createElement('a');
-    anchor.href = url; anchor.download = `formula-racing-camp-sales-${new Date().toISOString().slice(0, 10)}.json`; anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    try {
+      const url = URL.createObjectURL(window.CampSalesWorkbook.create(ledger)), anchor = document.createElement('a');
+      anchor.href = url; anchor.download = `formula-racing-camp-sales-${new Date().toISOString().slice(0, 10)}.xlsx`; anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      $('feedback').textContent = 'Excel workbook exported.';
+    } catch (error) { $('feedback').textContent = 'Export failed: ' + error.message; }
   });
   load();
 })();
