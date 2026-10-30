@@ -66,18 +66,18 @@
   function build(ledger, exportedAt = new Date().toISOString()) {
     const totals = model.summary(ledger), endSales = Math.max(2, ledger.sales.length + 1), endBatches = Math.max(2, ledger.batches.length + 1);
     const salesRange = column => `Sales!$${column}$2:$${column}$${endSales}`;
-    const batches = [header(['Batch', 'Record ID', 'Cost (INR)', 'Ordered at (IST)']), ...ledger.batches.map(batch => [batchName(batch), batch.id, amount(batch.costPaise), date(batch.createdAt)])];
-    const sales = [header(['Order', 'Record ID', 'Channel', 'Batch', 'Format', 'Payment name', 'Price (INR)', 'Recorded at (IST)', 'Status', 'Cancelled at (IST)']), ...ledger.sales.map(sale => [
-      orderName(sale), sale.id, sale.channel === 'online' ? 'Online stall' : 'Batch sale', sale.batchId ? batchName(ledger.batches.find(batch => batch.id === sale.batchId)) : '', sale.format, sale.paymentName || '', amount(sale.pricePaise), date(sale.createdAt), sale.status, date(sale.cancelledAt)
+    const batches = [header(['Batch', 'Record ID', 'Cost (INR)', 'Ordered at (IST)', 'Books ordered']), ...ledger.batches.map(batch => [batchName(batch), batch.id, amount(batch.costPaise), date(batch.createdAt), batch.booksOrdered == null ? text('') : { value: batch.booksOrdered, style: 0 }])];
+    const sales = [header(['Order', 'Record ID', 'Channel', 'Batch', 'Format', 'Payment name', 'Price per book (INR)', 'Recorded at (IST)', 'Status', 'Cancelled at (IST)', 'Quantity', 'Sale total (INR)']), ...ledger.sales.map((sale, i) => [
+      orderName(sale), sale.id, sale.channel === 'online' ? 'Online stall' : 'Batch sale', sale.batchId ? batchName(ledger.batches.find(batch => batch.id === sale.batchId)) : '', sale.format, sale.paymentName || '', amount(sale.pricePaise), date(sale.createdAt), sale.status, date(sale.cancelledAt), { value: model.quantity(sale), style: 0 }, formula(`G${i + 2}*K${i + 2}`, model.saleTotal(sale) / 100)
     ])];
-    const profits = [header(['Batch', 'Cost (INR)', 'Active sales (INR)', 'Profit (INR)', 'Books sold']), ...totals.batchProfits.map((batch, i) => {
+    const profits = [header(['Batch', 'Cost (INR)', 'Active sales (INR)', 'Profit (INR)', 'Books sold', 'Books ordered', 'Books left']), ...totals.batchProfits.map((batch, i) => {
       const row = i + 2;
-      return [text(batchName(batch)), formula(`Batches!C${row}`, batch.costPaise / 100), formula(`SUMIFS(${salesRange('G')},${salesRange('D')},Batches!A${row},${salesRange('I')},"active")`, batch.revenuePaise / 100), formula(`C${row}-B${row}`, batch.profitPaise / 100), formula(`COUNTIFS(${salesRange('D')},Batches!A${row},${salesRange('I')},"active")`, batch.booksSold, 0)];
+      return [text(batchName(batch)), formula(`Batches!C${row}`, batch.costPaise / 100), formula(`SUMIFS(${salesRange('L')},${salesRange('D')},Batches!A${row},${salesRange('I')},"active")`, batch.revenuePaise / 100), formula(`C${row}-B${row}`, batch.profitPaise / 100), formula(`SUMIFS(${salesRange('K')},${salesRange('D')},Batches!A${row},${salesRange('I')},"active")`, batch.booksSold, 0), batch.booksOrdered === null ? text('') : formula(`Batches!E${row}`, batch.booksOrdered, 0), batch.booksLeft === null ? text('') : formula(`F${row}-E${row}`, batch.booksLeft, 0)];
     })];
     const summary = [
       [{ value: 'Formula Racing Camp — Sales', style: 4 }], [], ['Exported at (IST)', date(exportedAt)], [], header(['Metric', 'Value']),
-      ['Total sales (INR)', formula(`SUMIF(${salesRange('I')},"active",${salesRange('G')})`, totals.salesPaise / 100)],
-      ['Books sold', formula(`COUNTIF(${salesRange('I')},"active")`, totals.booksSold, 0)],
+      ['Total sales (INR)', formula(`SUMIF(${salesRange('I')},"active",${salesRange('L')})`, totals.salesPaise / 100)],
+      ['Books sold', formula(`SUMIF(${salesRange('I')},"active",${salesRange('K')})`, totals.booksSold, 0)],
       ['Total batch costs (INR)', formula(`SUM(Batches!C2:C${endBatches})`, totals.costsPaise / 100)],
       ['Total profit (INR)', formula('B6-B8', totals.profitPaise / 100)],
       ['Number of authors', { value: 6, style: 0 }],
@@ -87,7 +87,7 @@
       ['Source: Camp Sales server records · www.formularacingcamp.com/sales']
     ];
     const names = ['Summary', 'Batch profits', 'Batches', 'Sales'];
-    const sheets = [worksheet(summary, [76, 30]), worksheet(profits, [20, 22, 24, 22, 16], true), worksheet(batches, [20, 40, 22, 30], true), worksheet(sales, [20, 40, 20, 20, 18, 36, 22, 30, 18, 30], true)];
+    const sheets = [worksheet(summary, [76, 30]), worksheet(profits, [20, 22, 24, 22, 16, 18, 16], true), worksheet(batches, [20, 40, 22, 30, 18], true), worksheet(sales, [20, 40, 20, 20, 18, 36, 26, 30, 18, 30, 16, 24], true)];
     const styles = declaration + `<styleSheet xmlns="${ns}"><numFmts count="2"><numFmt numFmtId="164" formatCode="${xml('"₹"#,##0.00;[Red]"-₹"#,##0.00')}"/><numFmt numFmtId="165" formatCode="${xml('dd mmm yyyy, hh:mm "IST"')}"/></numFmts><fonts count="3"><font><sz val="11"/><color rgb="FF151C35"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="18"/><color rgb="FF2457DF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF2457DF"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFill="1" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
     return zip([
       ['[Content_Types].xml', declaration + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${names.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],

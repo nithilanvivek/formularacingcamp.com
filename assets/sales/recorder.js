@@ -10,8 +10,8 @@
   const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', editor: 'Record Editor' };
   const descriptions = {
     batch: ['A fresh starting line.', 'Record the total cost of the books you ordered. A batch number is assigned when you save.'],
-    'batch-sale': ['One book. One happy reader.', 'Choose the batch, book format, and selling price. Each record is a sale of one book.'],
-    'online-sale': ['Your online stall, recorded.', 'Choose the book format and selling price. Each record is a sale of one book, without a batch.'],
+    'batch-sale': ['Every book counts.', 'Choose the batch, format, quantity, and price per book. Your batch stock updates when the sale is saved.'],
+    'online-sale': ['Your online stall, recorded.', 'Choose the format, quantity, and price per book. Online stall sales do not use batch stock.'],
     editor: ['Keep your records in shape.', 'Find a batch or sale with the filters, then edit its details. Sales can also be deleted. Batch records stay in your ledger.']
   };
 
@@ -32,6 +32,20 @@
   function dateLabel(date) { return new Date(date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }) + ' IST'; }
   function moneyField(id, label) {
     return `<label for="${id}">${label} (INR)</label><div class="money"><span aria-hidden="true">₹</span><input id="${id}" type="text" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="0.00" required aria-describedby="money-hint"></div><small id="money-hint" class="hint">Enter an amount greater than zero, with up to two decimal places.</small>`;
+  }
+  function quantityField(id, label, value = '') {
+    return `<label for="${id}">${label}</label><input id="${id}" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="e.g. 40" value="${value}" required><small class="hint">Whole books only.</small>`;
+  }
+  function updateSaleDetails() {
+    if (!$('quantity')) return;
+    try { $('sale-total').textContent = 'Sale total: ' + model.money(model.parseMoney($('price').value) * model.parseQuantity($('quantity').value)); }
+    catch { $('sale-total').textContent = 'Sale total: —'; }
+    if ($('stock-hint')) {
+      const batch = model.summary(ledger).batchProfits.find(batch => batch.id === $('batch-id').value);
+      let available = batch?.booksLeft;
+      if (batch && action === 'editor' && editing?.batchId === batch.id && editing.status === 'active') available += model.quantity(editing);
+      $('stock-hint').textContent = !batch ? 'Choose a batch to see available stock.' : batch.booksOrdered === null ? 'Set this batch’s books ordered in Record Editor first.' : `${available} books available for this sale (${batch.booksOrdered} ordered).`;
+    }
   }
   function updateSaveButton() {
     const noChoices = action === 'batch-sale' && !ledger?.batches.length || action === 'editor' && !editing;
@@ -130,7 +144,7 @@
     option(select, '', 'Choose a batch or sale');
     const candidates = editorCandidates();
     for (const record of candidates) {
-      const label = record.kind === 'batch' ? `${batchName(record)} · ${model.money(record.costPaise)} cost` : `${orderName(record)} · ${channelName(record)} · ${record.format} · ${model.money(record.pricePaise)}${record.paymentName ? ' · ' + record.paymentName : ''}${record.status === 'cancelled' ? ' · Cancelled' : ''}`;
+      const label = record.kind === 'batch' ? `${batchName(record)} · ${model.money(record.costPaise)} cost` : `${orderName(record)} · ${channelName(record)} · ${record.format} · ${model.quantity(record)} books · ${model.money(model.saleTotal(record))}${record.paymentName ? ' · ' + record.paymentName : ''}${record.status === 'cancelled' ? ' · Cancelled' : ''}`;
       option(select, `${record.kind}:${record.id}`, label + ' · ' + dateLabel(record.createdAt));
     }
     if (candidates.some(record => `${record.kind}:${record.id}` === editorSelection)) select.value = editorSelection;
@@ -147,21 +161,26 @@
     fields.append(element('p', `${editing.kind === 'batch' ? batchName(editing) : orderName(editing)} · Recorded ${dateLabel(editing.createdAt)}`, 'field-note'));
     const controls = element('div');
     if (editing.kind === 'batch') {
-      controls.innerHTML = moneyField('cost', 'Cost of books ordered');
+      controls.innerHTML = quantityField('books-ordered', 'Books ordered') + moneyField('cost', 'Total cost of books ordered');
       fields.append(controls);
       $('cost').value = (editing.costPaise / 100).toFixed(2);
+      $('books-ordered').value = editing.booksOrdered ?? '';
     } else {
-      controls.innerHTML = '<label for="edit-channel">Sale channel</label><select id="edit-channel" required><option value="batch">Batch sale</option><option value="online">Online stall</option></select><div id="edit-batch-field"><label for="batch-id">Batch number</label><select id="batch-id"></select></div><label for="format">Paperback / Hardcover</label><select id="format" required><option>Paperback</option><option>Hardcover</option></select>' + moneyField('price', 'Price sold at') + '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off"><div class="editor-delete-row"><span>Remove this sale from your records.</span><button id="delete-sale" type="button" class="delete-icon" aria-label="Delete sale" title="Delete sale"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div><div id="delete-confirmation" class="notice" hidden><p>Delete this sale permanently? This cannot be undone.</p><div class="delete-confirm-buttons"><button id="keep-sale" type="button" class="secondary">Keep sale</button><button id="confirm-delete-sale" type="button" class="secondary delete-confirm">Delete sale</button></div></div>';
+      controls.innerHTML = '<label for="edit-channel">Sale channel</label><select id="edit-channel" required><option value="batch">Batch sale</option><option value="online">Online stall</option></select><div id="edit-batch-field"><label for="batch-id">Batch number</label><select id="batch-id"></select></div><label for="format">Paperback / Hardcover</label><select id="format" required><option>Paperback</option><option>Hardcover</option></select>' + quantityField('quantity', 'Quantity', 1) + moneyField('price', 'Price per book') + '<p id="sale-total" class="field-note">Sale total: —</p>' + '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off"><div class="editor-delete-row"><span>Remove this sale from your records.</span><button id="delete-sale" type="button" class="delete-icon" aria-label="Delete sale" title="Delete sale"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div><div id="delete-confirmation" class="notice" hidden><p>Delete this sale permanently? This cannot be undone.</p><div class="delete-confirm-buttons"><button id="keep-sale" type="button" class="secondary">Keep sale</button><button id="confirm-delete-sale" type="button" class="secondary delete-confirm">Delete sale</button></div></div>';
       fields.append(controls);
+      $('edit-batch-field').append(element('small', '', 'hint'));
+      $('edit-batch-field').lastChild.id = 'stock-hint';
       $('edit-channel').value = editing.channel;
       option($('batch-id'), '', 'Choose a batch');
       for (const batch of ledger.batches) option($('batch-id'), batch.id, batchName(batch));
       $('batch-id').value = editing.batchId || '';
       $('format').value = editing.format;
       $('price').value = (editing.pricePaise / 100).toFixed(2);
+      $('quantity').value = model.quantity(editing);
       $('payment-name').value = editing.paymentName || '';
       if (editing.status === 'cancelled') fields.append(element('p', 'This is a previously cancelled sale. Editing its details keeps it excluded from sales totals.', 'field-note'));
       updateEditChannel();
+      updateSaleDetails();
     }
     updateSaveButton();
   }
@@ -180,16 +199,17 @@
     $('entry-error').textContent = '';
     const fields = $('entry-fields'), button = $('save-entry');
     if (action === 'batch') {
-      fields.innerHTML = '<p class="field-note">Record the total cost of your book order. Your batch number is created automatically.</p>' + moneyField('cost', 'Cost of books ordered');
+      fields.innerHTML = '<p class="field-note">Record the books ordered and the total cost. Your batch number is created automatically.</p>' + quantityField('books-ordered', 'Books ordered') + moneyField('cost', 'Total cost of books ordered');
       button.textContent = 'Save batch ↗';
     } else if (action === 'batch-sale' || action === 'online-sale') {
       fields.innerHTML = (action === 'batch-sale' ? '<label for="batch-id">Batch number</label><select id="batch-id" required></select><p id="batch-hint" class="hint"></p>' : '') +
-        '<label for="format">Paperback / Hardcover</label><select id="format" required><option value="">Choose a format</option><option>Paperback</option><option>Hardcover</option></select>' + moneyField('price', 'Price sold at') +
-        '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Payment reference name"><p class="field-note">One sale records one book. Date and time are saved automatically.</p>';
+        '<label for="format">Paperback / Hardcover</label><select id="format" required><option value="">Choose a format</option><option>Paperback</option><option>Hardcover</option></select>' + quantityField('quantity', 'Quantity', 1) + moneyField('price', 'Price per book') + '<p id="sale-total" class="field-note">Sale total: —</p>' +
+        '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Payment reference name"><p class="field-note">Date and time are saved automatically.</p>';
       if (action === 'batch-sale') {
         option($('batch-id'), '', 'Choose a batch');
         for (const batch of ledger?.batches || []) option($('batch-id'), batch.id, `${batchName(batch)} · ${model.money(batch.costPaise)} cost`);
         $('batch-hint').textContent = ledger?.batches.length ? '' : 'Add a new batch first to record a batch sale.';
+        $('batch-hint').id = 'stock-hint';
       }
       button.textContent = 'Save sale ↗';
     } else {
@@ -216,7 +236,7 @@
     const scroll = element('div', undefined, 'table-scroll');
     const table = element('table', undefined, 'profit-table');
     const thead = element('thead'), head = element('tr');
-    for (const title of ['Batch', 'Cost', 'Sales', 'Profit']) {
+    for (const title of ['Batch', 'Cost', 'Sales', 'Profit', 'Ordered', 'Sold', 'Left']) {
       const th = element('th', title); th.scope = 'col'; head.append(th);
     }
     thead.append(head);
@@ -224,6 +244,7 @@
     for (const batch of summary.batchProfits) {
       const row = element('tr');
       row.append(element('td', batchName(batch)), element('td', model.money(batch.costPaise)), element('td', model.money(batch.revenuePaise)), element('td', model.money(batch.profitPaise), batch.profitPaise < 0 ? 'negative' : 'positive'));
+      row.append(element('td', batch.booksOrdered ?? 'Not set'), element('td', batch.booksSold), element('td', batch.booksLeft ?? 'Not set', 'books-left'));
       tbody.append(row);
     }
     table.append(thead, tbody); scroll.append(table); container.append(scroll);
@@ -244,11 +265,11 @@
         const row = element('li', undefined, 'record-row' + (entry.status === 'cancelled' ? ' cancelled' : ''));
         const detail = element('div');
         detail.append(element('strong', entry.kind === 'batch' ? batchName(entry) : `${orderName(entry)} · ${entry.status === 'cancelled' ? 'Cancelled' : 'Sale'}`));
-        detail.append(element('small', entry.kind === 'batch' ? `Books ordered · ${dateLabel(entry.createdAt)}` : `${channelName(entry)} · ${entry.format} · ${dateLabel(entry.createdAt)}`));
+        detail.append(element('small', entry.kind === 'batch' ? `${entry.booksOrdered ?? 'Quantity not set'} books ordered · ${dateLabel(entry.createdAt)}` : `${channelName(entry)} · ${entry.format} · ${model.quantity(entry)} books × ${model.money(entry.pricePaise)} · ${dateLabel(entry.createdAt)}`));
         if (entry.paymentName) detail.append(element('small', `Payment name: ${entry.paymentName}`));
         if (entry.cancelledAt) detail.append(element('small', `Cancelled ${dateLabel(entry.cancelledAt)}`));
         if (entry.updatedAt) detail.append(element('small', `Edited ${dateLabel(entry.updatedAt)}`));
-        row.append(detail, element('span', model.money(entry.kind === 'batch' ? entry.costPaise : entry.pricePaise), 'record-amount'));
+        row.append(detail, element('span', model.money(entry.kind === 'batch' ? entry.costPaise : model.saleTotal(entry)), 'record-amount'));
         list.append(row);
       }
       container.append(list);
@@ -305,10 +326,12 @@
   }
   $('entry-form').addEventListener('input', event => {
     event.target.removeAttribute('aria-invalid'); $('entry-error').textContent = '';
+    updateSaleDetails();
   });
   $('entry-form').addEventListener('change', event => {
     if (event.target.id === 'editor-record') renderEditorFields();
     if (event.target.id === 'edit-channel') updateEditChannel();
+    if (['edit-channel', 'batch-id'].includes(event.target.id)) updateSaleDetails();
   });
   $('entry-form').addEventListener('click', async event => {
     if (busy || !pageVerified || action !== 'editor' || editing?.kind !== 'sale') return;
@@ -347,8 +370,12 @@
       data.recordId = editing.id;
       data.expectedVersion = editing.recordVersion || 0;
     }
-    if (isBatch) data.cost = $('cost').value.trim();
+    const count = $(isBatch ? 'books-ordered' : 'quantity');
+    try { model.parseQuantity(count.value); }
+    catch (error) { count.setAttribute('aria-invalid', 'true'); $('entry-error').textContent = error.message; count.focus(); return; }
+    if (isBatch) { data.cost = $('cost').value.trim(); data.booksOrdered = count.value.trim(); }
     else {
+      data.quantity = count.value.trim();
       data.format = $('format').value; data.price = $('price').value.trim(); data.paymentName = $('payment-name').value.trim();
       if (action === 'editor') data.channel = $('edit-channel').value;
       if (action === 'batch-sale' || data.channel === 'batch') data.batchId = $('batch-id').value;

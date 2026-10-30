@@ -18,10 +18,66 @@ test('sales amounts accept decimal INR and retain exact paise', () => {
   }
 });
 
+test('book quantities must be positive whole numbers and totals multiply the price per book', () => {
+  for (const value of ['0', '-1', '1.5', '1e3', '', null, '1000000']) assert.throws(() => model.parseQuantity(value));
+  assert.equal(model.parseQuantity('40'), 40);
+  const summary = model.summary({ batches: [{ id: 'b1', costPaise: 10000, booksOrdered: 40 }], sales: [
+    { batchId: 'b1', quantity: 3, pricePaise: 12550, status: 'active' },
+    { batchId: 'b1', quantity: 4, pricePaise: 10000, status: 'cancelled' },
+    { quantity: 2, pricePaise: 10000, status: 'active' }
+  ] });
+  assert.equal(summary.salesPaise, 57650);
+  assert.equal(summary.booksSold, 5);
+  assert.equal(summary.batchProfits[0].booksLeft, 37);
+});
+
+test('legacy records persist Batch 001 as 40 books and sales as quantity one without inventing other batch counts', async t => {
+  const fixture = salesFixture(t);
+  fixture.raw = JSON.stringify({ version: 1, revision: 5, batches: [
+    { id: 'b1', number: 1, costPaise: 10000, createdAt: '2026-10-01T00:00:00Z' },
+    { id: 'b2', number: 2, costPaise: 10000, createdAt: '2026-10-01T00:00:00Z' }
+  ], sales: [{ id: 's1', number: 1, batchId: 'b1', status: 'active', pricePaise: 15000, createdAt: '2026-10-02T00:00:00Z' }] });
+  const migrated = await store.readLedger();
+  assert.equal(migrated.batches[0].booksOrdered, 40);
+  assert.equal(migrated.batches[1].booksOrdered, null);
+  assert.equal(migrated.sales[0].quantity, 1);
+  assert.equal(migrated.sales[0].pricePaise, 15000);
+  assert.equal(model.summary(migrated).batchProfits[0].booksLeft, 39);
+  assert.equal(JSON.parse(fixture.raw).batches[0].booksOrdered, 40);
+  assert.equal((await store.readLedger()).revision, migrated.revision);
+});
+
+test('batch stock follows quantity edits, batch moves and deletion, and cannot be reduced below books sold', async t => {
+  const fixture = salesFixture(t);
+  const first = await store.saveEntry(fixture.request('batch', { cost: '100', booksOrdered: 5 }));
+  const b1 = first.batches[0].id;
+  const second = await store.saveEntry(fixture.request('batch', { cost: '100', booksOrdered: 10 }));
+  const b2 = second.batches[1].id;
+  const sold = await store.saveEntry(fixture.request('batch-sale', { batchId: b1, format: 'Paperback', price: '100', quantity: 4 }));
+  const id = sold.sales[0].id;
+  assert.equal(model.summary(sold).batchProfits[0].booksLeft, 1);
+  await assert.rejects(store.saveEntry(fixture.request('edit-batch', { recordId: b1, expectedVersion: 0, cost: '100', booksOrdered: 3 })), { status: 409 });
+  await assert.rejects(store.saveEntry(fixture.request('edit-sale', { recordId: id, expectedVersion: 0, channel: 'batch', batchId: b1, format: 'Paperback', price: '100', quantity: 6 })), { status: 409 });
+  const moved = await store.saveEntry(fixture.request('edit-sale', { recordId: id, expectedVersion: 0, channel: 'batch', batchId: b2, format: 'Paperback', price: '100', quantity: 7 }));
+  assert.deepEqual(model.summary(moved).batchProfits.map(batch => batch.booksLeft), [5, 3]);
+  assert.equal(model.summary(moved).salesPaise, 70000);
+  const deleted = await store.saveEntry(fixture.request('delete-sale', { recordId: id, expectedVersion: 1 }));
+  assert.deepEqual(model.summary(deleted).batchProfits.map(batch => batch.booksLeft), [5, 10]);
+});
+
+test('concurrent batch sales cannot sell more books than ordered', async t => {
+  const fixture = salesFixture(t);
+  const state = await store.saveEntry(fixture.request('batch', { cost: '100', booksOrdered: 5 }));
+  const results = await Promise.allSettled([1, 2].map(() => store.saveEntry(fixture.request('batch-sale', { batchId: state.batches[0].id, format: 'Paperback', price: '100', quantity: 3 }))));
+  assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
+  assert.equal(results.find(result => result.status === 'rejected').reason.status, 409);
+  assert.equal(model.summary(await store.readLedger()).batchProfits[0].booksLeft, 2);
+});
+
 test('batch numbering stays unique and sales require a known batch and format', () => {
   const batches = [{ id: 'batch-1', number: 1 }, { id: 'batch-3', number: 3 }];
-  assert.deepEqual(model.createBatch(batches, '1250.50', 'batch-4', '2026-10-30T12:00:00Z'), {
-    id: 'batch-4', number: 4, costPaise: 125050, createdAt: '2026-10-30T12:00:00Z'
+  assert.deepEqual(model.createBatch(batches, '1250.50', 'batch-4', '2026-10-30T12:00:00Z', 40), {
+    id: 'batch-4', number: 4, costPaise: 125050, booksOrdered: 40, createdAt: '2026-10-30T12:00:00Z'
   });
   const input = { batchId: 'batch-1', format: 'Paperback', price: '349.50' };
   assert.equal(model.createBatchSale(batches, input, 'order-1', 'now').pricePaise, 34950);
@@ -139,7 +195,7 @@ test('deleting the last sale does not reuse its order number and legacy cancelle
 test('simultaneous saves preserve both records and assign distinct batch numbers', async t => {
   salesFixture(t);
   const { randomUUID } = require('node:crypto');
-  await Promise.all([100, 200, 300].map(cost => store.saveEntry({ action: 'batch', requestId: randomUUID(), cost: String(cost) })));
+  await Promise.all([100, 200, 300].map(cost => store.saveEntry({ action: 'batch', requestId: randomUUID(), cost: String(cost), booksOrdered: 40 })));
   const ledger = await store.readLedger();
   assert.deepEqual(ledger.batches.map(batch => batch.number), [1, 2, 3]);
   assert.equal(model.summary(ledger).costsPaise, 60000);

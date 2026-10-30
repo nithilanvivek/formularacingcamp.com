@@ -20,11 +20,21 @@
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(paise / 100);
   }
 
-  function createBatch(batches, cost, id, createdAt) {
+  function parseQuantity(value) {
+    const text = String(value ?? '').trim();
+    if (!/^[1-9]\d{0,5}$/.test(text)) throw new Error('Enter a whole number of books from 1 to 999,999.');
+    return Number(text);
+  }
+
+  function quantity(sale) { return sale.quantity ?? 1; }
+  function saleTotal(sale) { return sale.pricePaise * quantity(sale); }
+
+  function createBatch(batches, cost, id, createdAt, booksOrdered) {
     return {
       id,
       number: batches.reduce((largest, batch) => Math.max(largest, batch.number), 0) + 1,
       costPaise: parseMoney(cost),
+      booksOrdered: parseQuantity(booksOrdered),
       createdAt
     };
   }
@@ -33,12 +43,12 @@
     const batch = batches.find(item => item.id === input.batchId);
     if (!batch) throw new Error('Choose an existing batch before recording a sale.');
     if (!['Paperback', 'Hardcover'].includes(input.format)) throw new Error('Choose Paperback or Hardcover.');
-    return { id, batchId: batch.id, channel: 'batch', format: input.format, pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
+    return { id, batchId: batch.id, channel: 'batch', format: input.format, quantity: parseQuantity(input.quantity ?? 1), pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
   }
 
   function createOnlineSale(input, id, createdAt) {
     if (!['Paperback', 'Hardcover'].includes(input.format)) throw new Error('Choose Paperback or Hardcover.');
-    return { id, channel: 'online', format: input.format, pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
+    return { id, channel: 'online', format: input.format, quantity: parseQuantity(input.quantity ?? 1), pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
   }
 
   function paymentName(value = '') {
@@ -48,14 +58,17 @@
 
   function summary(ledger) {
     const active = ledger.sales.filter(sale => sale.status === 'active');
-    const salesPaise = active.reduce((sum, sale) => sum + sale.pricePaise, 0);
+    const salesPaise = active.reduce((sum, sale) => sum + saleTotal(sale), 0);
     const costsPaise = ledger.batches.reduce((sum, batch) => sum + batch.costPaise, 0);
     const batchProfits = ledger.batches.map(batch => {
       const sales = active.filter(sale => sale.batchId === batch.id);
-      const revenuePaise = sales.reduce((sum, sale) => sum + sale.pricePaise, 0);
-      return { ...batch, revenuePaise, profitPaise: revenuePaise - batch.costPaise, booksSold: sales.length };
+      const revenuePaise = sales.reduce((sum, sale) => sum + saleTotal(sale), 0);
+      const booksSold = sales.reduce((sum, sale) => sum + quantity(sale), 0);
+      const booksOrdered = batch.booksOrdered ?? null;
+      return { ...batch, booksOrdered, revenuePaise, profitPaise: revenuePaise - batch.costPaise, booksSold, booksLeft: booksOrdered === null ? null : booksOrdered - booksSold };
     });
-    return { salesPaise, costsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.length, batchProfits };
+    if (!Number.isSafeInteger(salesPaise) || !Number.isSafeInteger(costsPaise)) throw new Error('These amounts exceed the recorder’s supported total.');
+    return { salesPaise, costsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.reduce((sum, sale) => sum + quantity(sale), 0), batchProfits };
   }
 
   function localDay(value = Date.now()) {
@@ -71,5 +84,5 @@
     return true;
   }
 
-  return { parseMoney, money, createBatch, createBatchSale, createOnlineSale, summary, localDay, matchesFilters };
+  return { parseMoney, parseQuantity, quantity, saleTotal, money, createBatch, createBatchSale, createOnlineSale, summary, localDay, matchesFilters };
 });

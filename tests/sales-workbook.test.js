@@ -18,9 +18,9 @@ function files(bytes) {
 
 test('Excel exports contain all records, numeric INR, sortable dates and linked profit formulas', async () => {
   const ledger = {
-    batches: [{ id: 'b1', number: 1, costPaise: 10000, createdAt: '2026-10-30T00:00:00Z' }],
+    batches: [{ id: 'b1', number: 1, costPaise: 10000, booksOrdered: 40, createdAt: '2026-10-30T00:00:00Z' }],
     sales: [
-      { id: 's1', number: 1, channel: 'batch', batchId: 'b1', format: 'Paperback', pricePaise: 15000, paymentName: '=SUM(A1:A2) & <name>', status: 'active', createdAt: '2026-10-30T00:00:00Z' },
+      { id: 's1', number: 1, channel: 'batch', batchId: 'b1', format: 'Paperback', quantity: 3, pricePaise: 15000, paymentName: '=SUM(A1:A2) & <name>', status: 'active', createdAt: '2026-10-30T00:00:00Z' },
       { id: 's2', number: 2, channel: 'online', format: 'Hardcover', pricePaise: 50000, status: 'cancelled', createdAt: '2026-10-30T00:00:00Z', cancelledAt: '2026-10-30T01:00:00Z' }
     ]
   };
@@ -28,14 +28,17 @@ test('Excel exports contain all records, numeric INR, sortable dates and linked 
   assert.equal(blob.type, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   assert.equal(Object.keys(exported).length, 9);
   const summary = exported['xl/worksheets/sheet1.xml'], profits = exported['xl/worksheets/sheet2.xml'], sales = exported['xl/worksheets/sheet4.xml'];
-  assert.match(summary, /<c r="B6" s="2"><f>SUMIF\(.+?<\/f><v>150<\/v>/);
-  assert.match(summary, /<c r="B9" s="2"><f>B6-B8<\/f><v>50<\/v>/);
-  assert.match(profits, /<f>C2-B2<\/f><v>50<\/v>/);
+  assert.match(summary, /<c r="B6" s="2"><f>SUMIF\(.+?<\/f><v>450<\/v>/);
+  assert.match(summary, /<c r="B9" s="2"><f>B6-B8<\/f><v>350<\/v>/);
+  assert.match(profits, /<f>C2-B2<\/f><v>350<\/v>/);
+  assert.match(profits, /<f>F2-E2<\/f><v>37<\/v>/);
   assert.match(sales, /<c r="F2" s="0" t="inlineStr"><is><t xml:space="preserve">=SUM\(A1:A2\) &amp; &lt;name&gt;<\/t>/);
   assert.match(sales, /<c r="G2" s="2"><v>150<\/v>/);
+  assert.match(sales, /<c r="K2" s="0"><v>3<\/v>/);
+  assert.match(sales, /<c r="L2" s="2"><f>G2\*K2<\/f><v>450<\/v>/);
   assert.match(sales, /<c r="H2" s="3"><v>[\d.]+<\/v>/);
   assert.match(sales, /cancelled/);
-  assert.match(sales, /<autoFilter ref="A1:J3"\/>/);
+  assert.match(sales, /<autoFilter ref="A1:L3"\/>/);
   assert.match(sales, /state="frozen"/);
 });
 
@@ -43,5 +46,5 @@ test('an empty sales recorder still exports a valid four-sheet workbook with zer
   const exported = files(workbook.build({ batches: [], sales: [] }));
   assert.match(exported['xl/workbook.xml'], /name="Batch profits"/);
   assert.match(exported['xl/worksheets/sheet1.xml'], /<f>B6-B8<\/f><v>0<\/v>/);
-  assert.match(exported['xl/worksheets/sheet4.xml'], /dimension ref="A1:J1"/);
+  assert.match(exported['xl/worksheets/sheet4.xml'], /dimension ref="A1:L1"/);
 });

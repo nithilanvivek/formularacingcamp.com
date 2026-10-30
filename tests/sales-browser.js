@@ -96,12 +96,13 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     assert.equal(await evaluate(`document.querySelector('#save-entry').disabled`), true);
     await choose('batch');
     await until(`!document.querySelector('#save-entry').disabled`);
+    await fill({ 'books-ordered': '40' });
     for (const cost of ['-10', '1e3', '1.234', '0']) {
       await fill({ cost }); await submit();
       assert.equal(await evaluate(`document.querySelector('#cost').getAttribute('aria-invalid')`), 'true');
       assert.equal(fixture.raw, null);
     }
-    await fill({ cost: '1000.50' }); await submit(); await saved(1);
+    await fill({ cost: '1000.50', 'books-ordered': '40' }); await submit(); await saved(1);
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '-₹1,000.50');
     const batchId = JSON.parse(fixture.raw).batches[0].id;
     await choose('batch-sale');
@@ -117,7 +118,7 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹1,600.00');
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '₹599.50');
     assert.equal(await evaluate(`document.querySelector('#author-profit').textContent`), '₹99.92');
-    assert.equal(await evaluate(`document.querySelector('.profit-table tbody tr td:last-child').textContent`), '₹200.25');
+    assert.equal(await evaluate(`document.querySelector('.profit-table tbody tr td:nth-child(4)').textContent`), '₹200.25');
 
     // Reload from server state; no browser storage is used to recover records.
     await navigate();
@@ -226,6 +227,33 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     await until(`document.querySelector('#verification-gate').hidden`);
     assert.equal(fixture.verifications, 2);
     await submit(); await saved(9);
+    assert.equal(await evaluate(`document.querySelector('.books-left').textContent`), '40');
+    await choose('batch-sale');
+    await fill({ 'batch-id': batchId, format: 'Paperback', quantity: '3', price: '100.00' });
+    assert.equal(await evaluate(`document.querySelector('#sale-total').textContent`), 'Sale total: ₹300.00');
+    await submit(); await saved(10);
+    assert.equal(await evaluate(`document.querySelector('.books-left').textContent`), '37');
+    const quantitySale = JSON.parse(fixture.raw).sales.find(sale => sale.batchId === batchId);
+    await choose('editor');
+    await change('editor-channel', 'all');
+    await change('editor-format', 'all');
+    await change('editor-record', 'sale:' + quantitySale.id);
+    assert.equal(await evaluate(`document.querySelector('#quantity').value`), '3');
+    await fill({ quantity: '5' }); await submit(); await saved(11);
+    assert.equal(await evaluate(`document.querySelector('.books-left').textContent`), '35');
+    assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹969.50');
+    fs.unlinkSync(downloaded);
+    await evaluate(`document.querySelector('#export').click()`);
+    for (let i = 0; i < 100 && !fs.existsSync(downloaded); i++) await new Promise(resolve => setTimeout(resolve, 30));
+    assert.ok(fs.readFileSync(downloaded).includes(Buffer.from('Books left')));
+    await fill({ quantity: '41' }); await submit();
+    await until(`document.querySelector('#entry-error').textContent.includes('enough books')`);
+    assert.equal(JSON.parse(fixture.raw).revision, 11);
+    assert.equal(await evaluate(`document.querySelector('#quantity').value`), '41');
+    await evaluate(`document.querySelector('#delete-sale').click();document.querySelector('#confirm-delete-sale').click()`);
+    await saved(12);
+    assert.equal(await evaluate(`document.querySelector('.books-left').textContent`), '40');
+    assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹469.50');
     await choose('editor');
     await change('editor-record', 'sale:' + JSON.parse(fixture.raw).sales.find(sale => sale.format === 'Hardcover').id);
     await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');

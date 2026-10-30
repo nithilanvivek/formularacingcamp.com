@@ -25,7 +25,7 @@ function salesFixture(t) {
     } else throw new Error('Unexpected Redis command');
     return { ok: true, json: async () => ({ result }) };
   });
-  fixture.request = (action, fields = {}) => ({ action, requestId: randomUUID(), ...fields });
+  fixture.request = (action, fields = {}) => ({ action, requestId: randomUUID(), ...(action === 'batch' ? { booksOrdered: 40 } : {}), ...fields });
   return fixture;
 }
 
