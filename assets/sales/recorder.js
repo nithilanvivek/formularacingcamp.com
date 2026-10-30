@@ -50,7 +50,7 @@
       return;
     }
     widgetId = window.turnstile.render('#sales-challenge', {
-      sitekey: siteKey, action: 'sales', size: 'flexible',
+      sitekey: siteKey, action: 'sales', size: 'compact',
       callback: token => { challengeToken = token; $('challenge-status').textContent = 'Bot verification complete.'; updateSaveButton(); },
       'expired-callback': () => { challengeToken = ''; $('challenge-status').textContent = 'Verification expired. Please verify again.'; updateSaveButton(); },
       'error-callback': () => { challengeToken = ''; $('challenge-status').textContent = 'Bot verification failed. Please try again.'; updateSaveButton(); }

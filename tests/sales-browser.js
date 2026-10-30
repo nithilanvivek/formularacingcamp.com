@@ -56,7 +56,7 @@ test('sales recorder persists all four workflows and updates profits under the p
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: `
       window.cspViolations=[];
       addEventListener('securitypolicyviolation',e=>cspViolations.push(e.violatedDirective+':'+e.blockedURI));
-      window.turnstile={render(selector,options){window.challengeOptions=options;setTimeout(()=>options.callback('test-token'),0);return 'test-widget';},reset(){setTimeout(()=>window.challengeOptions.callback('test-token'),0);}};
+      window.turnstile={render(selector,options){window.challengeOptions=options;const box=document.createElement('div');box.style.width=options.size==='compact'?'150px':'300px';box.style.height=options.size==='compact'?'140px':'65px';document.querySelector(selector).append(box);setTimeout(()=>options.callback('test-token'),0);return 'test-widget';},reset(){setTimeout(()=>window.challengeOptions.callback('test-token'),0);}};
     ` });
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
     const navigate = async () => {
