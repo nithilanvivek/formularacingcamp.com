@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Camp Sales — Sales Recorder</title>
+  <link rel="canonical" href="https://www.formularacingcamp.com/sales">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/assets/upi/studio.css">
+  <link rel="stylesheet" href="/assets/sales/recorder.css">
+  <script defer src="/assets/sales/model.js"></script>
+  <script defer src="/assets/sales/recorder.js"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand"><img src="/assets/site/f1-camp-logo-transparent.webp" alt="Formula Racing Camp"><span>CAMP<span class="light">SALES</span><small>FORMULA RACING CAMP</small></span></a>
+    <a class="header-note" href="/upi">OPEN CAMP PAY ↗</a>
+  </header>
+  <main>
+    <div class="intro">
+      <div class="eyebrow">BEHIND THE BOOKS</div>
+      <h1>Every book.<br><span>Every sale.</span></h1>
+      <p>Your camp’s sales, all in one place.<br>Choose what you’d like to record.</p>
+    </div>
+    <section class="overview" aria-labelledby="overview-title">
+      <div class="section-title"><h2 id="overview-title">Sales overview</h2><span class="local">Cancelled sales excluded</span></div>
+      <div class="totals"><div><span>Total sales</span><strong id="total-sales">—</strong><small id="total-books">Loading…</small></div><div><span>Total profit</span><strong id="total-profit">—</strong><small>Sales minus all batch costs</small></div><div><span>Profit per author</span><strong id="author-profit">—</strong><small>Equal share · 6 authors</small></div></div>
+      <div class="section-title"><h2>Batch-wise profit</h2></div>
+      <div id="batch-profits"><p class="empty-records">Loading batches…</p></div>
+      <p class="field-note">Batch profit = active sales from that batch minus its total order cost. Total profit also includes online stall sales, with no online stall costs recorded. Author shares are rounded to the nearest paise.</p>
+    </section>
+    <section class="action-section" aria-labelledby="action-title">
+      <div class="section-title"><span class="step">01</span><h2 id="action-title">What would you like to do?</h2></div>
+      <div class="actions" role="group" aria-label="Choose an action">
+        <button type="button" data-action="batch" aria-pressed="false"><span class="action-icon">▤</span><strong>New batch</strong><span>Record books ordered</span><b aria-hidden="true">↗</b></button>
+        <button type="button" data-action="batch-sale" aria-pressed="false"><span class="action-icon">↗</span><strong>New batch sale</strong><span>Sell from an existing batch</span><b aria-hidden="true">↗</b></button>
+        <button type="button" data-action="online-sale" aria-pressed="false"><span class="action-icon">◇</span><strong>New online stall sale</strong><span>Record an online stall order</span><b aria-hidden="true">↗</b></button>
+        <button type="button" data-action="cancel" aria-pressed="false"><span class="action-icon">↶</span><strong>Cancel order</strong><span>Find and cancel a sale</span><b aria-hidden="true">↗</b></button>
+      </div>
+    </section>
+    <section id="entry-panel" class="workspace" hidden aria-labelledby="entry-title">
+      <div class="editor">
+        <div class="section-title"><span class="step">02</span><h2 id="entry-title" tabindex="-1">New batch</h2></div>
+        <form id="entry-form" novalidate>
+          <div id="entry-fields"></div>
+          <p id="entry-error" class="error" role="alert"></p>
+          <div id="sales-challenge"></div>
+          <p id="challenge-status" class="hint" role="status"></p>
+          <button id="save-entry" class="primary" type="submit">Save batch <span>↗</span></button>
+        </form>
+      </div>
+      <aside class="preview">
+        <div class="preview-heading"><span>YOUR RECORD</span><span id="entry-kind" class="status">NEW BATCH</span></div>
+        <div class="record-preview"><img src="/assets/site/f1-camp-logo-transparent.webp" width="42" height="42" alt=""><h3 id="preview-title">A fresh starting line.</h3><p id="preview-description">Save the cost of your book order. Each batch gets its own number for future sales.</p></div>
+      </aside>
+    </section>
+    <p id="feedback" role="status" aria-live="polite"></p>
+    <section class="ledger" aria-labelledby="ledger-title">
+      <div class="section-title"><span class="step">03</span><h2 id="ledger-title">Your records</h2><span id="storage-label" class="local"></span></div>
+      <div id="records" aria-live="polite"><p class="empty-records">Loading your records…</p></div>
+      <div class="record-tools"><button id="refresh" class="secondary" type="button">Refresh records</button><button id="export" class="secondary" type="button" disabled>Export records</button></div>
+    </section>
+    <footer><span>EVERY BOOK. YOUR CAMP.</span><span>Made for the Formula Racing Camp team.</span></footer>
+  </main>
+</body>
+</html>
