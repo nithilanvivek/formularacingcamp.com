@@ -9,7 +9,7 @@ const { salesFixture } = require('./helpers/sales-fixture');
 const salesAPI = require('../api/sales-data');
 const config = require('../vercel.json');
 
-test('sales recorder persists all four workflows and updates profits under the production CSP', { timeout: 90000 }, async t => {
+test('sales recorder persists creation, record editing and sale deletion and updates profits under the production CSP', { timeout: 90000 }, async t => {
   const fixture = salesFixture(t);
   const root = path.resolve(__dirname, '..');
   const output = fs.mkdtempSync(path.join(os.tmpdir(), 'frc-sales-qa-'));
@@ -68,11 +68,12 @@ test('sales recorder persists all four workflows and updates profits under the p
     const choose = async action => {
       await evaluate(`document.querySelector('[data-action="${action}"]').click()`);
       if (await evaluate(`!document.querySelector('#save-entry').disabled`)) return;
-      if (action !== 'cancel' && action !== 'batch-sale') await until(`!document.querySelector('#save-entry').disabled`);
+      if (action !== 'editor' && action !== 'batch-sale') await until(`!document.querySelector('#save-entry').disabled`);
     };
     const fill = async values => evaluate(`(() => {for(const [id,value] of Object.entries(${JSON.stringify(values)})){const field=document.getElementById(id);field.value=value;field.dispatchEvent(new Event('input',{bubbles:true}));}})()`);
+    const change = async (id, value, checked = false) => evaluate(`(() => {const field=document.getElementById(${JSON.stringify(id)});field[${checked ? '"checked"' : '"value"'}]=${JSON.stringify(value)};field.dispatchEvent(new Event('change',{bubbles:true}));})()`);
     const submit = async () => evaluate(`document.querySelector('#entry-form').requestSubmit()`);
-    const saved = async revision => until(`document.querySelector('#feedback').textContent.includes('saved') || document.querySelector('#feedback').textContent.startsWith('Order cancelled')`).then(() => assert.equal(JSON.parse(fixture.raw).revision, revision));
+    const saved = async revision => until(`document.querySelector('#feedback').textContent.includes('saved') || document.querySelector('#feedback').textContent.startsWith('Sale deleted')`).then(() => assert.equal(JSON.parse(fixture.raw).revision, revision));
 
     await cdp.send('Page.navigate', { url: base + '/sales' });
     await until('!!window.challengeOptions');
@@ -124,18 +125,38 @@ test('sales recorder persists all four workflows and updates profits under the p
     assert.equal(await evaluate(`localStorage.length`), 0);
     assert.equal(await evaluate(`typeof window.challengeOptions`), 'undefined', 'Reload should reuse the verified session');
     assert.equal(fixture.verifications, 1);
-    await choose('cancel');
-    await until(`!document.querySelector('#save-entry').disabled`);
-    await fill({ 'order-id': JSON.parse(fixture.raw).sales[0].id });
-    await submit();
-    assert.match(await evaluate(`document.querySelector('#entry-error').textContent`), /Confirm/);
-    await evaluate(`document.querySelector('#confirm-cancel').checked=true`);
-    await submit(); await saved(4);
+    assert.equal(await evaluate(`!!document.querySelector('[data-action="cancel"]')`), false);
+    await choose('editor');
+    await change('editor-record', 'batch:' + batchId);
+    assert.equal(await evaluate(`document.querySelector('#cost').value`), '1000.50');
+    assert.equal(await evaluate(`!!document.querySelector('#delete-sale')`), false, 'Batches must never have a delete icon');
+    await fill({ cost: '900.50' }); await submit(); await saved(4);
+    assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '₹699.50');
+    await fill({ cost: '1000.50' }); await submit(); await saved(5);
+    const firstSaleId = JSON.parse(fixture.raw).sales[0].id;
+    const originalTime = JSON.parse(fixture.raw).sales[0].createdAt;
+    await change('editor-record', 'sale:' + firstSaleId);
+    assert.equal(await evaluate(`document.querySelector('#price').value`), '1200.75');
+    await fill({ price: '1300.75', format: 'Hardcover', 'payment-name': 'Corrected buyer' });
+    await submit(); await saved(6);
+    assert.equal(JSON.parse(fixture.raw).sales[0].createdAt, originalTime);
+    assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹1,700.00');
+    await change('edit-channel', 'online');
+    assert.equal(await evaluate(`document.querySelector('#edit-batch-field').hidden`), true);
+    await change('edit-channel', 'batch');
+    assert.equal(await evaluate(`document.querySelector('#price').value`), '1300.75');
+    await evaluate(`document.querySelector('#delete-sale').click()`);
+    assert.equal(await evaluate(`document.querySelector('#delete-confirmation').hidden`), false);
+    await evaluate(`document.querySelector('#keep-sale').click()`);
+    assert.equal(await evaluate(`document.querySelector('#delete-confirmation').hidden`), true);
+    assert.equal(JSON.parse(fixture.raw).sales.length, 2);
+    await evaluate(`document.querySelector('#delete-sale').click();document.querySelector('#confirm-delete-sale').click()`);
+    await saved(7);
+    assert.equal(JSON.parse(fixture.raw).sales.some(sale=>sale.id===firstSaleId), false);
     assert.equal(await evaluate(`document.querySelector('#total-sales').textContent`), '₹399.25');
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '-₹601.25');
     assert.equal(await evaluate(`document.querySelector('#author-profit').textContent`), '-₹100.21');
     assert.equal(await evaluate(`document.querySelector('#total-books').textContent`), '1 book sold');
-    assert.equal(await evaluate(`document.querySelectorAll('.cancelled').length`), 1);
 
     // Fail a save, retain all inputs, then retry it without losing or duplicating records.
     await choose('online-sale');
@@ -145,11 +166,10 @@ test('sales recorder persists all four workflows and updates profits under the p
     assert.equal(await evaluate(`document.querySelector('#price').value`), '50.25');
     fixture.offline = false;
     await until(`!document.querySelector('#save-entry').disabled`);
-    await submit(); await saved(5);
-    assert.equal(JSON.parse(fixture.raw).sales.length, 3);
-    assert.equal(fixture.verifications, 1, 'All saves and cancellations share one page check');
+    await submit(); await saved(8);
+    assert.equal(JSON.parse(fixture.raw).sales.length, 2);
+    assert.equal(fixture.verifications, 1, 'All saves, edits and deletions share one page check');
 
-    const change = async (id, value, checked = false) => evaluate(`(() => {const field=document.getElementById(${JSON.stringify(id)});field[${checked ? '"checked"' : '"value"'}]=${JSON.stringify(value)};field.dispatchEvent(new Event('change',{bubbles:true}));})()`);
     await change('record-type', 'batch');
     assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 1);
     assert.equal(await evaluate(`!!document.querySelector('#record-batch')`), true);
@@ -166,22 +186,26 @@ test('sales recorder persists all four workflows and updates profits under the p
     await change('record-format', 'all');
     await change('record-channel', 'batch');
     await change('record-batch', batchId);
-    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 1);
+    assert.equal(await evaluate(`document.querySelectorAll('#records .record-row').length`), 0);
     await change('record-type', 'all');
     await change('record-channel', 'all');
 
-    await choose('cancel');
-    assert.equal(await evaluate(`!!document.querySelector('#cancel-type')`), false);
-    await change('cancel-channel', 'batch');
-    await change('cancel-batch', batchId);
-    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 1, 'Cancelled orders must not reappear');
-    await change('cancel-channel', 'online');
-    await change('cancel-format', 'Hardcover');
-    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 2);
-    await change('cancel-date-enabled', true, true);
-    await change('cancel-date', '2000-01-01');
-    assert.equal(await evaluate(`document.querySelector('#order-id').options.length`), 1);
-    await change('cancel-date-enabled', false, true);
+    await choose('editor');
+    await change('editor-type', 'batch');
+    assert.equal(await evaluate(`document.querySelector('#editor-record').options.length`), 2);
+    await change('editor-record', 'batch:' + batchId);
+    assert.equal(await evaluate(`!!document.querySelector('#delete-sale')`), false);
+    await change('editor-type', 'sale');
+    await change('editor-channel', 'batch');
+    await change('editor-batch', batchId);
+    assert.equal(await evaluate(`document.querySelector('#editor-record').options.length`), 1, 'Deleted sales must not reappear');
+    await change('editor-channel', 'online');
+    await change('editor-format', 'Hardcover');
+    assert.equal(await evaluate(`document.querySelector('#editor-record').options.length`), 2);
+    await change('editor-date-enabled', true, true);
+    await change('editor-date', '2000-01-01');
+    assert.equal(await evaluate(`document.querySelector('#editor-record').options.length`), 1);
+    await change('editor-date-enabled', false, true);
 
     await evaluate(`document.querySelector('#export').click()`);
     const filename = 'formula-racing-camp-sales-' + new Date().toISOString().slice(0, 10) + '.xlsx';
@@ -201,10 +225,12 @@ test('sales recorder persists all four workflows and updates profits under the p
     await evaluate(`window.challengeOptions.callback('test-token')`);
     await until(`document.querySelector('#verification-gate').hidden`);
     assert.equal(fixture.verifications, 2);
-    await submit(); await saved(6);
+    await submit(); await saved(9);
+    await choose('editor');
+    await change('editor-record', 'sale:' + JSON.parse(fixture.raw).sales.find(sale => sale.format === 'Hardcover').id);
     await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
     await cdp.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }).then(result => fs.writeFileSync(path.join(output, 'desktop.png'), Buffer.from(result.data, 'base64')));
-    for (const action of ['batch', 'batch-sale', 'online-sale', 'cancel']) {
+    for (const action of ['batch', 'batch-sale', 'online-sale', 'editor']) {
       await cdp.send('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true });
       await choose(action);
       assert.equal(await evaluate(`document.documentElement.scrollWidth<=innerWidth`), true, action + ' mobile overflow');

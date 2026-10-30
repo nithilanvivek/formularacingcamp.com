@@ -61,7 +61,7 @@ test('record filters combine type, sale channel, format, batch and recorded day 
   assert.equal(count({ batchId: 'unknown' }), 0);
 });
 
-test('server persists dated batches and sales, retries safely, and retains cancelled orders', async t => {
+test('server persists dated records, retries safely, and permanently deletes only selected sales', async t => {
   const fixture = salesFixture(t);
   const batchRequest = fixture.request('batch', { cost: '100.10' });
   const first = await store.saveEntry(batchRequest);
@@ -74,16 +74,66 @@ test('server persists dated batches and sales, retries safely, and retains cance
   assert.equal((await store.saveEntry(saleRequest)).sales.length, 1);
   await assert.rejects(store.saveEntry({ ...saleRequest, price: '99.00' }), { status: 409 });
   await store.saveEntry(fixture.request('online-sale', { format: 'Hardcover', price: '300.50' }));
-  const cancel = fixture.request('cancel', { orderId: second.sales[0].id });
-  const cancelled = await store.saveEntry(cancel);
-  assert.equal(cancelled.sales.length, 2);
-  assert.equal(cancelled.sales[0].status, 'cancelled');
-  assert.ok(Number.isFinite(Date.parse(cancelled.sales[0].cancelledAt)));
-  assert.equal((await store.saveEntry(cancel)).revision, cancelled.revision);
-  assert.equal(model.summary(cancelled).profitPaise, 20040);
-  assert.equal('fingerprint' in store.publicLedger(cancelled).sales[0], false);
-  assert.equal('cancelRequestId' in store.publicLedger(cancelled).sales[0], false);
-  await assert.rejects(store.saveEntry(fixture.request('cancel', { orderId: second.sales[0].id })), { status: 409 });
+  const deletion = fixture.request('delete-sale', { recordId: second.sales[0].id, expectedVersion: 0 });
+  const deleted = await store.saveEntry(deletion);
+  assert.equal(deleted.sales.length, 1);
+  assert.equal(deleted.sales.some(sale => sale.id === second.sales[0].id), false);
+  assert.equal((await store.saveEntry(deletion)).revision, deleted.revision);
+  assert.equal(model.summary(deleted).profitPaise, 20040);
+  assert.equal('fingerprint' in store.publicLedger(deleted).sales[0], false);
+  assert.equal('mutationReceipts' in store.publicLedger(deleted), false);
+  assert.equal('deletedSaleIds' in store.publicLedger(deleted), false);
+  await assert.rejects(store.saveEntry(saleRequest), { status: 409 });
+  await assert.rejects(store.saveEntry(fixture.request('delete-sale', { recordId: first.batches[0].id, expectedVersion: 0 })), { status: 404 });
+  await assert.rejects(store.saveEntry(fixture.request('delete-batch', { recordId: first.batches[0].id, expectedVersion: 0 })), { status: 400 });
+  assert.equal((await store.readLedger()).batches.length, 1);
+});
+
+test('edits preserve record identity, update totals, and reject stale or invalid changes', async t => {
+  const fixture = salesFixture(t);
+  const original = await store.saveEntry(fixture.request('batch', { cost: '100' }));
+  const batch = original.batches[0];
+  const batchEdit = fixture.request('edit-batch', { recordId: batch.id, expectedVersion: 0, cost: '125.75' });
+  const edited = await store.saveEntry(batchEdit);
+  assert.equal(edited.batches[0].createdAt, batch.createdAt);
+  assert.equal(edited.batches[0].number, batch.number);
+  assert.equal(edited.batches[0].costPaise, 12575);
+  assert.equal(edited.batches[0].recordVersion, 1);
+  assert.ok(edited.batches[0].updatedAt);
+  assert.equal((await store.saveEntry(batchEdit)).revision, edited.revision);
+  await assert.rejects(store.saveEntry(fixture.request('edit-batch', { recordId: batch.id, expectedVersion: 0, cost: '999' })), { status: 409 });
+  const added = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '200', paymentName: 'Original' }));
+  const sale = added.sales[0];
+  const saleEdit = fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 0, channel: 'batch', batchId: batch.id, format: 'Hardcover', price: '250.50', paymentName: 'Corrected' });
+  const corrected = await store.saveEntry(saleEdit);
+  assert.equal(corrected.sales[0].createdAt, sale.createdAt);
+  assert.equal(corrected.sales[0].number, sale.number);
+  assert.equal(corrected.sales[0].batchId, batch.id);
+  assert.equal(corrected.sales[0].paymentName, 'Corrected');
+  assert.equal(model.summary(corrected).profitPaise, 12475);
+  assert.equal((await store.saveEntry(saleEdit)).revision, corrected.revision);
+  await assert.rejects(store.saveEntry(fixture.request('delete-sale', { recordId: sale.id, expectedVersion: 0 })), { status: 409 });
+  const invalid = fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 1, channel: 'batch', batchId: 'unknown', format: 'Paperback', price: '10' });
+  await assert.rejects(store.saveEntry(invalid), { status: 400 });
+  assert.equal((await store.readLedger()).sales[0].pricePaise, 25050);
+  const online = await store.saveEntry(fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 1, channel: 'online', format: 'Paperback', price: '175.25', paymentName: '' }));
+  assert.equal('batchId' in online.sales[0], false);
+  assert.equal(online.sales[0].paymentName, '');
+});
+
+test('deleting the last sale does not reuse its order number and legacy cancelled sales stay cancelled when edited', async t => {
+  const fixture = salesFixture(t);
+  const added = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '200' }));
+  const sale = added.sales[0];
+  added.sales[0].status = 'cancelled';
+  added.sales[0].cancelledAt = new Date().toISOString();
+  fixture.raw = JSON.stringify(added);
+  const edited = await store.saveEntry(fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 0, channel: 'online', format: 'Hardcover', price: '250' }));
+  assert.equal(edited.sales[0].status, 'cancelled');
+  assert.equal(model.summary(edited).salesPaise, 0);
+  await store.saveEntry(fixture.request('delete-sale', { recordId: sale.id, expectedVersion: 1 }));
+  const next = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '300' }));
+  assert.equal(next.sales[0].number, 2);
 });
 
 test('simultaneous saves preserve both records and assign distinct batch numbers', async t => {

@@ -5,13 +5,14 @@
   let ledger = null, action = null, busy = false, pending = null;
   let siteKey = '', widgetId = null, scriptLoading = false, pageVerified = false, verifying = false;
   const newFilters = type => ({ type, channel: 'all', format: 'all', batchId: 'all', dateEnabled: false, date: model.localDay() });
-  const recordFilters = newFilters('all'), cancelFilters = newFilters('sale');
-  const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', cancel: 'Cancel order' };
+  const recordFilters = newFilters('all'), editorFilters = newFilters('all');
+  let editorSelection = '', editing = null;
+  const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', editor: 'Record Editor' };
   const descriptions = {
     batch: ['A fresh starting line.', 'Record the total cost of the books you ordered. A batch number is assigned when you save.'],
     'batch-sale': ['One book. One happy reader.', 'Choose the batch, book format, and selling price. Each record is a sale of one book.'],
     'online-sale': ['Your online stall, recorded.', 'Choose the book format and selling price. Each record is a sale of one book, without a batch.'],
-    cancel: ['Keep the history. Update the totals.', 'Cancelled orders stay in your records and are removed from sales and profit totals. Batch costs stay the same.']
+    editor: ['Keep your records in shape.', 'Find a batch or sale with the filters, then edit its details. Sales can also be deleted. Batch records stay in your ledger.']
   };
 
   function element(tag, text, className) {
@@ -33,7 +34,7 @@
     return `<label for="${id}">${label} (INR)</label><div class="money"><span aria-hidden="true">₹</span><input id="${id}" type="text" inputmode="decimal" maxlength="10" autocomplete="off" placeholder="0.00" required aria-describedby="money-hint"></div><small id="money-hint" class="hint">Enter an amount greater than zero, with up to two decimal places.</small>`;
   }
   function updateSaveButton() {
-    const noChoices = action === 'batch-sale' && !ledger?.batches.length || action === 'cancel' && !ledger?.sales.some(sale => sale.status === 'active');
+    const noChoices = action === 'batch-sale' && !ledger?.batches.length || action === 'editor' && !editing;
     $('save-entry').disabled = busy || !ledger || !pageVerified || Boolean(noChoices);
   }
   function ensureChallenge() {
@@ -120,15 +121,54 @@
       onChange();
     };
   }
-  function renderCancelOptions() {
-    const select = $('order-id'), previous = select.value;
+  function editorCandidates() {
+    return [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' }))].filter(record => model.matchesFilters(record, editorFilters));
+  }
+  function renderEditorOptions() {
+    const select = $('editor-record');
     select.replaceChildren();
-    option(select, '', 'Choose an active order');
-    const candidates = ledger.sales.filter(sale => sale.status === 'active' && model.matchesFilters({ ...sale, kind: 'sale' }, cancelFilters));
-    for (const sale of candidates) option(select, sale.id, `${orderName(sale)} · ${channelName(sale)} · ${sale.format} · ${model.money(sale.pricePaise)}${sale.paymentName ? ' · ' + sale.paymentName : ''} · ${dateLabel(sale.createdAt)}`);
-    if (candidates.some(sale => sale.id === previous)) select.value = previous;
-    $('confirm-cancel').checked = false;
-    $('cancel-hint').textContent = candidates.length ? `${candidates.length} active order${candidates.length === 1 ? '' : 's'} match your filters.` : 'No active orders match these filters.';
+    option(select, '', 'Choose a batch or sale');
+    const candidates = editorCandidates();
+    for (const record of candidates) {
+      const label = record.kind === 'batch' ? `${batchName(record)} · ${model.money(record.costPaise)} cost` : `${orderName(record)} · ${channelName(record)} · ${record.format} · ${model.money(record.pricePaise)}${record.paymentName ? ' · ' + record.paymentName : ''}${record.status === 'cancelled' ? ' · Cancelled' : ''}`;
+      option(select, `${record.kind}:${record.id}`, label + ' · ' + dateLabel(record.createdAt));
+    }
+    if (candidates.some(record => `${record.kind}:${record.id}` === editorSelection)) select.value = editorSelection;
+    else editorSelection = '';
+    $('editor-hint').textContent = `${candidates.length} record${candidates.length === 1 ? '' : 's'} match your filters.`;
+    renderEditorFields();
+  }
+  function renderEditorFields() {
+    editorSelection = $('editor-record').value;
+    editing = editorCandidates().find(record => `${record.kind}:${record.id}` === editorSelection) || null;
+    const fields = $('edit-fields');
+    fields.replaceChildren();
+    if (!editing) { updateSaveButton(); return; }
+    fields.append(element('p', `${editing.kind === 'batch' ? batchName(editing) : orderName(editing)} · Recorded ${dateLabel(editing.createdAt)}`, 'field-note'));
+    const controls = element('div');
+    if (editing.kind === 'batch') {
+      controls.innerHTML = moneyField('cost', 'Cost of books ordered');
+      fields.append(controls);
+      $('cost').value = (editing.costPaise / 100).toFixed(2);
+    } else {
+      controls.innerHTML = '<label for="edit-channel">Sale channel</label><select id="edit-channel" required><option value="batch">Batch sale</option><option value="online">Online stall</option></select><div id="edit-batch-field"><label for="batch-id">Batch number</label><select id="batch-id"></select></div><label for="format">Paperback / Hardcover</label><select id="format" required><option>Paperback</option><option>Hardcover</option></select>' + moneyField('price', 'Price sold at') + '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off"><div class="editor-delete-row"><span>Remove this sale from your records.</span><button id="delete-sale" type="button" class="delete-icon" aria-label="Delete sale" title="Delete sale"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div><div id="delete-confirmation" class="notice" hidden><p>Delete this sale permanently? This cannot be undone.</p><div class="delete-confirm-buttons"><button id="keep-sale" type="button" class="secondary">Keep sale</button><button id="confirm-delete-sale" type="button" class="secondary delete-confirm">Delete sale</button></div></div>';
+      fields.append(controls);
+      $('edit-channel').value = editing.channel;
+      option($('batch-id'), '', 'Choose a batch');
+      for (const batch of ledger.batches) option($('batch-id'), batch.id, batchName(batch));
+      $('batch-id').value = editing.batchId || '';
+      $('format').value = editing.format;
+      $('price').value = (editing.pricePaise / 100).toFixed(2);
+      $('payment-name').value = editing.paymentName || '';
+      if (editing.status === 'cancelled') fields.append(element('p', 'This is a previously cancelled sale. Editing its details keeps it excluded from sales totals.', 'field-note'));
+      updateEditChannel();
+    }
+    updateSaveButton();
+  }
+  function updateEditChannel() {
+    const batchSale = $('edit-channel').value === 'batch';
+    $('edit-batch-field').hidden = !batchSale;
+    $('batch-id').required = batchSale;
   }
   function renderForm() {
     if (!action) return;
@@ -139,7 +179,6 @@
     $('preview-description').textContent = descriptions[action][1];
     $('entry-error').textContent = '';
     const fields = $('entry-fields'), button = $('save-entry');
-    button.classList.toggle('danger', action === 'cancel');
     if (action === 'batch') {
       fields.innerHTML = '<p class="field-note">Record the total cost of your book order. Your batch number is created automatically.</p>' + moneyField('cost', 'Cost of books ordered');
       button.textContent = 'Save batch ↗';
@@ -154,10 +193,10 @@
       }
       button.textContent = 'Save sale ↗';
     } else {
-      fields.innerHTML = '<div id="cancel-filters" class="filter-controls" aria-label="Filter orders"></div><label for="order-id">Order to cancel</label><select id="order-id" required></select><p id="cancel-hint" class="hint"></p><label class="confirm-row" for="confirm-cancel"><input id="confirm-cancel" type="checkbox" required><span>I confirm this order should be cancelled.</span></label>';
-      renderFilters($('cancel-filters'), 'cancel', cancelFilters, false, renderCancelOptions);
-      renderCancelOptions();
-      button.textContent = 'Cancel selected order ↶';
+      fields.innerHTML = '<div id="editor-filters" class="filter-controls" aria-label="Filter records to edit"></div><label for="editor-record">Record to edit</label><select id="editor-record" required></select><p id="editor-hint" class="hint"></p><div id="edit-fields"></div>';
+      renderFilters($('editor-filters'), 'editor', editorFilters, true, renderEditorOptions);
+      renderEditorOptions();
+      button.textContent = 'Save changes ↗';
     }
     updateSaveButton();
   }
@@ -208,6 +247,7 @@
         detail.append(element('small', entry.kind === 'batch' ? `Books ordered · ${dateLabel(entry.createdAt)}` : `${channelName(entry)} · ${entry.format} · ${dateLabel(entry.createdAt)}`));
         if (entry.paymentName) detail.append(element('small', `Payment name: ${entry.paymentName}`));
         if (entry.cancelledAt) detail.append(element('small', `Cancelled ${dateLabel(entry.cancelledAt)}`));
+        if (entry.updatedAt) detail.append(element('small', `Edited ${dateLabel(entry.updatedAt)}`));
         row.append(detail, element('span', model.money(entry.kind === 'batch' ? entry.costPaise : entry.pricePaise), 'record-amount'));
         list.append(row);
       }
@@ -229,8 +269,8 @@
   function setBusy(value) {
     busy = value;
     for (const button of document.querySelectorAll('[data-action], #refresh, #export')) button.disabled = value;
-    for (const field of $('entry-fields').querySelectorAll('input, select')) field.disabled = value;
-    if ($('cancel-date')) $('cancel-date').disabled = value || !cancelFilters.dateEnabled;
+    for (const field of $('entry-fields').querySelectorAll('input, select, button')) field.disabled = value;
+    if ($('editor-date')) $('editor-date').disabled = value || !editorFilters.dateEnabled;
     $('entry-form').setAttribute('aria-busy', String(value));
     updateSaveButton();
     if (!ledger) $('export').disabled = true;
@@ -266,7 +306,23 @@
   $('entry-form').addEventListener('input', event => {
     event.target.removeAttribute('aria-invalid'); $('entry-error').textContent = '';
   });
-  $('entry-form').addEventListener('change', event => { if (event.target.id === 'order-id') $('confirm-cancel').checked = false; });
+  $('entry-form').addEventListener('change', event => {
+    if (event.target.id === 'editor-record') renderEditorFields();
+    if (event.target.id === 'edit-channel') updateEditChannel();
+  });
+  $('entry-form').addEventListener('click', async event => {
+    if (busy || !pageVerified || action !== 'editor' || editing?.kind !== 'sale') return;
+    const button = event.target.closest('button');
+    if (button?.id === 'delete-sale') {
+      $('delete-confirmation').hidden = false;
+      $('confirm-delete-sale').focus();
+    } else if (button?.id === 'keep-sale') {
+      $('delete-confirmation').hidden = true;
+      $('delete-sale').focus();
+    } else if (button?.id === 'confirm-delete-sale') {
+      await persist({ action: 'delete-sale', recordId: editing.id, expectedVersion: editing.recordVersion || 0 });
+    }
+  });
   $('entry-form').addEventListener('submit', async event => {
     event.preventDefault();
     if (busy || !ledger || $('save-entry').disabled) return;
@@ -274,23 +330,32 @@
     for (const field of $('entry-fields').querySelectorAll('[required]')) {
       if (!field.checkValidity()) {
         field.setAttribute('aria-invalid', 'true');
-        $('entry-error').textContent = field.type === 'checkbox' ? 'Confirm the cancellation before continuing.' : 'Complete the highlighted field.';
+        $('entry-error').textContent = 'Complete the highlighted field.';
         field.focus(); return;
       }
       field.removeAttribute('aria-invalid');
     }
     const data = { action };
-    const amountField = action === 'batch' ? $('cost') : action === 'cancel' ? null : $('price');
+    const isBatch = action === 'batch' || action === 'editor' && editing?.kind === 'batch';
+    const amountField = isBatch ? $('cost') : $('price');
     if (amountField) {
       try { model.parseMoney(amountField.value); }
       catch (error) { amountField.setAttribute('aria-invalid', 'true'); $('entry-error').textContent = error.message; amountField.focus(); return; }
     }
-    if (action === 'batch') data.cost = $('cost').value.trim();
-    else if (action === 'cancel') data.orderId = $('order-id').value;
+    if (action === 'editor') {
+      data.action = editing.kind === 'batch' ? 'edit-batch' : 'edit-sale';
+      data.recordId = editing.id;
+      data.expectedVersion = editing.recordVersion || 0;
+    }
+    if (isBatch) data.cost = $('cost').value.trim();
     else {
       data.format = $('format').value; data.price = $('price').value.trim(); data.paymentName = $('payment-name').value.trim();
-      if (action === 'batch-sale') data.batchId = $('batch-id').value;
+      if (action === 'editor') data.channel = $('edit-channel').value;
+      if (action === 'batch-sale' || data.channel === 'batch') data.batchId = $('batch-id').value;
     }
+    await persist(data);
+  });
+  async function persist(data) {
     const signature = JSON.stringify(data);
     if (!pending || pending.signature !== signature) pending = { signature, requestId: crypto.randomUUID() };
     data.requestId = pending.requestId;
@@ -298,14 +363,15 @@
     try {
       ledger = await api({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       pending = null;
+      if (data.action === 'delete-sale') { editorSelection = ''; editing = null; }
       renderRecords(); renderForm();
-      $('feedback').textContent = action === 'batch' ? 'Batch saved. You can now select it for a batch sale.' : action === 'cancel' ? 'Order cancelled. Your totals have been updated.' : 'Sale saved. Your totals have been updated.';
+      $('feedback').textContent = data.action === 'batch' ? 'Batch saved. You can now select it for a batch sale.' : data.action === 'delete-sale' ? 'Sale deleted. Your totals have been updated.' : data.action.startsWith('edit-') ? 'Changes saved. Your totals have been updated.' : 'Sale saved. Your totals have been updated.';
     } catch (error) {
       $('feedback').textContent = ''; $('entry-error').textContent = error.message + ' Your form is still here; try again.';
     } finally {
       setBusy(false);
     }
-  });
+  }
   $('refresh').addEventListener('click', load);
   $('retry-verification').addEventListener('click', async () => {
     if (verifying) return;
