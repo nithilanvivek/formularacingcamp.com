@@ -15,8 +15,6 @@ The website has been converted from the original Canva AI Code exports into a st
 - `puzzles.js` - crossword, Wordle-style game, and quiz behavior.
 - `preview.html` - progressive WebP book preview with an optimized PDF fallback, available at `/preview`.
 - `404.html` - custom error page with a built-in F1-themed collection game.
-- `launch-game.css` - styles retained for the historical leaderboard.
-- `api/launch-game-submit.js` - Vercel Function endpoint for launch game submissions and review flags.
 - `assets/` - local optimized images, including the book cover and character bio WebP files.
 - `vercel.json` - static hosting rules, clean URLs, canonical redirect, and headers.
 - `llms.txt` - concise AI-readable site guide following the llms.txt proposal.
@@ -28,7 +26,7 @@ The website has been converted from the original Canva AI Code exports into a st
 - `.vercelignore` - excludes reference-only files from deployment.
 - `formularacingcamp.html` - original Canva/Cocoa export kept as a reference source.
 
-The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles`. The retired launch-week game has been removed; `/game` and `/game.html` return 404. The historical leaderboard remains available.
+The current deployable entry point is `index.html`, with the puzzles page available through `/puzzles`. The retired launch-week game has been removed; `/game` and `/game.html` return 404. The leaderboard, submission endpoints, and current leaderboard data file have also been removed.
 
 ## Latest Session State
 
@@ -41,10 +39,7 @@ As of 2026-09-11:
 - Header navigation includes a "Get in Touch" link.
 - Authors copy says the group is made up of middle school students from Bengaluru, Karnataka, India.
 - The puzzles page is wired at `/puzzles`.
-- The retired Launch Grand Prix page has been removed; its historical leaderboard remains unindexed.
-- Launch Grand Prix now uses a six-screen flow, explicit one-attempt rules, player-clicked screen transitions with car-zip animation, a faster fixed Pit Lane Dash item script, and an expanded strategy decision level without a shareable final code.
-- The launch game has a high-visibility tab/window/browser-tool disqualification flash and a viewport-responsive launch hero for laptop screen sizes.
-- Disqualified game runs return to the homepage, and the score strip is placed in reserved layout space so it does not cover controls.
+- The retired Launch Grand Prix page has been removed; its leaderboard, data file, and submission endpoints have also been removed.
 - The Wordle-style puzzle now colors submitted row tiles as well as keyboard letters.
 - Homepage bitmap images are served from local optimized assets.
 - Homepage statistics cite official Formula 1 sources, and the authors section documents the student editorial approach.
@@ -123,7 +118,6 @@ preview.html
 puzzles.html
 puzzles.css
 puzzles.js
-launch-game.css
 api/
 assets/
 vercel.json
@@ -204,25 +198,7 @@ and `/go/book` and `/go/youtube` page statistics are excluded from the dashboard
 Older transition links still continue through the corresponding short link.
 A counter outage or a 1.5-second timeout does not block the redirect.
 
-Launch game submissions post to `/api/launch-game-submit`. To forward real entries to a durable destination, configure `LAUNCH_GAME_WEBHOOK_URL` in Vercel. Usernames beginning with `test_` remain separated internally from production entries, but the public leaderboard exposes only the main launch leaderboard.
-
-The launch-game API can also save a leaderboard entry to `data/launch-game-leaderboard.json` through the GitHub Contents API. This file stores username, score, level scores, review status, bucket, and timestamps, but not email addresses. Because the repository is public, these stored leaderboard fields are public even though the raw JSON file is excluded from Vercel deployments by `.vercelignore`; the `vercel.json` not-found rewrite is retained as defense in depth. Submitted email addresses are used for receipts and may be sent to the configured private administrative webhook, but are not written into new GitHub leaderboard entries. Configure these Vercel environment variables to enable it:
-
-- `LAUNCH_GAME_GITHUB_TOKEN` or `GITHUB_TOKEN`
-- `GITHUB_OWNER`, default fallback: `nithilanvivek`
-- `GITHUB_REPO`, default fallback: `formularacingcamp.com`
-- `GITHUB_BRANCH`, default fallback: `main`
-- `LAUNCH_GAME_LEADERBOARD_PATH`, default fallback: `data/launch-game-leaderboard.json`
-
-Podium placements are calculated from the current leaderboard file only, so removed test entries do not count. Entries are ordered by score, then earliest valid submission for tied scores. First place receives a free book and must reply with a delivery address. Second place receives separate one-time Notion Press codes for 50% off paperback and 59% off hardcover. Third place receives separate one-time codes for 40% off paperback and 49% off hardcover. Second- and third-place winners may buy both editions, but each edition code works only once. Keep the unique winner codes outside public repository files.
-
-Player receipt emails are sent through Resend after valid, non-dry-run submissions. Configure these Vercel environment variables before relying on receipts:
-
-- `RESEND_API_KEY`
-- `LAUNCH_GAME_EMAIL_FROM`, default fallback: `Formula Racing Camp <game@formularacingcamp.com>`
-- `LAUNCH_GAME_ADMIN_EMAIL`, optional comma-separated BCC recipients
-
-Player receipt emails always use `authors@formularacingcamp.com` as Reply-To.
+The launch-week game, leaderboard, and submission APIs are retired. Game-specific Redis duplicate-submission keys and daily submission counters are removed; shared sales, contact protection, and other analytics data are retained. Historical Git commits are not rewritten.
 
 The homepage contact form also uses Resend through `/api/contact-submit`. It sends messages to `CONTACT_TO`, falling back to `LAUNCH_GAME_REPLY_TO` and then `authors@formularacingcamp.com`, with `reply_to` set to the visitor's email.
 
@@ -238,12 +214,7 @@ Successful contact messages are limited to five per rolling 24 hours by both pub
 ## Near-Term Tasks
 
 1. Confirm remaining CTA destinations: buy link, puzzles, YouTube, and contact email.
-2. Configure the GitHub leaderboard token before broad launch-game testing.
-3. Configure the launch game submission webhook before judging real winners.
-4. Configure Resend receipt-email environment variables before broad launch-game testing.
-5. After August 15, ask the first-place winner for a delivery address and send the unique second- and third-place codes in the email body without attaching the source CSV files.
-6. Verify the launch-week game on production Chrome/Safari after deployment.
-7. Consider replacing the Tailwind CDN with a build step if the project grows.
+2. Consider replacing the Tailwind CDN with a build step if the project grows.
 
 ## Unlisted public analytics
 

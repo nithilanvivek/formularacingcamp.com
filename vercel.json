@@ -27,11 +27,6 @@
       "source": "/puzzles.html",
       "destination": "/puzzles",
       "permanent": true
-    },
-    {
-      "source": "/game-leaderboard.html",
-      "destination": "/game-leaderboard",
-      "permanent": true
     }
   ],
   "rewrites": [
@@ -218,15 +213,6 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow, noarchive, nosnippet"
-        }
-      ]
-    },
-    {
-      "source": "/game-leaderboard",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
         }
       ]
     },

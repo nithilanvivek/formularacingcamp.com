@@ -53,7 +53,7 @@
     }
     $('challenge-status').textContent = 'Complete this check to open the sales recorder.';
     widgetId = window.turnstile.render('#sales-challenge', {
-      sitekey: siteKey, action: 'sales', size: 'compact',
+      sitekey: siteKey, action: 'sales', size: 'normal',
       callback: verifyPage,
       'expired-callback': () => { if (!pageVerified) $('challenge-status').textContent = 'Verification expired. Please complete the check.'; },
       'error-callback': () => { if (!pageVerified) { $('challenge-status').textContent = 'Bot verification failed. Please try again.'; $('retry-verification').hidden = false; } }

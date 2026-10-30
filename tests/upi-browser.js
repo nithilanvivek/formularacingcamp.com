@@ -61,6 +61,8 @@ test('UPI studio validates, generates and exports locally under the production C
     await until(() => evaluate('typeof paymentURI === "function" && document.readyState === "complete"'), 'studio loaded');
     assert.equal(await evaluate('location.pathname'), '/upi');
     assert.equal(await evaluate('document.title'), 'Camp Pay — UPI QR Studio');
+    assert.equal(await evaluate('document.querySelector("header .header-note").getAttribute("href")'), '/sales');
+    assert.equal(await evaluate('document.querySelector("header .header-note").textContent'), 'OPEN CAMP SALES ↗');
     assert.equal(await evaluate('document.querySelectorAll("#png:disabled,#svg:disabled,#copy:disabled").length'), 3);
     assert.equal(await evaluate('getComputedStyle(document.body).color'), 'rgb(21, 28, 53)');
     assert.equal(await evaluate('Array.from(document.images).every(image=>image.complete && image.naturalWidth>0)'), true);

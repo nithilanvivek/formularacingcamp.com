@@ -83,7 +83,7 @@ function samplePayload(days, range) {
       actionTypes: actions.filter((action) => action.count > 0).length
     },
     trend,
-    topPages: [{ requestPath: '/', pageviews: 248, visitors: 162 }, { requestPath: '/puzzles', pageviews: 91, visitors: 55 }, { requestPath: '/preview', pageviews: 64, visitors: 39 }, { requestPath: '/game', pageviews: 47, visitors: 31 }],
+    topPages: [{ requestPath: '/', pageviews: 248, visitors: 162 }, { requestPath: '/puzzles', pageviews: 91, visitors: 55 }, { requestPath: '/preview', pageviews: 64, visitors: 39 }],
     referrers: [{ referrerHostname: 'google.com', pageviews: 104, visitors: 78 }, { referrerHostname: 'youtube.com', pageviews: 48, visitors: 34 }, { referrerHostname: 'Direct', pageviews: 42, visitors: 30 }],
     devices: [{ deviceType: 'desktop', pageviews: 226, visitors: 148 }, { deviceType: 'mobile', pageviews: 171, visitors: 107 }, { deviceType: 'tablet', pageviews: 53, visitors: 32 }],
     browsers: [{ browserName: 'Chrome', pageviews: 252, visitors: 166 }, { browserName: 'Safari', pageviews: 132, visitors: 83 }, { browserName: 'Edge', pageviews: 43, visitors: 25 }],

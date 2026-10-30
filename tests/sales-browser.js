@@ -76,6 +76,11 @@ test('sales recorder persists all four workflows and updates profits under the p
 
     await cdp.send('Page.navigate', { url: base + '/sales' });
     await until('!!window.challengeOptions');
+    assert.equal(await evaluate('window.challengeOptions.size'), 'normal');
+    for (const width of [320, 375, 1440]) {
+      await cdp.send('Emulation.setDeviceMetricsOverride', { width, height: 1100, deviceScaleFactor: 1, mobile: width < 760 });
+      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true, 'Verification gate overflow at ' + width);
+    }
     assert.equal(await evaluate(`document.querySelector('#recorder-content').hidden`), true);
     assert.equal(fixture.commands.length, 0, 'Records must not be read before page verification');
     await evaluate(`window.challengeOptions.callback('test-token')`);

@@ -3,7 +3,6 @@ const test = require('node:test');
 
 const counters = require('../lib/analytics-counters');
 const trackAction = require('../api/track-action');
-const launchGameSubmit = require('../api/launch-game-submit');
 
 function responseRecorder() {
   return {
@@ -113,64 +112,5 @@ test('interaction endpoint rejects cross-origin counter requests', { concurrency
   restore();
 
   assert.equal(res.statusCode, 403);
-  assert.equal(calls, 0);
-});
-
-test('accepted production game submission increments the Redis counter once', { concurrency: false }, async () => {
-  const restore = saveEnvironment();
-  const originalFetch = global.fetch;
-  const originalLog = console.log;
-  configureRedis();
-  delete process.env.LAUNCH_GAME_WEBHOOK_URL;
-  delete process.env.LAUNCH_GAME_GITHUB_TOKEN;
-  delete process.env.GITHUB_TOKEN;
-  delete process.env.RESEND_API_KEY;
-  console.log = () => {};
-  let command;
-  global.fetch = async (_url, options) => {
-    command = JSON.parse(options.body);
-    return { ok: true, status: 200, json: async () => ({ result: 1 }) };
-  };
-  const req = {
-    method: 'POST',
-    body: {
-      sessionId: 'accepted-session-1',
-      username: 'driver_one',
-      playerName: 'Driver One',
-      email: 'driver@example.com',
-      score: 1200,
-      levels: { reaction: true, dash: true, strategy: true },
-      antiCheat: { tabHiddenCount: 0, hiddenMs: 0, blurCount: 0 }
-    }
-  };
-  const res = responseRecorder();
-  await launchGameSubmit(req, res);
-  global.fetch = originalFetch;
-  console.log = originalLog;
-  restore();
-
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.analyticsCounterStatus, 'counted');
-  assert.equal(command[0], 'EVAL');
-  assert.match(command.at(-1), /:discount_game:submitted$/);
-});
-
-test('invalid game submission never increments the Redis counter', { concurrency: false }, async () => {
-  const restore = saveEnvironment();
-  const originalFetch = global.fetch;
-  const originalLog = console.log;
-  configureRedis();
-  console.log = () => {};
-  let calls = 0;
-  global.fetch = async () => { calls += 1; };
-  const req = { method: 'POST', body: { sessionId: 'invalid-session' } };
-  const res = responseRecorder();
-  await launchGameSubmit(req, res);
-  global.fetch = originalFetch;
-  console.log = originalLog;
-  restore();
-
-  assert.equal(res.statusCode, 400);
-  assert.equal(res.body.analyticsCounterStatus, 'skipped_invalid');
   assert.equal(calls, 0);
 });
