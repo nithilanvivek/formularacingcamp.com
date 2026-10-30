@@ -49,6 +49,7 @@
       document.head.append(script);
       return;
     }
+    $('challenge-status').textContent = 'Complete the bot check below before saving.';
     widgetId = window.turnstile.render('#sales-challenge', {
       sitekey: siteKey, action: 'sales', size: 'compact',
       callback: token => { challengeToken = token; $('challenge-status').textContent = 'Bot verification complete.'; updateSaveButton(); },
