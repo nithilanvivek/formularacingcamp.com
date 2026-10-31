@@ -290,3 +290,43 @@ test('sales and UPI have noindex in page metadata and HTTP headers, and are abse
     assert.equal(sitemap.includes(`/${name}<`), false);
   }
 });
+
+
+test('stall extra costs persist once, edit with version checks, and leave sales and batches intact', async t => {
+  const fixture = salesFixture(t);
+  const original = await store.saveEntry(fixture.request('batch', { cost: '100' }));
+  await store.saveEntry(fixture.request('batch-sale', { batchId: original.batches[0].id, format: 'Paperback', price: '200' }));
+  await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '300' }));
+  const request = fixture.request('extra-cost', { description: ' Delivery & taxes ', cost: '125.50', batchId: original.batches[0].id, channel: 'batch' });
+  const state = await store.saveEntry(request);
+  const expense = state.extraCosts[0];
+  assert.equal(expense.channel, 'online');
+  assert.equal(expense.batchId, undefined);
+  assert.equal(expense.description, 'Delivery & taxes');
+  assert.ok(Number.isFinite(Date.parse(expense.createdAt)));
+  assert.equal((await store.saveEntry(request)).revision, state.revision);
+  await assert.rejects(store.saveEntry({ ...request, description: 'Different' }), { status: 409 });
+  const totals = model.summary(state);
+  assert.equal(totals.salesPaise, 50000);
+  assert.equal(totals.extraCostsPaise, 12550);
+  assert.equal(totals.profitPaise, 27450);
+  assert.equal(totals.batchProfits[0].profitPaise, 10000);
+  assert.equal(totals.batchProfits[0].booksLeft, 39);
+  const edit = fixture.request('edit-extra-cost', { recordId: expense.id, expectedVersion: 0, description: 'Tax correction', cost: '150.25' });
+  const edited = await store.saveEntry(edit);
+  assert.equal(edited.extraCosts[0].createdAt, expense.createdAt);
+  assert.equal(edited.extraCosts[0].recordVersion, 1);
+  assert.ok(edited.extraCosts[0].updatedAt);
+  assert.equal(model.summary(edited).profitPaise, 24975);
+  assert.equal((await store.saveEntry(edit)).revision, edited.revision);
+  await assert.rejects(store.saveEntry(fixture.request('edit-extra-cost', { recordId: expense.id, expectedVersion: 0, description: 'Stale', cost: '1' })), { status: 409 });
+  assert.equal(store.publicLedger(edited).extraCosts[0].fingerprint, undefined);
+  assert.equal(store.publicLedger(await store.readLedger()).extraCosts[0].costPaise, 15025);
+  for (const fields of [{ description: '', cost: '1' }, { description: 'x'.repeat(121), cost: '1' }, { description: 'Tax', cost: '-1' }]) {
+    await assert.rejects(store.saveEntry(fixture.request('extra-cost', fields)), { status: 400 });
+  }
+  assert.equal((await store.readLedger()).revision, edited.revision);
+  const filters = { type: 'extra-cost', channel: 'all', format: 'all', batchId: 'all', dateEnabled: true, date: model.localDay(expense.createdAt) };
+  assert.equal(model.matchesFilters({ ...expense, kind: 'extra-cost' }, filters), true);
+  assert.equal(model.matchesFilters({ ...expense, kind: 'extra-cost' }, { ...filters, type: 'sale' }), false);
+});

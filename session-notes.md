@@ -1014,3 +1014,12 @@ Date: 2026-09-20
 - Latest feature commit: `95e7522b7822da14c8e3d7a4cbff98182d1070bd` on `main`, pushed to `origin/main` at `https://github.com/nithilanvivek/formularacingcamp.com.git`. Vercel deployment `dpl_6yLEvJjVhdV2iVVNE2V8E3pXBWJi` reached READY and production assets matched the tested code at `https://www.formularacingcamp.com`.
 - Final validation: 61 Node tests, sales and UPI checks using the dedicated headless shell, JavaScript syntax checks, and `git diff --check` passed. Browser fixtures created no production records, payments or emails. Test browsers and servers closed in `finally`; no project preview listeners remain.
 - This wrap-up adds notes and refreshes the visible saved update dates on `/sales` and `/upi` to October 30, 2026. Other page review dates are unchanged. The existing untracked macOS `Icon\r` file is left untouched.
+
+
+## 2026-10-31 — Stall extra costs
+
+- Added “Add Extra Costs” at `/sales` for expenses paid by us rather than buyers (taxes, delivery, etc.). Each records a required description, positive decimal INR amount, and server timestamp. Costs belong only to the online stall; no batch linkage or stock changes.
+- Total profit now subtracts batch costs and stall extra costs; the six-author share follows the revised profit. Batch profits and sales totals retain their existing calculations. The overview displays the total stall extra costs.
+- Extra costs appear in records, have their own type/date filters, and can be updated in Record Editor with the same record-version and retry protections as other edits. Existing records load without migration or synthetic expenses. Only sales retain deletion controls.
+- Excel export now includes an Extra costs sheet and linked cost/profit formulas, with numeric INR and IST dates. Updated README and `/sales` review date.
+- Validation: all 63 Node tests passed; dedicated headless sales browser flow passed under the production CSP, covering create/edit/reload/filter/export and mobile overflow. Independently imported and recalculated the exported workbook, changed an expense to confirm profit/author formulas update while batch profit stays fixed, and inspected the affected sheet renders. No production test records were created.

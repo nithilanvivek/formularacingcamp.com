@@ -34,10 +34,11 @@
     <div id="recorder-content" hidden>
     <section class="overview" aria-labelledby="overview-title">
       <div class="section-title"><h2 id="overview-title">Sales overview</h2><span class="local">Cancelled sales excluded</span></div>
-      <div class="totals"><div><span>Total sales</span><strong id="total-sales">—</strong><small id="total-books">Loading…</small></div><div><span>Total profit</span><strong id="total-profit">—</strong><small>Sales minus all batch costs</small></div><div><span>Profit per author</span><strong id="author-profit">—</strong><small>Equal share · 6 authors</small></div></div>
+      <div class="totals"><div><span>Total sales</span><strong id="total-sales">—</strong><small id="total-books">Loading…</small></div><div><span>Total profit</span><strong id="total-profit">—</strong><small>Sales minus batch &amp; stall costs</small></div><div><span>Profit per author</span><strong id="author-profit">—</strong><small>Equal share · 6 authors</small></div></div>
+      <p id="extra-costs-total" class="field-note">Stall extra costs: —</p>
       <div class="section-title"><h2>Batch profit &amp; stock</h2></div>
       <div id="batch-profits"><p class="empty-records">Loading batches…</p></div>
-      <p class="field-note">Batch profit = active sales from that batch minus its total order cost. Total profit also includes online stall sales, with no online stall costs recorded. Author shares are rounded to the nearest paise.</p>
+      <p class="field-note">Batch profit = active sales from that batch minus its total order cost. Total profit includes online stall sales minus extra costs you pay, such as taxes and delivery. Extra costs do not affect batch profits. Author shares are rounded to the nearest paise.</p>
     </section>
     <section class="action-section" aria-labelledby="action-title">
       <div class="section-title"><span class="step">01</span><h2 id="action-title">What would you like to do?</h2></div>
@@ -45,7 +46,8 @@
         <button type="button" data-action="batch" aria-pressed="false"><span class="action-icon">▤</span><strong>New batch</strong><span>Record books ordered</span><b aria-hidden="true">↗</b></button>
         <button type="button" data-action="batch-sale" aria-pressed="false"><span class="action-icon">↗</span><strong>New batch sale</strong><span>Sell from an existing batch</span><b aria-hidden="true">↗</b></button>
         <button type="button" data-action="online-sale" aria-pressed="false"><span class="action-icon">◇</span><strong>New online stall sale</strong><span>Record an online stall order</span><b aria-hidden="true">↗</b></button>
-        <button type="button" data-action="editor" aria-pressed="false"><span class="action-icon">✎</span><strong>Record Editor</strong><span>Edit batches and sales</span><b aria-hidden="true">↗</b></button>
+        <button type="button" data-action="extra-cost" aria-pressed="false"><span class="action-icon">₹</span><strong>Add Extra Costs</strong><span>Stall taxes, delivery &amp; other expenses</span><b aria-hidden="true">↗</b></button>
+        <button type="button" data-action="editor" aria-pressed="false"><span class="action-icon">✎</span><strong>Record Editor</strong><span>Edit batches, sales and costs</span><b aria-hidden="true">↗</b></button>
       </div>
     </section>
     <section id="entry-panel" class="workspace" hidden aria-labelledby="entry-title">
@@ -71,7 +73,7 @@
       <div class="record-tools"><button id="refresh" class="secondary" type="button">Refresh records</button><button id="export" class="secondary" type="button" disabled>Export Excel (.xlsx)</button></div>
     </section>
     </div>
-    <footer><span>EVERY BOOK. YOUR CAMP.</span><span class="updated">Last updated <time datetime="2026-10-30">October 30, 2026</time></span><span>Made for the Formula Racing Camp team.</span></footer>
+    <footer><span>EVERY BOOK. YOUR CAMP.</span><span class="updated">Last updated <time datetime="2026-10-31">October 31, 2026</time></span><span>Made for the Formula Racing Camp team.</span></footer>
   </main>
 </body>
 </html>

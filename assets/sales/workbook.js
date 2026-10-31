@@ -78,22 +78,24 @@
       [{ value: 'Formula Racing Camp — Sales', style: 4 }], [], ['Exported at (IST)', date(exportedAt)], [], header(['Metric', 'Value']),
       ['Total sales (INR)', formula(`SUMIF(${salesRange('I')},"active",${salesRange('L')})`, totals.salesPaise / 100)],
       ['Books sold', formula(`SUMIF(${salesRange('I')},"active",${salesRange('K')})`, totals.booksSold, 0)],
-      ['Total batch costs (INR)', formula(`SUM(Batches!C2:C${endBatches})`, totals.costsPaise / 100)],
-      ['Total profit (INR)', formula('B6-B8', totals.profitPaise / 100)],
+      ['Total batch costs (INR)', formula(`SUM(Batches!C2:C${endBatches})`, totals.batchCostsPaise / 100)],
+      ['Total profit (INR)', formula('B6-B8-B12', totals.profitPaise / 100)],
       ['Number of authors', { value: 6, style: 0 }],
-      ['Profit per author (INR)', formula('B9/B10', totals.profitPaise / 100 / 6)], [],
-      ['Profit uses active sales minus all batch costs.'],
-      ['Online stall costs are not recorded. Cancelled sales are excluded.'],
+      ['Profit per author (INR)', formula('B9/B10', totals.profitPaise / 100 / 6)],
+      ['Stall extra costs (INR)', formula(`SUM('Extra costs'!D2:D${Math.max(2, (ledger.extraCosts || []).length + 1)})`, totals.extraCostsPaise / 100)],
+      ['Profit uses active sales minus batch costs and stall extra costs.'],
+      ['Extra costs are stall expenses paid by us. Cancelled sales are excluded.'],
       ['Source: Camp Sales server records · www.formularacingcamp.com/sales']
     ];
-    const names = ['Summary', 'Batch profits', 'Batches', 'Sales'];
-    const sheets = [worksheet(summary, [76, 30]), worksheet(profits, [20, 22, 24, 22, 16, 18, 16], true), worksheet(batches, [20, 40, 22, 30, 18], true), worksheet(sales, [20, 40, 20, 20, 18, 36, 26, 30, 18, 30, 16, 24], true)];
+    const extraCosts = [header(['Record ID', 'Channel', 'Description', 'Cost (INR)', 'Recorded at (IST)', 'Edited at (IST)']), ...(ledger.extraCosts || []).map(cost => [cost.id, 'Online stall', cost.description, amount(cost.costPaise), date(cost.createdAt), date(cost.updatedAt)])];
+    const names = ['Summary', 'Batch profits', 'Batches', 'Sales', 'Extra costs'];
+    const sheets = [worksheet(summary, [76, 30]), worksheet(profits, [20, 22, 24, 22, 16, 18, 16], true), worksheet(batches, [20, 40, 22, 30, 18], true), worksheet(sales, [20, 40, 20, 20, 18, 36, 26, 30, 18, 30, 16, 24], true), worksheet(extraCosts, [40, 20, 54, 22, 30, 30], true)];
     const styles = declaration + `<styleSheet xmlns="${ns}"><numFmts count="2"><numFmt numFmtId="164" formatCode="${xml('"₹"#,##0.00;[Red]"-₹"#,##0.00')}"/><numFmt numFmtId="165" formatCode="${xml('dd mmm yyyy, hh:mm "IST"')}"/></numFmts><fonts count="3"><font><sz val="11"/><color rgb="FF151C35"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="18"/><color rgb="FF2457DF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF2457DF"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFill="1" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
     return zip([
       ['[Content_Types].xml', declaration + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${names.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
       ['_rels/.rels', declaration + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
       ['xl/workbook.xml', declaration + `<workbook xmlns="${ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${names.map((name, i) => `<sheet name="${name}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`],
-      ['xl/_rels/workbook.xml.rels', declaration + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${names.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+      ['xl/_rels/workbook.xml.rels', declaration + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${names.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId6" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
       ['xl/styles.xml', styles], ...sheets.map((sheet, i) => [`xl/worksheets/sheet${i + 1}.xml`, sheet])
     ]);
   }

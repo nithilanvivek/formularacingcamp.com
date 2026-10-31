@@ -51,6 +51,11 @@
     return { id, channel: 'online', format: input.format, quantity: parseQuantity(input.quantity ?? 1), pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
   }
 
+  function createExtraCost(input, id, createdAt) {
+    if (typeof input.description !== 'string' || !input.description.trim() || input.description.trim().length > 120) throw new Error('Describe the extra cost in 1 to 120 characters.');
+    return { id, channel: 'online', description: input.description.trim(), costPaise: parseMoney(input.cost), createdAt };
+  }
+
   function paymentName(value = '') {
     if (typeof value !== 'string' || value.trim().length > 80) throw new Error('Payment name must be no longer than 80 characters.');
     return value.trim();
@@ -59,7 +64,9 @@
   function summary(ledger) {
     const active = ledger.sales.filter(sale => sale.status === 'active');
     const salesPaise = active.reduce((sum, sale) => sum + saleTotal(sale), 0);
-    const costsPaise = ledger.batches.reduce((sum, batch) => sum + batch.costPaise, 0);
+    const batchCostsPaise = ledger.batches.reduce((sum, batch) => sum + batch.costPaise, 0);
+    const extraCostsPaise = (ledger.extraCosts || []).reduce((sum, cost) => sum + cost.costPaise, 0);
+    const costsPaise = batchCostsPaise + extraCostsPaise;
     const batchProfits = ledger.batches.map(batch => {
       const sales = active.filter(sale => sale.batchId === batch.id);
       const revenuePaise = sales.reduce((sum, sale) => sum + saleTotal(sale), 0);
@@ -68,7 +75,7 @@
       return { ...batch, booksOrdered, revenuePaise, profitPaise: revenuePaise - batch.costPaise, booksSold, booksLeft: booksOrdered === null ? null : booksOrdered - booksSold };
     });
     if (!Number.isSafeInteger(salesPaise) || !Number.isSafeInteger(costsPaise)) throw new Error('These amounts exceed the recorder’s supported total.');
-    return { salesPaise, costsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.reduce((sum, sale) => sum + quantity(sale), 0), batchProfits };
+    return { salesPaise, costsPaise, batchCostsPaise, extraCostsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.reduce((sum, sale) => sum + quantity(sale), 0), batchProfits };
   }
 
   function localDay(value = Date.now()) {
@@ -77,12 +84,12 @@
 
   function matchesFilters(entry, filters) {
     if (filters.type !== 'all' && entry.kind !== filters.type) return false;
-    if (filters.channel !== 'all' && (entry.kind !== 'sale' || entry.channel !== filters.channel)) return false;
+    if (filters.channel !== 'all' && (entry.channel !== filters.channel)) return false;
     if (filters.format !== 'all' && (entry.kind !== 'sale' || entry.format !== filters.format)) return false;
     if (filters.batchId !== 'all' && (entry.kind === 'batch' ? entry.id : entry.batchId) !== filters.batchId) return false;
     if (filters.dateEnabled && localDay(entry.createdAt) !== filters.date) return false;
     return true;
   }
 
-  return { parseMoney, parseQuantity, quantity, saleTotal, money, createBatch, createBatchSale, createOnlineSale, summary, localDay, matchesFilters };
+  return { parseMoney, parseQuantity, quantity, saleTotal, money, createBatch, createBatchSale, createOnlineSale, createExtraCost, summary, localDay, matchesFilters };
 });

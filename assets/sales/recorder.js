@@ -7,12 +7,13 @@
   const newFilters = type => ({ type, channel: 'all', format: 'all', batchId: 'all', dateEnabled: false, date: model.localDay() });
   const recordFilters = newFilters('all'), editorFilters = newFilters('all');
   let editorSelection = '', editing = null;
-  const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', editor: 'Record Editor' };
+  const titles = { batch: 'New batch', 'batch-sale': 'New batch sale', 'online-sale': 'New online stall sale', 'extra-cost': 'Add Extra Costs', editor: 'Record Editor' };
   const descriptions = {
     batch: ['A fresh starting line.', 'Record the total cost of the books you ordered. A batch number is assigned when you save.'],
     'batch-sale': ['Every book counts.', 'Choose the batch, format, quantity, and price per book. Your batch stock updates when the sale is saved.'],
     'online-sale': ['Your online stall, recorded.', 'Choose the format, quantity, and price per book. Online stall sales do not use batch stock.'],
-    editor: ['Keep your records in shape.', 'Find a batch or sale with the filters, then edit its details. Sales can also be deleted. Batch records stay in your ledger.']
+    'extra-cost': ['Keep every expense counted.', 'Record stall taxes, delivery, or other costs paid by us. These reduce total profit without changing batch profits.'],
+    editor: ['Keep your records in shape.', 'Find a batch, sale, or extra cost with the filters, then edit its details. Sales can also be deleted. Batch records stay in your ledger.']
   };
 
   function element(tag, text, className) {
@@ -106,8 +107,8 @@
     } finally { verifying = false; }
   }
   function renderFilters(container, prefix, filters, allowType, onChange) {
-    container.innerHTML = (allowType ? `<div><label for="${prefix}-type">Record type</label><select id="${prefix}-type"><option value="all">All records</option><option value="sale">Sales</option><option value="batch">Batches</option></select></div>` : '') +
-      (filters.type !== 'batch' ? `<div><label for="${prefix}-channel">Sale channel</label><select id="${prefix}-channel"><option value="all">All channels</option><option value="online">Online stall</option><option value="batch">Batch sales</option></select></div><div><label for="${prefix}-format">Book format</label><select id="${prefix}-format"><option value="all">All formats</option><option>Paperback</option><option>Hardcover</option></select></div>` : '') +
+    container.innerHTML = (allowType ? `<div><label for="${prefix}-type">Record type</label><select id="${prefix}-type"><option value="all">All records</option><option value="sale">Sales</option><option value="batch">Batches</option><option value="extra-cost">Extra costs</option></select></div>` : '') +
+      (!['batch', 'extra-cost'].includes(filters.type) ? `<div><label for="${prefix}-channel">Sale channel</label><select id="${prefix}-channel"><option value="all">All channels</option><option value="online">Online stall</option><option value="batch">Batch sales</option></select></div><div><label for="${prefix}-format">Book format</label><select id="${prefix}-format"><option value="all">All formats</option><option>Paperback</option><option>Hardcover</option></select></div>` : '') +
       (filters.type === 'batch' || filters.channel === 'batch' ? `<div><label for="${prefix}-batch">Batch number</label><select id="${prefix}-batch"></select></div>` : '') +
       `<div class="date-filter"><label class="filter-toggle" for="${prefix}-date-enabled"><input type="checkbox" id="${prefix}-date-enabled">Filter by date</label><input type="date" id="${prefix}-date" aria-label="Recorded on, India time"><small class="hint">Recorded date · India time</small></div>`;
     if (allowType) $(prefix + '-type').value = filters.type;
@@ -128,7 +129,7 @@
       filters.batchId = $(prefix + '-batch')?.value || 'all';
       filters.dateEnabled = $(prefix + '-date-enabled').checked;
       filters.date = $(prefix + '-date').value;
-      if (allowType && event.target.id === prefix + '-type' && filters.type === 'batch') { filters.channel = 'all'; filters.format = 'all'; }
+      if (allowType && event.target.id === prefix + '-type' && ['batch', 'extra-cost'].includes(filters.type)) { filters.channel = 'all'; filters.format = 'all'; }
       if (allowType && (event.target.id === prefix + '-channel' && filters.channel !== 'all' || event.target.id === prefix + '-format' && filters.format !== 'all')) filters.type = 'sale';
       if (filters.type !== 'batch' && filters.channel !== 'batch') filters.batchId = 'all';
       renderFilters(container, prefix, filters, allowType, onChange);
@@ -136,15 +137,15 @@
     };
   }
   function editorCandidates() {
-    return [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' }))].filter(record => model.matchesFilters(record, editorFilters));
+    return [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' })), ...ledger.extraCosts.map(cost => ({ ...cost, kind: 'extra-cost' }))].filter(record => model.matchesFilters(record, editorFilters));
   }
   function renderEditorOptions() {
     const select = $('editor-record');
     select.replaceChildren();
-    option(select, '', 'Choose a batch or sale');
+    option(select, '', 'Choose a record');
     const candidates = editorCandidates();
     for (const record of candidates) {
-      const label = record.kind === 'batch' ? `${batchName(record)} · ${model.money(record.costPaise)} cost` : `${orderName(record)} · ${channelName(record)} · ${record.format} · ${model.quantity(record)} books · ${model.money(model.saleTotal(record))}${record.paymentName ? ' · ' + record.paymentName : ''}${record.status === 'cancelled' ? ' · Cancelled' : ''}`;
+      const label = record.kind === 'extra-cost' ? `Extra cost · ${record.description} · ${model.money(record.costPaise)}` : record.kind === 'batch' ? `${batchName(record)} · ${model.money(record.costPaise)} cost` : `${orderName(record)} · ${channelName(record)} · ${record.format} · ${model.quantity(record)} books · ${model.money(model.saleTotal(record))}${record.paymentName ? ' · ' + record.paymentName : ''}${record.status === 'cancelled' ? ' · Cancelled' : ''}`;
       option(select, `${record.kind}:${record.id}`, label + ' · ' + dateLabel(record.createdAt));
     }
     if (candidates.some(record => `${record.kind}:${record.id}` === editorSelection)) select.value = editorSelection;
@@ -158,13 +159,18 @@
     const fields = $('edit-fields');
     fields.replaceChildren();
     if (!editing) { updateSaveButton(); return; }
-    fields.append(element('p', `${editing.kind === 'batch' ? batchName(editing) : orderName(editing)} · Recorded ${dateLabel(editing.createdAt)}`, 'field-note'));
+    fields.append(element('p', `${editing.kind === 'extra-cost' ? 'Extra cost' : editing.kind === 'batch' ? batchName(editing) : orderName(editing)} · Recorded ${dateLabel(editing.createdAt)}`, 'field-note'));
     const controls = element('div');
     if (editing.kind === 'batch') {
       controls.innerHTML = quantityField('books-ordered', 'Books ordered') + moneyField('cost', 'Total cost of books ordered');
       fields.append(controls);
       $('cost').value = (editing.costPaise / 100).toFixed(2);
       $('books-ordered').value = editing.booksOrdered ?? '';
+    } else if (editing.kind === 'extra-cost') {
+      controls.innerHTML = extraCostFields();
+      fields.append(controls);
+      $('description').value = editing.description;
+      $('cost').value = (editing.costPaise / 100).toFixed(2);
     } else {
       controls.innerHTML = '<label for="edit-channel">Sale channel</label><select id="edit-channel" required><option value="batch">Batch sale</option><option value="online">Online stall</option></select><div id="edit-batch-field"><label for="batch-id">Batch number</label><select id="batch-id"></select></div><label for="format">Paperback / Hardcover</label><select id="format" required><option>Paperback</option><option>Hardcover</option></select>' + quantityField('quantity', 'Quantity', 1) + moneyField('price', 'Price per book') + '<p id="sale-total" class="field-note">Sale total: —</p>' + '<label for="payment-name">Payment name <span>Optional</span></label><input id="payment-name" type="text" maxlength="80" autocomplete="off"><div class="editor-delete-row"><span>Remove this sale from your records.</span><button id="delete-sale" type="button" class="delete-icon" aria-label="Delete sale" title="Delete sale"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div><div id="delete-confirmation" class="notice" hidden><p>Delete this sale permanently? This cannot be undone.</p><div class="delete-confirm-buttons"><button id="keep-sale" type="button" class="secondary">Keep sale</button><button id="confirm-delete-sale" type="button" class="secondary delete-confirm">Delete sale</button></div></div>';
       fields.append(controls);
@@ -189,6 +195,9 @@
     $('edit-batch-field').hidden = !batchSale;
     $('batch-id').required = batchSale;
   }
+  function extraCostFields() {
+    return '<label for="description">What is this cost for?</label><input id="description" type="text" maxlength="120" required autocomplete="off" placeholder="e.g. Delivery or taxes">' + moneyField('cost', 'Extra cost') + '<p class="field-note">For stall sales only. Record costs paid by us that buyers do not pay. Date and time are saved automatically.</p>';
+  }
   function renderForm() {
     if (!action) return;
     $('entry-panel').hidden = false;
@@ -201,6 +210,9 @@
     if (action === 'batch') {
       fields.innerHTML = '<p class="field-note">Record the books ordered and the total cost. Your batch number is created automatically.</p>' + quantityField('books-ordered', 'Books ordered') + moneyField('cost', 'Total cost of books ordered');
       button.textContent = 'Save batch ↗';
+    } else if (action === 'extra-cost') {
+      fields.innerHTML = extraCostFields();
+      button.textContent = 'Save extra cost ↗';
     } else if (action === 'batch-sale' || action === 'online-sale') {
       fields.innerHTML = (action === 'batch-sale' ? '<label for="batch-id">Batch number</label><select id="batch-id" required></select><p id="batch-hint" class="hint"></p>' : '') +
         '<label for="format">Paperback / Hardcover</label><select id="format" required><option value="">Choose a format</option><option>Paperback</option><option>Hardcover</option></select>' + quantityField('quantity', 'Quantity', 1) + moneyField('price', 'Price per book') + '<p id="sale-total" class="field-note">Sale total: —</p>' +
@@ -222,6 +234,7 @@
   }
   function renderStats() {
     const summary = model.summary(ledger);
+    $('extra-costs-total').textContent = 'Stall extra costs: ' + model.money(summary.extraCostsPaise);
     $('total-sales').textContent = model.money(summary.salesPaise);
     $('total-books').textContent = `${summary.booksSold.toLocaleString('en-IN')} ${summary.booksSold === 1 ? 'book' : 'books'} sold`;
     $('total-profit').textContent = model.money(summary.profitPaise);
@@ -255,7 +268,7 @@
     const container = $('records');
     container.replaceChildren();
     renderFilters($('record-filters'), 'record', recordFilters, true, renderRecords);
-    const all = [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' }))];
+    const all = [...ledger.batches.map(batch => ({ ...batch, kind: 'batch' })), ...ledger.sales.map(sale => ({ ...sale, kind: 'sale' })), ...ledger.extraCosts.map(cost => ({ ...cost, kind: 'extra-cost' }))];
     const entries = all.filter(entry => model.matchesFilters(entry, recordFilters)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     $('records-filter-status').textContent = `Showing ${entries.length} of ${all.length} records. Overview and Excel export include all records.`;
     if (!entries.length) container.append(element('p', all.length ? 'No records match these filters.' : 'Your first record starts here. Choose an action above.', 'empty-records'));
@@ -264,12 +277,12 @@
       for (const entry of entries) {
         const row = element('li', undefined, 'record-row' + (entry.status === 'cancelled' ? ' cancelled' : ''));
         const detail = element('div');
-        detail.append(element('strong', entry.kind === 'batch' ? batchName(entry) : `${orderName(entry)} · ${entry.status === 'cancelled' ? 'Cancelled' : 'Sale'}`));
-        detail.append(element('small', entry.kind === 'batch' ? `${entry.booksOrdered ?? 'Quantity not set'} books ordered · ${dateLabel(entry.createdAt)}` : `${channelName(entry)} · ${entry.format} · ${model.quantity(entry)} books × ${model.money(entry.pricePaise)} · ${dateLabel(entry.createdAt)}`));
+        detail.append(element('strong', entry.kind === 'extra-cost' ? 'Extra cost · ' + entry.description : entry.kind === 'batch' ? batchName(entry) : `${orderName(entry)} · ${entry.status === 'cancelled' ? 'Cancelled' : 'Sale'}`));
+        detail.append(element('small', entry.kind === 'extra-cost' ? `Online stall expense · ${dateLabel(entry.createdAt)}` : entry.kind === 'batch' ? `${entry.booksOrdered ?? 'Quantity not set'} books ordered · ${dateLabel(entry.createdAt)}` : `${channelName(entry)} · ${entry.format} · ${model.quantity(entry)} books × ${model.money(entry.pricePaise)} · ${dateLabel(entry.createdAt)}`));
         if (entry.paymentName) detail.append(element('small', `Payment name: ${entry.paymentName}`));
         if (entry.cancelledAt) detail.append(element('small', `Cancelled ${dateLabel(entry.cancelledAt)}`));
         if (entry.updatedAt) detail.append(element('small', `Edited ${dateLabel(entry.updatedAt)}`));
-        row.append(detail, element('span', model.money(entry.kind === 'batch' ? entry.costPaise : model.saleTotal(entry)), 'record-amount'));
+        row.append(detail, element('span', model.money(entry.kind !== 'sale' ? entry.costPaise : model.saleTotal(entry)), 'record-amount'));
         list.append(row);
       }
       container.append(list);
@@ -284,8 +297,8 @@
       throw Object.assign(new Error(data.error), { verificationRequired: true });
     }
     if (!response.ok) throw new Error(data.error || 'Could not save your record. Please try again.');
-    if (data.version !== 1 || !Array.isArray(data.batches) || !Array.isArray(data.sales)) throw new Error('The server returned an invalid record. Try refreshing.');
-    return { version: data.version, revision: data.revision, batches: data.batches, sales: data.sales };
+    if (data.version !== 1 || !Array.isArray(data.batches) || !Array.isArray(data.sales) || (data.extraCosts !== undefined && !Array.isArray(data.extraCosts))) throw new Error('The server returned an invalid record. Try refreshing.');
+    return { version: data.version, revision: data.revision, batches: data.batches, sales: data.sales, extraCosts: data.extraCosts || [] };
   }
   function setBusy(value) {
     busy = value;
@@ -360,20 +373,24 @@
     }
     const data = { action };
     const isBatch = action === 'batch' || action === 'editor' && editing?.kind === 'batch';
-    const amountField = isBatch ? $('cost') : $('price');
+    const isExtraCost = action === 'extra-cost' || action === 'editor' && editing?.kind === 'extra-cost';
+    const amountField = isBatch || isExtraCost ? $('cost') : $('price');
     if (amountField) {
       try { model.parseMoney(amountField.value); }
       catch (error) { amountField.setAttribute('aria-invalid', 'true'); $('entry-error').textContent = error.message; amountField.focus(); return; }
     }
     if (action === 'editor') {
-      data.action = editing.kind === 'batch' ? 'edit-batch' : 'edit-sale';
+      data.action = editing.kind === 'extra-cost' ? 'edit-extra-cost' : editing.kind === 'batch' ? 'edit-batch' : 'edit-sale';
       data.recordId = editing.id;
       data.expectedVersion = editing.recordVersion || 0;
     }
     const count = $(isBatch ? 'books-ordered' : 'quantity');
-    try { model.parseQuantity(count.value); }
-    catch (error) { count.setAttribute('aria-invalid', 'true'); $('entry-error').textContent = error.message; count.focus(); return; }
-    if (isBatch) { data.cost = $('cost').value.trim(); data.booksOrdered = count.value.trim(); }
+    if (!isExtraCost) {
+      try { model.parseQuantity(count.value); }
+      catch (error) { count.setAttribute('aria-invalid', 'true'); $('entry-error').textContent = error.message; count.focus(); return; }
+    }
+    if (isExtraCost) { data.cost = $('cost').value.trim(); data.description = $('description').value.trim(); }
+    else if (isBatch) { data.cost = $('cost').value.trim(); data.booksOrdered = count.value.trim(); }
     else {
       data.quantity = count.value.trim();
       data.format = $('format').value; data.price = $('price').value.trim(); data.paymentName = $('payment-name').value.trim();
@@ -392,7 +409,7 @@
       pending = null;
       if (data.action === 'delete-sale') { editorSelection = ''; editing = null; }
       renderRecords(); renderForm();
-      $('feedback').textContent = data.action === 'batch' ? 'Batch saved. You can now select it for a batch sale.' : data.action === 'delete-sale' ? 'Sale deleted. Your totals have been updated.' : data.action.startsWith('edit-') ? 'Changes saved. Your totals have been updated.' : 'Sale saved. Your totals have been updated.';
+      $('feedback').textContent = data.action === 'batch' ? 'Batch saved. You can now select it for a batch sale.' : data.action === 'delete-sale' ? 'Sale deleted. Your totals have been updated.' : data.action.startsWith('edit-') ? 'Changes saved. Your totals have been updated.' : data.action === 'extra-cost' ? 'Extra cost saved. Your totals have been updated.' : 'Sale saved. Your totals have been updated.';
     } catch (error) {
       $('feedback').textContent = ''; $('entry-error').textContent = error.message + ' Your form is still here; try again.';
     } finally {
