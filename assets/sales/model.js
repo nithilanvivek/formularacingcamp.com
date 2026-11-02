@@ -5,6 +5,12 @@
 })(typeof globalThis === 'object' ? globalThis : this, function () {
   'use strict';
 
+  const PEOPLE = Object.freeze(['Tejas', 'Jaskirat', 'Nandana', 'Nithilan', 'Shaurya', 'Nihira']);
+  function person(value) {
+    if (!PEOPLE.includes(value)) throw new Error('Choose a person from the dropdown.');
+    return value;
+  }
+
   // Store amounts as integer paise so decimal additions remain exact.
   function parseMoney(value) {
     if (typeof value !== 'string' || !/^\d{1,7}(?:\.\d{1,2})?$/.test(value.trim())) {
@@ -29,12 +35,13 @@
   function quantity(sale) { return sale.quantity ?? 1; }
   function saleTotal(sale) { return sale.pricePaise * quantity(sale); }
 
-  function createBatch(batches, cost, id, createdAt, booksOrdered) {
+  function createBatch(batches, cost, id, createdAt, booksOrdered, paidBy) {
     return {
       id,
       number: batches.reduce((largest, batch) => Math.max(largest, batch.number), 0) + 1,
       costPaise: parseMoney(cost),
       booksOrdered: parseQuantity(booksOrdered),
+      paidBy: person(paidBy),
       createdAt
     };
   }
@@ -43,7 +50,7 @@
     const batch = batches.find(item => item.id === input.batchId);
     if (!batch) throw new Error('Choose an existing batch before recording a sale.');
     if (!['Paperback', 'Hardcover'].includes(input.format)) throw new Error('Choose Paperback or Hardcover.');
-    return { id, batchId: batch.id, channel: 'batch', format: input.format, quantity: parseQuantity(input.quantity ?? 1), pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
+    return { id, batchId: batch.id, channel: 'batch', paidTo: person(input.paidTo), format: input.format, quantity: parseQuantity(input.quantity ?? 1), pricePaise: parseMoney(input.price), paymentName: paymentName(input.paymentName), createdAt, status: 'active' };
   }
 
   function createOnlineSale(input, id, createdAt) {
@@ -53,7 +60,7 @@
 
   function createExtraCost(input, id, createdAt) {
     if (typeof input.description !== 'string' || !input.description.trim() || input.description.trim().length > 120) throw new Error('Describe the extra cost in 1 to 120 characters.');
-    return { id, channel: 'online', description: input.description.trim(), costPaise: parseMoney(input.cost), createdAt };
+    return { id, channel: 'online', paidBy: person(input.paidBy), description: input.description.trim(), costPaise: parseMoney(input.cost), createdAt };
   }
 
   function paymentName(value = '') {
@@ -78,6 +85,46 @@
     return { salesPaise, costsPaise, batchCostsPaise, extraCostsPaise, profitPaise: salesPaise - costsPaise, booksSold: active.reduce((sum, sale) => sum + quantity(sale), 0), batchProfits };
   }
 
+  // Split every cash flow once. Distribute leftover paise in the fixed author order.
+  function authorDashboard(ledger) {
+    const targets = new Map(), unattributed = [];
+    function split(kind, record, total, holder, income, label) {
+      if (!PEOPLE.includes(holder)) { unattributed.push({ kind, id: record.id, label, missing: income ? 'recipient' : 'payer' }); return; }
+      PEOPLE.forEach((name, index) => {
+        if (name === holder) return;
+        const amountPaise = Math.floor(total / PEOPLE.length) + (index < total % PEOPLE.length ? 1 : 0);
+        if (!amountPaise) return;
+        const basisFrom = income ? holder : name, basisTo = income ? name : holder;
+        const id = `${kind}:${record.id}:${basisFrom}:${basisTo}`;
+        targets.set(id, { id, kind, sourceId: record.id, label, basisFrom, basisTo, targetPaise: amountPaise, settledPaise: 0, createdAt: record.createdAt });
+      });
+    }
+    for (const batch of ledger.batches) split('batch', batch, batch.costPaise, batch.paidBy, false, `Batch ${String(batch.number).padStart(3, '0')} · Books ordered`);
+    for (const cost of ledger.extraCosts || []) split('extra-cost', cost, cost.costPaise, cost.paidBy, false, `Extra cost · ${cost.description}`);
+    for (const sale of ledger.sales.filter(sale => sale.status === 'active')) split('sale', sale, saleTotal(sale), sale.paidTo, true, `Order ${String(sale.number).padStart(4, '0')} · Sales income`);
+    for (const payment of ledger.authorPayments || []) {
+      if (payment.voidedAt) continue;
+      if (!targets.has(payment.transactionId)) targets.set(payment.transactionId, { id: payment.transactionId, kind: payment.kind, sourceId: payment.sourceId, label: payment.label, basisFrom: payment.basisFrom, basisTo: payment.basisTo, targetPaise: 0, settledPaise: 0, createdAt: payment.createdAt });
+      const target = targets.get(payment.transactionId);
+      target.settledPaise += payment.from === target.basisFrom ? payment.amountPaise : -payment.amountPaise;
+    }
+    const pending = [];
+    for (const target of targets.values()) {
+      const remaining = target.targetPaise - target.settledPaise;
+      if (!Number.isSafeInteger(remaining)) throw new Error('Author balances exceed the recorder’s supported total.');
+      if (remaining) pending.push({ ...target, from: remaining > 0 ? target.basisFrom : target.basisTo, to: remaining > 0 ? target.basisTo : target.basisFrom, amountPaise: Math.abs(remaining), adjustment: target.settledPaise !== 0 });
+    }
+    const pairs = [];
+    PEOPLE.forEach((first, index) => {
+      for (const second of PEOPLE.slice(index + 1)) {
+        const netPaise = pending.reduce((sum, entry) => entry.from === first && entry.to === second ? sum + entry.amountPaise : entry.from === second && entry.to === first ? sum - entry.amountPaise : sum, 0);
+        if (!Number.isSafeInteger(netPaise)) throw new Error('Author balances exceed the recorder’s supported total.');
+        pairs.push({ first, second, from: netPaise < 0 ? second : first, to: netPaise < 0 ? first : second, amountPaise: Math.abs(netPaise) });
+      }
+    });
+    return { pending, payments: ledger.authorPayments || [], pairs, unattributed };
+  }
+
   function localDay(value = Date.now()) {
     return new Date(new Date(value).getTime() + 19800000).toISOString().slice(0, 10);
   }
@@ -91,5 +138,5 @@
     return true;
   }
 
-  return { parseMoney, parseQuantity, quantity, saleTotal, money, createBatch, createBatchSale, createOnlineSale, createExtraCost, summary, localDay, matchesFilters };
+  return { PEOPLE, person, parseMoney, parseQuantity, quantity, saleTotal, money, createBatch, createBatchSale, createOnlineSale, createExtraCost, summary, authorDashboard, localDay, matchesFilters };
 });

@@ -25,7 +25,18 @@ function salesFixture(t) {
     } else throw new Error('Unexpected Redis command');
     return { ok: true, json: async () => ({ result }) };
   });
-  fixture.request = (action, fields = {}) => ({ action, requestId: randomUUID(), ...(action === 'batch' ? { booksOrdered: 40 } : {}), ...fields });
+  fixture.request = (action, fields = {}) => ({ action, requestId: randomUUID(), ...(['batch', 'edit-batch', 'extra-cost', 'edit-extra-cost'].includes(action) ? { paidBy: 'Tejas' } : {}), ...(action === 'batch' ? { booksOrdered: 40 } : {}), ...(['batch-sale', 'edit-sale'].includes(action) ? { paidTo: 'Nithilan' } : {}), ...fields });
+  // Historical online sales are seeded, never created through the retired API action.
+  fixture.seedOnline = fields => {
+    const model = require('../../assets/sales/model');
+    const state = fixture.raw ? JSON.parse(fixture.raw) : { version: 1, revision: 0, batches: [], sales: [] };
+    const number = Math.max(state.nextSaleNumber || 1, ...state.sales.map(sale => sale.number + 1));
+    state.sales.push({ ...model.createOnlineSale(fields, randomUUID(), new Date().toISOString()), number });
+    state.nextSaleNumber = number + 1;
+    state.revision++;
+    fixture.raw = JSON.stringify(state);
+    return state;
+  };
   return fixture;
 }
 

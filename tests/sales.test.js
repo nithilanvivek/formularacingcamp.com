@@ -40,6 +40,9 @@ test('legacy records persist Batch 001 as 40 books and sales as quantity one wit
   const migrated = await store.readLedger();
   assert.equal(migrated.batches[0].booksOrdered, 40);
   assert.equal(migrated.batches[1].booksOrdered, null);
+  assert.equal(migrated.batches[0].paidBy, 'Tejas');
+  assert.equal(migrated.batches[1].paidBy, undefined);
+  assert.equal(model.authorDashboard(migrated).pending.filter(entry => entry.kind === 'batch' && entry.to === 'Tejas').length, 5);
   assert.equal(migrated.sales[0].quantity, 1);
   assert.equal(migrated.sales[0].pricePaise, 15000);
   assert.equal(model.summary(migrated).batchProfits[0].booksLeft, 39);
@@ -76,10 +79,10 @@ test('concurrent batch sales cannot sell more books than ordered', async t => {
 
 test('batch numbering stays unique and sales require a known batch and format', () => {
   const batches = [{ id: 'batch-1', number: 1 }, { id: 'batch-3', number: 3 }];
-  assert.deepEqual(model.createBatch(batches, '1250.50', 'batch-4', '2026-10-30T12:00:00Z', 40), {
-    id: 'batch-4', number: 4, costPaise: 125050, booksOrdered: 40, createdAt: '2026-10-30T12:00:00Z'
+  assert.deepEqual(model.createBatch(batches, '1250.50', 'batch-4', '2026-10-30T12:00:00Z', 40, 'Tejas'), {
+    id: 'batch-4', number: 4, costPaise: 125050, booksOrdered: 40, paidBy: 'Tejas', createdAt: '2026-10-30T12:00:00Z'
   });
-  const input = { batchId: 'batch-1', format: 'Paperback', price: '349.50' };
+  const input = { paidTo: 'Nithilan', batchId: 'batch-1', format: 'Paperback', price: '349.50' };
   assert.equal(model.createBatchSale(batches, input, 'order-1', 'now').pricePaise, 34950);
   assert.throws(() => model.createBatchSale(batches, { ...input, batchId: 'unknown' }, 'order-1', 'now'));
   assert.throws(() => model.createBatchSale(batches, { ...input, format: 'Ebook' }, 'order-1', 'now'));
@@ -129,7 +132,7 @@ test('server persists dated records, retries safely, and permanently deletes onl
   assert.equal(second.sales[0].paymentName, 'Buyer <one>');
   assert.equal((await store.saveEntry(saleRequest)).sales.length, 1);
   await assert.rejects(store.saveEntry({ ...saleRequest, price: '99.00' }), { status: 409 });
-  await store.saveEntry(fixture.request('online-sale', { format: 'Hardcover', price: '300.50' }));
+  fixture.seedOnline({ format: 'Hardcover', price: '300.50' });
   const deletion = fixture.request('delete-sale', { recordId: second.sales[0].id, expectedVersion: 0 });
   const deleted = await store.saveEntry(deletion);
   assert.equal(deleted.sales.length, 1);
@@ -158,7 +161,7 @@ test('edits preserve record identity, update totals, and reject stale or invalid
   assert.ok(edited.batches[0].updatedAt);
   assert.equal((await store.saveEntry(batchEdit)).revision, edited.revision);
   await assert.rejects(store.saveEntry(fixture.request('edit-batch', { recordId: batch.id, expectedVersion: 0, cost: '999' })), { status: 409 });
-  const added = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '200', paymentName: 'Original' }));
+  const added = fixture.seedOnline({ format: 'Paperback', price: '200', paymentName: 'Original' });
   const sale = added.sales[0];
   const saleEdit = fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 0, channel: 'batch', batchId: batch.id, format: 'Hardcover', price: '250.50', paymentName: 'Corrected' });
   const corrected = await store.saveEntry(saleEdit);
@@ -172,14 +175,12 @@ test('edits preserve record identity, update totals, and reject stale or invalid
   const invalid = fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 1, channel: 'batch', batchId: 'unknown', format: 'Paperback', price: '10' });
   await assert.rejects(store.saveEntry(invalid), { status: 400 });
   assert.equal((await store.readLedger()).sales[0].pricePaise, 25050);
-  const online = await store.saveEntry(fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 1, channel: 'online', format: 'Paperback', price: '175.25', paymentName: '' }));
-  assert.equal('batchId' in online.sales[0], false);
-  assert.equal(online.sales[0].paymentName, '');
+  await assert.rejects(store.saveEntry(fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 1, channel: 'online', format: 'Paperback', price: '175.25', paymentName: '' })), { status: 400 });
 });
 
 test('deleting the last sale does not reuse its order number and legacy cancelled sales stay cancelled when edited', async t => {
   const fixture = salesFixture(t);
-  const added = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '200' }));
+  const added = fixture.seedOnline({ format: 'Paperback', price: '200' });
   const sale = added.sales[0];
   added.sales[0].status = 'cancelled';
   added.sales[0].cancelledAt = new Date().toISOString();
@@ -188,14 +189,15 @@ test('deleting the last sale does not reuse its order number and legacy cancelle
   assert.equal(edited.sales[0].status, 'cancelled');
   assert.equal(model.summary(edited).salesPaise, 0);
   await store.saveEntry(fixture.request('delete-sale', { recordId: sale.id, expectedVersion: 1 }));
-  const next = await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '300' }));
+  const batch = await store.saveEntry(fixture.request('batch', { cost: '100' }));
+  const next = await store.saveEntry(fixture.request('batch-sale', { batchId: batch.batches[0].id, format: 'Paperback', price: '300' }));
   assert.equal(next.sales[0].number, 2);
 });
 
 test('simultaneous saves preserve both records and assign distinct batch numbers', async t => {
   salesFixture(t);
   const { randomUUID } = require('node:crypto');
-  await Promise.all([100, 200, 300].map(cost => store.saveEntry({ action: 'batch', requestId: randomUUID(), cost: String(cost), booksOrdered: 40 })));
+  await Promise.all([100, 200, 300].map(cost => store.saveEntry({ action: 'batch', requestId: randomUUID(), cost: String(cost), booksOrdered: 40, paidBy: 'Tejas' })));
   const ledger = await store.readLedger();
   assert.deepEqual(ledger.batches.map(batch => batch.number), [1, 2, 3]);
   assert.equal(model.summary(ledger).costsPaise, 60000);
@@ -203,13 +205,15 @@ test('simultaneous saves preserve both records and assign distinct batch numbers
 
 test('invalid sales cannot change saved records, and storage failures never silently save locally', async t => {
   const fixture = salesFixture(t);
+  const batch = await store.saveEntry(fixture.request('batch', { cost: '10' }));
+  const raw = fixture.raw;
   for (const fields of [{ format: 'Other', price: '10' }, { format: 'Hardcover', price: '1e3' }, { format: 'Hardcover', price: '10', paymentName: 'x'.repeat(81) }]) {
-    await assert.rejects(store.saveEntry(fixture.request('online-sale', fields)), { status: 400 });
-    assert.equal(fixture.raw, null);
+    await assert.rejects(store.saveEntry(fixture.request('batch-sale', { batchId: batch.batches[0].id, ...fields })), { status: 400 });
+    assert.equal(fixture.raw, raw);
   }
   fixture.offline = true;
   await assert.rejects(store.saveEntry(fixture.request('batch', { cost: '500' })));
-  assert.equal(fixture.raw, null);
+  assert.equal(fixture.raw, raw);
 });
 
 async function callAPI(method, body, headers = {}) {
@@ -250,7 +254,7 @@ test('one page verification unlocks reads and repeated writes; unverified reques
   const read = await callAPI('GET', undefined, { cookie });
   assert.equal(read.statusCode, 200);
   assert.equal(read.body.batches.length, 1);
-  assert.equal((await callAPI('POST', fixture.request('online-sale', { format: 'Paperback', price: '500' }), { cookie })).statusCode, 200);
+  assert.equal((await callAPI('POST', fixture.request('batch-sale', { batchId: saved.body.batches[0].id, format: 'Paperback', price: '500' }), { cookie })).statusCode, 200);
   assert.equal(fixture.verifications, 3, 'Saving and refreshing must not recheck Turnstile');
   assert.equal(JSON.stringify(read.body).includes('test-secret-key'), false);
   delete process.env.TURNSTILE_SECRET_KEY;
@@ -296,7 +300,7 @@ test('stall extra costs persist once, edit with version checks, and leave sales 
   const fixture = salesFixture(t);
   const original = await store.saveEntry(fixture.request('batch', { cost: '100' }));
   await store.saveEntry(fixture.request('batch-sale', { batchId: original.batches[0].id, format: 'Paperback', price: '200' }));
-  await store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '300' }));
+  fixture.seedOnline({ format: 'Paperback', price: '300' });
   const request = fixture.request('extra-cost', { description: ' Delivery & taxes ', cost: '125.50', batchId: original.batches[0].id, channel: 'batch' });
   const state = await store.saveEntry(request);
   const expense = state.extraCosts[0];
@@ -329,4 +333,79 @@ test('stall extra costs persist once, edit with version checks, and leave sales 
   const filters = { type: 'extra-cost', channel: 'all', format: 'all', batchId: 'all', dateEnabled: true, date: model.localDay(expense.createdAt) };
   assert.equal(model.matchesFilters({ ...expense, kind: 'extra-cost' }, filters), true);
   assert.equal(model.matchesFilters({ ...expense, kind: 'extra-cost' }, { ...filters, type: 'sale' }), false);
+});
+
+test('batch payers and sale recipients require one of the six people and can be corrected', async t => {
+  const fixture = salesFixture(t);
+  assert.deepEqual(model.PEOPLE, ['Tejas', 'Jaskirat', 'Nandana', 'Nithilan', 'Shaurya', 'Nihira']);
+  for (const paidBy of ['', undefined, 'Unknown', 'tejas']) await assert.rejects(store.saveEntry(fixture.request('batch', { cost: '100', paidBy })), { status: 400 });
+  assert.equal(fixture.raw, null);
+  const state = await store.saveEntry(fixture.request('batch', { cost: '100', paidBy: 'Nandana' }));
+  const batch = state.batches[0];
+  for (const paidTo of ['', undefined, 'Unknown']) await assert.rejects(store.saveEntry(fixture.request('batch-sale', { batchId: batch.id, format: 'Paperback', price: '200', paidTo })), { status: 400 });
+  const added = await store.saveEntry(fixture.request('batch-sale', { batchId: batch.id, format: 'Paperback', price: '200', paidTo: 'Shaurya' }));
+  assert.equal(added.batches[0].paidBy, 'Nandana');
+  assert.equal(added.sales[0].paidTo, 'Shaurya');
+  const corrected = await store.saveEntry(fixture.request('edit-sale', { recordId: added.sales[0].id, expectedVersion: 0, channel: 'batch', batchId: batch.id, format: 'Paperback', price: '200', paidTo: 'Nihira' }));
+  assert.equal(corrected.sales[0].paidTo, 'Nihira');
+  assert.equal(corrected.sales[0].createdAt, added.sales[0].createdAt);
+  delete corrected.batches[0].paidBy;
+  delete corrected.sales[0].paidTo;
+  fixture.raw = JSON.stringify(corrected);
+  const legacy = await store.readLedger();
+  assert.equal(legacy.batches[0].paidBy, 'Tejas', 'The user confirmed the opening batch payer');
+  assert.equal(legacy.sales[0].paidTo, undefined);
+  const repaired = await store.saveEntry(fixture.request('edit-batch', { recordId: batch.id, expectedVersion: 0, cost: '100', booksOrdered: 40, paidBy: 'Jaskirat' }));
+  assert.equal(repaired.batches[0].paidBy, 'Jaskirat');
+  assert.equal(repaired.batches[0].createdAt, batch.createdAt);
+});
+
+test('online sale creation is retired while historical sales remain readable and editable', async t => {
+  const fixture = salesFixture(t);
+  await assert.rejects(store.saveEntry(fixture.request('online-sale', { format: 'Paperback', price: '100' })), { status: 400 });
+  assert.equal(fixture.raw, null);
+  const seeded = fixture.seedOnline({ format: 'Paperback', price: '125.50' });
+  const sale = seeded.sales[0];
+  const edited = await store.saveEntry(fixture.request('edit-sale', { recordId: sale.id, expectedVersion: 0, channel: 'online', format: 'Hardcover', price: '150.50' }));
+  assert.equal(edited.sales[0].channel, 'online');
+  assert.equal(edited.sales[0].createdAt, sale.createdAt);
+  assert.equal(model.summary(await store.readLedger()).salesPaise, 15050);
+});
+
+test('merchandise under extra costs records dated expenses with validated payers, atomic saves and safe edits', async t => {
+  const fixture = salesFixture(t);
+  const batch = await store.saveEntry(fixture.request('batch', { cost: '100' }));
+  await store.saveEntry(fixture.request('batch-sale', { batchId: batch.batches[0].id, format: 'Paperback', price: '250' }));
+  const request = fixture.request('extra-cost', { description: ' Stickers ', cost: '35.50', paidBy: 'Nithilan' });
+  const added = await store.saveEntry(request);
+  const purchase = added.extraCosts[0];
+  assert.equal(purchase.description, 'Stickers');
+  assert.equal(purchase.paidBy, 'Nithilan');
+  assert.ok(Number.isFinite(Date.parse(purchase.createdAt)));
+  assert.equal((await store.saveEntry(request)).revision, added.revision);
+  await assert.rejects(store.saveEntry({ ...request, paidBy: 'Tejas' }), { status: 409 });
+  const totals = model.summary(added);
+  assert.equal(totals.extraCostsPaise, 3550);
+  assert.equal(totals.profitPaise, 11450);
+  assert.equal(totals.batchProfits[0].profitPaise, 15000);
+  assert.equal(totals.batchProfits[0].booksLeft, 39);
+  const edit = fixture.request('edit-extra-cost', { recordId: purchase.id, expectedVersion: 0, description: 'T-shirts', cost: '50.25', paidBy: 'Nihira' });
+  const edited = await store.saveEntry(edit);
+  assert.equal(edited.extraCosts[0].createdAt, purchase.createdAt);
+  assert.equal(edited.extraCosts[0].paidBy, 'Nihira');
+  assert.equal(edited.extraCosts[0].recordVersion, 1);
+  assert.ok(edited.extraCosts[0].updatedAt);
+  assert.equal(model.summary(edited).profitPaise, 9975);
+  assert.equal((await store.saveEntry(edit)).revision, edited.revision);
+  await assert.rejects(store.saveEntry({ ...edit, requestId: fixture.request('extra-cost').requestId }), { status: 409 });
+  assert.equal(store.publicLedger(edited).extraCosts[0].fingerprint, undefined);
+  for (const fields of [{ description: '' }, { description: 'x'.repeat(121) }, { cost: '1.234' }, { paidBy: 'Unknown' }, { paidBy: undefined }]) {
+    await assert.rejects(store.saveEntry(fixture.request('extra-cost', { description: 'Mug', cost: '10', paidBy: 'Tejas', ...fields })), { status: 400 });
+  }
+  assert.equal((await store.readLedger()).revision, edited.revision);
+  const filters = { type: 'extra-cost', channel: 'all', format: 'all', batchId: 'all', dateEnabled: true, date: model.localDay(purchase.createdAt) };
+  assert.equal(model.matchesFilters({ ...purchase, kind: 'extra-cost' }, filters), true);
+  assert.equal(model.matchesFilters({ ...purchase, kind: 'extra-cost' }, { ...filters, type: 'sale' }), false);
+  await Promise.all(['Jaskirat', 'Shaurya'].map(paidBy => store.saveEntry(fixture.request('extra-cost', { description: 'Mug', cost: '10', paidBy }))));
+  assert.equal((await store.readLedger()).extraCosts.length, 3);
 });
