@@ -1025,14 +1025,14 @@ Date: 2026-09-20
 - Validation: all 63 Node tests passed; dedicated headless sales browser flow passed under the production CSP, covering create/edit/reload/filter/export and mobile overflow. Independently imported and recalculated the exported workbook, changed an expense to confirm profit/author formulas update while batch profit stays fixed, and inspected the affected sheet renders. No production test records were created.
 
 
-## 2026-11-02 — Batch income per author (local only)
+## 2026-11-02 — Batch income per author
 
 - Added Income per author to the batch profit/stock table and Excel Batch profits sheet. It is batch net profit divided equally among six authors, displayed in INR to two decimal places; a loss remains negative. Stall income/costs do not enter individual batch shares.
 - The Excel formula uses the batch profit and Summary author-count cell, retaining cached values and existing stock columns. Updated page explanation, review date, and README.
 - Validation: 63 Node tests and the dedicated headless sales browser flow passed, including negative/positive shares, batch cost edits, and unchanged shares after stall sales. Exported workbook independently recalculated correctly after a batch-cost change; checked the changed sheet render.
-- User explicitly requested no deployment yet. Changes are uncommitted and unpushed; production remains unchanged.
+- Initially kept local at the user’s request; subsequently published with the author dashboard release below.
 
-## 2026-11-02 — Author attribution and settlement dashboard (local only)
+## 2026-11-02 — Author attribution and settlement dashboard
 
 - Added required person dropdowns for batch payer, sale recipient, and extra-cost payer, using exactly Tejas, Jaskirat, Nandana, Nithilan, Shaurya, and Nihira. Record Editor, record summaries, the batch table, and Excel include attribution. The user confirmed Tejas paid for Batch 001; the existing CAS migration fills that payer only when missing and preserves explicit corrections. No other historical payer/recipient is guessed.
 - Removed new online stall sales from the action menu and API. Historical online sales remain in totals and records, can be edited/deleted, and can have a recipient assigned. Batch sales cannot be changed into new online sales. The user clarified that merchandise belongs under Add Extra Costs, so there is no separate merchandising action or storage category.
@@ -1040,6 +1040,9 @@ Date: 2026-09-20
 - Each obligation has Mark paid; dated payment history supports Mark unpaid (reversal) without deleting its audit record. All 15 author-pair balances net both directions and update after marking. These settlements do not change profit or stock. Source edits, holder changes, and deleted/cancelled sales preserve recorded payments and create explicit adjustment/refund obligations. Atomic CAS saves, expected amount/direction checks, idempotent receipts, and persistent payment IDs prevent duplicate or stale paid markings.
 - Excel now exports eight sheets: Summary, Batch profits, Batches, Sales, Extra costs, Author transactions, Author balances, and Attribution needed. Balance formulas use exported unpaid transaction rows and recalculate both amount and owing direction. Excel exports remain snapshots and do not write changes back to the server.
 - Validation: all 73 Node tests passed, including exact cash-flow splitting, 15-pair netting, paid/unpaid retries, concurrency, refunds after edits/deletion, migration, and exports. The dedicated headless sales flow passed under production CSP at 320/375px and desktop, including attribution shortcuts, marking/undo/reload, unfinished-form preservation, legacy records, filters, stock checks, and exports. Independently recalculated all 15 exported balances before/after changing a transaction status and inspected the changed worksheet/browser views.
-- No production records were accessed or modified, and nothing was committed, pushed, or deployed. The user's no-deploy instruction remains active. Existing untracked macOS Icon file left untouched.
+- Implementation tests used only fixture records. The user subsequently authorized deployment; the release and verification are recorded below. Existing untracked macOS Icon file left untouched.
 
-- Deployment follow-up: the user explicitly requested publishing these changes on November 2, 2026, superseding the no-deploy instruction above. The tested author dashboard, attribution fields, Batch 001 payer backfill, and eight-sheet export are included in this release.
+- Published at the user’s explicit request: feature commit `c9658de99ffb7210abf702a2e0c33caa90d995f2` on `main`, pushed to `origin/main` (`https://github.com/nithilanvivek/formularacingcamp.com.git`). Vercel production deployment `dpl_7NENvLkxt56XaVaC1uxp85TYofEw` reached READY and is aliased to `https://www.formularacingcamp.com`.
+- Production checks confirmed the sales page and four sales assets exactly matched the tested release. A read-only headless check verified the author dashboard markup, absence of the online-sale/merchandise actions, one rectangular verification widget, mobile fit, noindex, and HTTP 401 without exposed records before verification. No production test records or payments were created; the live ledger was not inspected. Batch 001’s Tejas payer backfill runs on the next server ledger read where the payer is missing.
+- Wrap-up: `/sales` already displays November 2, 2026 with matching `datetime`; other page dates are unchanged. README documents the final workflows. No content-derived offline cache exists to regenerate. No project preview listeners were found; unrelated system/app listeners were left running. The tracked tree was clean before this notes-only wrap-up, apart from the existing untracked macOS Icon file.
+- Next use: assign any other unknown historical payer/recipient through the dashboard’s attribution shortcuts so those records enter the author balances.
