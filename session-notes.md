@@ -1046,3 +1046,10 @@ Date: 2026-09-20
 - Production checks confirmed the sales page and four sales assets exactly matched the tested release. A read-only headless check verified the author dashboard markup, absence of the online-sale/merchandise actions, one rectangular verification widget, mobile fit, noindex, and HTTP 401 without exposed records before verification. No production test records or payments were created; the live ledger was not inspected. Batch 001’s Tejas payer backfill runs on the next server ledger read where the payer is missing.
 - Wrap-up: `/sales` already displays November 2, 2026 with matching `datetime`; other page dates are unchanged. README documents the final workflows. No content-derived offline cache exists to regenerate. No project preview listeners were found; unrelated system/app listeners were left running. The tracked tree was clean before this notes-only wrap-up, apart from the existing untracked macOS Icon file.
 - Next use: assign any other unknown historical payer/recipient through the dashboard’s attribution shortcuts so those records enter the author balances.
+
+## 2026-11-03 — Author transaction filters
+
+- Author transactions now opens with “Unpaid only” and all six author checkboxes selected. Multiple selections match either sender or recipient; clearing all authors shows no transactions. Status and author filters combine without duplicating transactions.
+- Counts reflect the selected authors. Refreshing records and marking/reversing payments retain selections; a page reload restores the defaults. Overview totals, all 15 author balances, and the complete Excel export remain unchanged by these filters.
+- Updated README and the sales page update date. Validation: all 73 Node tests and the dedicated headless sales browser flow passed, including initial/reload defaults, sender/recipient matching, multiple/all/no authors, paid/reversed history, refresh persistence, payment updates, export, and desktop/mobile fit. Inspected the dashboard screenshot. Tests used only isolated fixture data.
+- User authorized production deployment after reviewing the local changes.

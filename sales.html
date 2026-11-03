@@ -68,7 +68,8 @@
       <div class="section-title"><h2 id="author-dashboard-title">Author transactions</h2></div>
       <p class="field-note">Each expense is shared among six authors. The payer is owed the other five shares; the person receiving sales income owes each other author their share of the sale revenue. Stall extra costs also need a payer. Splits use whole paise, so shares may differ by ₹0.01.</p>
       <div id="author-attribution" class="notice" hidden></div>
-      <div class="author-toolbar"><label for="author-status">Show transactions</label><select id="author-status"><option value="all">All transactions</option><option value="pending">Unpaid only</option><option value="paid">Paid only</option></select><span id="author-transaction-count" class="hint"></span></div>
+      <div class="author-toolbar"><label for="author-status">Show transactions</label><select id="author-status"><option value="all">All transactions</option><option value="pending" selected>Unpaid only</option><option value="paid">Paid only</option></select><span id="author-transaction-count" class="hint" role="status"></span></div>
+      <fieldset class="author-filter" aria-describedby="author-filter-hint"><legend>Authors involved</legend><div id="author-filters" class="author-filter-options"></div><p id="author-filter-hint" class="hint">Show transactions sent or received by any selected author.</p></fieldset>
       <p id="author-feedback" role="status" aria-live="polite"></p>
       <div id="author-transactions"></div>
       <div class="section-title"><h2>Total owing · 15 author pairs</h2></div>
@@ -83,7 +84,7 @@
       <div class="record-tools"><button id="refresh" class="secondary" type="button">Refresh records</button><button id="export" class="secondary" type="button" disabled>Export Excel (.xlsx)</button></div>
     </section>
     </div>
-    <footer><span>EVERY BOOK. YOUR CAMP.</span><span class="updated">Last updated <time datetime="2026-11-02">November 2, 2026</time></span><span>Made for the Formula Racing Camp team.</span></footer>
+    <footer><span>EVERY BOOK. YOUR CAMP.</span><span class="updated">Last updated <time datetime="2026-11-03">November 3, 2026</time></span><span>Made for the Formula Racing Camp team.</span></footer>
   </main>
 </body>
 </html>

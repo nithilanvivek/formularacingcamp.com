@@ -90,6 +90,8 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     assert.equal(await evaluate(`document.querySelector('#verification-gate').hidden`), true);
     assert.equal(await evaluate(`document.querySelector('#entry-panel').hidden`), true);
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), '₹0.00');
+    assert.equal(await evaluate(`document.querySelector('#author-status').value`), 'pending');
+    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#author-filters input'), input=>({name:input.value,checked:input.checked}))`), ['Tejas','Jaskirat','Nandana','Nithilan','Shaurya','Nihira'].map(name => ({ name, checked: true })));
     assert.equal(await evaluate(`document.querySelector('meta[name=robots]').content.includes('noindex')`), true);
     assert.equal(await evaluate(`document.querySelector('.overview').compareDocumentPosition(document.querySelector('.action-section')) & Node.DOCUMENT_POSITION_FOLLOWING`), 4);
     assert.equal(await evaluate(`!!document.querySelector('[data-action="online-sale"]')`), false);
@@ -224,6 +226,36 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     assert.equal(await evaluate(`document.querySelector('#author-attribution').hidden`), true);
     assert.equal(await evaluate(`!!document.querySelector('[data-action="merch-purchase"]')`), false);
     const accounting = require('../assets/sales/model');
+    const selectAuthors = async authors => evaluate(`Array.from(document.querySelectorAll('#author-filters input')).forEach(input=>{if(input.checked!==${JSON.stringify(authors)}.includes(input.value))input.click();})`);
+    const checkAuthorTransactions = async (authors, status = 'pending') => {
+      const dashboard = accounting.authorDashboard(JSON.parse(fixture.raw));
+      const expected = [
+        ...(status === 'paid' ? [] : dashboard.pending.map(entry => ({ ...entry, status: 'Unpaid' }))),
+        ...(status === 'pending' ? [] : dashboard.payments.filter(entry => status !== 'paid' || !entry.voidedAt).map(entry => ({ ...entry, status: entry.voidedAt ? 'Reversed' : 'Paid' })))
+      ].filter(entry => authors.includes(entry.from) || authors.includes(entry.to));
+      assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#author-transactions .record-row'),row=>[row.querySelector('strong').textContent,row.querySelectorAll('small')[1].textContent.split(' · ')[0]])`), expected.map(entry => [`${entry.from} → ${entry.to}`, entry.status]));
+      assert.ok((await evaluate(`document.querySelector('#author-transaction-count').textContent`)).startsWith(`${expected.length} shown · `));
+    };
+    await checkAuthorTransactions(accounting.PEOPLE);
+    const allBalances = await evaluate(`document.querySelector('#author-balances').textContent`);
+    await selectAuthors(['Nithilan']);
+    await checkAuthorTransactions(['Nithilan']);
+    const nithilanDirections = await evaluate(`Array.from(document.querySelectorAll('#author-transactions strong'),node=>node.textContent)`);
+    assert.ok(nithilanDirections.some(text => text.startsWith('Nithilan → ')), 'Include the selected author as sender');
+    assert.ok(nithilanDirections.some(text => text.endsWith(' → Nithilan')), 'Include the selected author as recipient');
+    await selectAuthors(['Nithilan', 'Shaurya']);
+    await checkAuthorTransactions(['Nithilan', 'Shaurya']);
+    assert.equal(await evaluate(`document.querySelector('#author-balances').textContent`), allBalances);
+    await evaluate(`document.querySelector('#refresh').click()`);
+    await until(`!document.querySelector('#refresh').disabled`);
+    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#author-filters input:checked'),input=>input.value)`), ['Nithilan', 'Shaurya']);
+    await checkAuthorTransactions(['Nithilan', 'Shaurya']);
+    await selectAuthors(accounting.PEOPLE);
+    await checkAuthorTransactions(accounting.PEOPLE);
+    await selectAuthors([]);
+    await checkAuthorTransactions([]);
+    assert.equal(await evaluate(`document.querySelector('#author-transactions .empty-records').textContent`), 'No transactions to show.');
+    await selectAuthors(accounting.PEOPLE);
     const debt = accounting.authorDashboard(JSON.parse(fixture.raw)).pending.find(entry => entry.kind === 'batch' && entry.from === 'Nihira');
     const pairSelector = '[data-author-pair="Nandana:Nihira"]';
     const owingBefore = await evaluate(`document.querySelector(${JSON.stringify(pairSelector)}).textContent`);
@@ -238,17 +270,29 @@ test('sales recorder persists creation, record editing and sale deletion and upd
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), profitBefore);
     assert.notEqual(await evaluate(`document.querySelector(${JSON.stringify(pairSelector)}).textContent`), owingBefore);
     await change('author-status', 'paid');
+    await selectAuthors(['Nithilan']);
+    await checkAuthorTransactions(['Nithilan'], 'paid');
+    assert.equal(await evaluate(`document.querySelector('#author-transactions .empty-records').textContent`), 'No transactions to show.');
+    await selectAuthors(['Nandana', 'Nihira']);
+    await checkAuthorTransactions(['Nandana', 'Nihira'], 'paid');
     assert.equal(await evaluate(`document.querySelectorAll('[data-author-undo]').length`), 1);
     assert.equal(await evaluate(`document.querySelectorAll('[data-author-pay]').length`), 0);
     await evaluate(`document.querySelector('[data-author-undo]').click()`);
     await until(`document.querySelector('#author-feedback').textContent.startsWith('Payment marked unpaid')`);
     assert.equal(JSON.parse(fixture.raw).revision, 14);
+    await change('author-status', 'all');
+    await checkAuthorTransactions(['Nandana', 'Nihira'], 'all');
     await change('author-status', 'pending');
+    await checkAuthorTransactions(['Nandana', 'Nihira']);
     assert.equal(await evaluate(`document.querySelector(${JSON.stringify(pairSelector)}).textContent`), owingBefore);
     await evaluate(`Array.from(document.querySelectorAll('[data-author-pay]')).find(button=>button.dataset.authorPay===${JSON.stringify(debt.id)}).click()`);
     await until(`document.querySelector('#author-feedback').textContent.startsWith('Payment recorded')`);
     assert.equal(JSON.parse(fixture.raw).revision, 15);
     await navigate();
+    assert.equal(await evaluate(`document.querySelector('#author-status').value`), 'pending');
+    assert.equal(await evaluate(`document.querySelectorAll('#author-filters input:checked').length`), 6);
+    await checkAuthorTransactions(accounting.PEOPLE);
+    assert.equal(await evaluate(`document.querySelectorAll('[data-author-undo]').length`), 0);
     assert.equal(JSON.parse(fixture.raw).authorPayments.filter(payment=>!payment.voidedAt).length, 1);
     assert.equal(await evaluate(`document.querySelector('#total-profit').textContent`), profitBefore);
     await evaluate(`document.querySelector('#export').click()`);

@@ -319,8 +319,11 @@
     }
     const container = $('author-transactions'); container.replaceChildren();
     const filter = $('author-status').value;
-    const rows = [...(filter === 'paid' ? [] : dashboard.pending.map(entry => ({ ...entry, status: 'Unpaid' }))), ...(filter === 'pending' ? [] : dashboard.payments.filter(entry => filter !== 'paid' || !entry.voidedAt).map(entry => ({ ...entry, status: entry.voidedAt ? 'Reversed' : 'Paid' })))];
-    $('author-transaction-count').textContent = `${dashboard.pending.length} unpaid · ${dashboard.payments.filter(payment => !payment.voidedAt).length} paid`;
+    const authors = Array.from($('author-filters').querySelectorAll('input:checked'), input => input.value);
+    const involvesAuthor = entry => authors.includes(entry.from) || authors.includes(entry.to);
+    const unpaid = dashboard.pending.filter(involvesAuthor), payments = dashboard.payments.filter(involvesAuthor);
+    const rows = [...(filter === 'paid' ? [] : unpaid.map(entry => ({ ...entry, status: 'Unpaid' }))), ...(filter === 'pending' ? [] : payments.filter(entry => filter !== 'paid' || !entry.voidedAt).map(entry => ({ ...entry, status: entry.voidedAt ? 'Reversed' : 'Paid' })))];
+    $('author-transaction-count').textContent = `${rows.length} shown · ${unpaid.length} unpaid · ${payments.filter(payment => !payment.voidedAt).length} paid`;
     if (!rows.length) container.append(element('p', 'No transactions to show.', 'empty-records'));
     const list = element('ul', undefined, 'record-list');
     for (const entry of rows) {
@@ -352,6 +355,12 @@
     }
     table.append(head, body); scroll.append(table); balances.append(scroll);
   }
+  for (const name of model.PEOPLE) {
+    const label = element('label'), input = element('input');
+    input.type = 'checkbox'; input.name = 'author'; input.value = name; input.checked = true;
+    label.append(input, document.createTextNode(name)); $('author-filters').append(label);
+  }
+  $('author-filters').addEventListener('change', renderAuthorDashboard);
   $('author-status').addEventListener('change', renderAuthorDashboard);
   document.querySelector('.author-dashboard').addEventListener('click', async event => {
     if (busy || !pageVerified || !ledger) return;
@@ -381,7 +390,7 @@
   }
   function setBusy(value) {
     busy = value;
-    for (const button of document.querySelectorAll('[data-action], #refresh, #export, [data-author-pay], [data-author-undo], [data-fix-author], #author-status')) button.disabled = value;
+    for (const button of document.querySelectorAll('[data-action], #refresh, #export, [data-author-pay], [data-author-undo], [data-fix-author], #author-status, #author-filters input')) button.disabled = value;
     for (const field of $('entry-fields').querySelectorAll('input, select, button')) field.disabled = value;
     if ($('editor-date')) $('editor-date').disabled = value || !editorFilters.dateEnabled;
     $('entry-form').setAttribute('aria-busy', String(value));
